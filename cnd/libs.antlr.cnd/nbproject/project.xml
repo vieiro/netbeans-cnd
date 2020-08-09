@@ -30,7 +30,7 @@
             </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/org-netbeans-modules-cnd-antlr.jar</runtime-relative-path>
-                <binary-origin>external/org-netbeans-modules-cnd-antlr.jar</binary-origin>
+                <binary-origin>external/org-netbeans-modules-cnd-antlr-RELEASE82.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

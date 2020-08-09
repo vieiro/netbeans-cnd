@@ -107,12 +107,12 @@ public class ResolveConflictsAction extends ContextAction {
                             NotifyDescriptor nd = new NotifyDescriptor.Message(org.openide.util.NbBundle.getMessage(ResolveConflictsAction.class, "MSG_NoConflictsFound")); // NOI18N
                             DialogDisplayer.getDefault().notify(nd);
                         } else {
-                            resolveTreeConflicts(treeConflicts);
-                            resolvePropertyConflicts(propertyConflicts, filteredFiles);
-                            for (VCSFileProxy file : filteredFiles) {
-                                ResolveConflictsExecutor executor = new ResolveConflictsExecutor(file);
-                                executor.exec();
-                            }
+                            // NETBEANS-4663 - Not currently implemented in Apache NetBeans.
+                            // See https://issues.apache.org/jira/browse/NETBEANS-4663
+                            NotifyDescriptor nd = new NotifyDescriptor.Message(
+                                    org.openide.util.NbBundle.getMessage(
+                                        ResolveConflictsAction.class, "MSG_NETBEANS_4663")); // NOI18N
+                            DialogDisplayer.getDefault().notify(nd);
                         }
                     }
                 });

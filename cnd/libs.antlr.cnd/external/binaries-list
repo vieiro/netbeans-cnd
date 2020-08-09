@@ -15,11 +15,5 @@
 # specific language governing permissions and limitations
 # under the License.
 
-is.autoload=true
-javac.compilerargs=-Xlint -Xlint:-serial
-javac.source=1.7
-sigtest.gen.fail.on.error=false
-
-release.external/org-netbeans-modules-cnd-antlr-RELEASE82.jar=modules/ext/org-netbeans-modules-cnd-antlr.jar
-
-spec.version.base=1.0
+# The NetBeans 8.2 cnd antlr parsers (CDDL License)
+9F10268EDFBD85FAE2E2416585AE9F0C01B615E2 org-netbeans-modules-cnd-antlr-RELEASE82.jar

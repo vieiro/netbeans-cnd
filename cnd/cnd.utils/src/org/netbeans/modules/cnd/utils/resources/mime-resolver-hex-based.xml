@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+
+<!DOCTYPE MIME-resolver PUBLIC '-//NetBeans//DTD MIME Resolver 1.0//EN' 'http://www.netbeans.org/dtds/mime-resolver-1_0.dtd'>
+<MIME-resolver>
+    <!-- 
+    Magic bytes for files frequently used in CND
+    See https://en.wikipedia.org/wiki/List_of_file_signatures 
+    And https://www.garykessler.net/library/file_sigs.html
+    And https://man7.org/linux/man-pages/man5/elf.5.html
+    -->
+    <file>
+        <!-- rpm package -->
+        <magic hex="edabeedb"
+               mask="ffffffff">
+            <resolver mime="application/x-rpm" />
+        </magic>
+        <!-- Mach-O binary (32-bit)  -->
+        <magic hex="feedface"
+              mask="ffffffff">
+            <resolver mime="application/x-exe" />
+        </magic>
+        <!-- Mach-O binary (32-bit, reverse byte ordering scheme)  -->
+        <magic hex="cefaedfe"
+              mask="ffffffff">
+            <resolver mime="application/x-exe" />
+        </magic>
+        <!-- Mach-O binary (64-bit)  -->
+        <magic hex="feedfacf"
+              mask="ffffffff">
+            <resolver mime="application/x-exe" />
+        </magic>
+        <!-- Mach-O binary (64-bit, reverse byte ordering scheme)  -->
+        <magic hex="cffaedfe"
+              mask="ffffffff">
+            <resolver mime="application/x-exe" />
+        </magic>
+        <!-- Microsoft CAB file -->
+        <magic hex="4d534346"
+              mask="ffffffff">
+            <resolver mime="application/vnd.ms-cab-compressed" />
+        </magic>
+        <!-- Apple DMG file -->
+        <magic hex="7801730D626260"
+              mask="ffffffffffffff">
+            <resolver mime="application/x-apple-diskimage" />
+        </magic>
+        <!-- Debian .deb format-->
+        <magic hex="213c617263683e"
+              mask="ffffffffffffff">
+            <resolver mime="application/vnd.debian.binary-package" />
+        </magic>
+        <!-- Preferred file format -->
+        <magic hex="4a6f7921"
+              mask="ffffffff">
+            <resolver mime="application/x-exe" />
+        </magic>
+        <!-- Microsoft COM/DLL/EXE -->
+        <magic hex="4d5a"
+               mask="ffff">
+            <resolver mime="application/x-exe" />
+        </magic>
+        <!-- Microsoft C++ debugging symbols file -->
+        <magic hex="4d6963726f736f667420432f432b2b20"
+               mask="ffffffffffffffffffffffffffffffff">
+            <resolver mime="application/x-pdb" />
+        </magic>
+        <!-- ELF executable 32 bit-->
+        <magic hex="7f454c4601"
+              mask="ffffffffff">
+            <resolver mime="application/x-elf" />
+        </magic>
+        <!-- ELF executable 64 bit-->
+        <magic hex="7f454c4602"
+              mask="ffffffffff">
+            <resolver mime="application/x-elf" />
+        </magic>
+    </file>
+</MIME-resolver>
