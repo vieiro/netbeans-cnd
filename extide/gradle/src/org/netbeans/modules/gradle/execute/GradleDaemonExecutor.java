@@ -35,6 +35,9 @@ import java.io.OutputStream;
 import java.io.StreamCorruptedException;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
@@ -47,18 +50,24 @@ import org.gradle.tooling.GradleConnectionException;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProgressEvent;
 import org.gradle.tooling.ProjectConnection;
+import org.gradle.tooling.events.ProgressListener;
 import org.netbeans.api.progress.ProgressHandle;
-import org.netbeans.api.progress.ProgressHandleFactory;
 import org.netbeans.api.project.ProjectInformation;
 import org.netbeans.api.project.ProjectUtils;
+import org.netbeans.modules.gradle.api.execute.GradleDistributionManager.GradleDistribution;
 import org.netbeans.modules.gradle.spi.GradleFiles;
+import org.netbeans.modules.gradle.spi.execute.GradleDistributionProvider;
 import org.netbeans.modules.gradle.spi.execute.GradleJavaPlatformProvider;
 import org.netbeans.spi.project.ui.support.BuildExecutionSupport;
 import org.openide.awt.StatusDisplayer;
+import org.openide.execution.ExecutorTask;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.NbBundle.Messages;
+import org.openide.util.Utilities;
 import org.openide.util.io.ReaderInputStream;
+import org.openide.util.lookup.Lookups;
 import org.openide.windows.IOColorPrint;
 import org.openide.windows.IOColors;
 import org.openide.windows.InputOutput;
@@ -77,11 +86,12 @@ public final class GradleDaemonExecutor extends AbstractGradleExecutor {
     private OutputStream outStream;
     private OutputStream errStream;
     private boolean cancelling;
+    private GradleTask gradleTask;
 
     @SuppressWarnings("LeakingThisInConstructor")
     public GradleDaemonExecutor(RunConfig config) {
         super(config);
-        handle = ProgressHandleFactory.createHandle(config.getTaskDisplayName(), this, new AbstractAction() {
+        handle = ProgressHandle.createHandle(config.getTaskDisplayName(), this, new AbstractAction() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -97,7 +107,12 @@ public final class GradleDaemonExecutor extends AbstractGradleExecutor {
         "BUILD_FAILED=Building {0} failed.",
         "# {0} - Platform Key",
         "NO_PLATFORM=No valid Java Platform found for key: ''{0}''",
-        "GRADLE_IO_ERROR=Gradle internal IO problem has been detected.\nThe running build may or may not have finished succesfully."
+        "GRADLE_IO_ERROR=Gradle internal IO problem has been detected.\nThe running build may or may not have finished succesfully.",
+        "# {0} - Gradle Version",
+        "DOWNLOAD_GRADLE=Downloading Gradle {0}...",
+        "# {0} - Gradle Version",
+        "# {1} - Gradle Distribution URI",
+        "DOWNLOAD_GRADLE_FAILED=Failed Downloading Gradle {0} from {1}",
     })
     @Override
     public void run() {
@@ -111,32 +126,51 @@ public final class GradleDaemonExecutor extends AbstractGradleExecutor {
             }
         }
 
-        ProjectConnection pconn = null;
         final InputOutput ioput = getInputOutput();
         actionStatesAtStart();
         handle.start();
+
+        // BuildLauncher creates its own threads, need to note the effective Lookup and re-establish it in the listeners
+        final Lookup execLookup = Lookup.getDefault();
+
+        class ProgressLookupListener implements org.gradle.tooling.events.ProgressListener {
+            private final org.gradle.tooling.events.ProgressListener delegate;
+
+            public ProgressLookupListener(ProgressListener delegate) {
+                this.delegate = delegate;
+            }
+
+            @Override
+            public void statusChanged(org.gradle.tooling.events.ProgressEvent event) {
+                Lookups.executeWith(execLookup, () -> delegate.statusChanged(event));
+            }
+        }
+
         try {
 
             BuildExecutionSupport.registerRunningItem(item);
             if (GradleSettings.getDefault().isAlwaysShowOutput()) {
                 ioput.select();
             }
-
-            GradleConnector gconn = GradleConnector.newConnector();
             cancelTokenSource = GradleConnector.newCancellationTokenSource();
-            File gradleInstall = RunUtils.evaluateGradleDistribution(config.getProject(), false);
-            if (gradleInstall != null) {
-                gconn.useInstallation(gradleInstall);
-            } else {
-                gconn.useBuildDistribution();
+
+            GradleDistributionProvider distProvider = config.getProject().getLookup().lookup(GradleDistributionProvider.class);
+            GradleDistribution dist = distProvider != null ? distProvider.getGradleDistribution() : null;
+            if ((dist != null) && !dist.isAvailable()) {
+                try {
+                    IOColorPrint.print(io, Bundle.DOWNLOAD_GRADLE(dist.getVersion()) + "\n",IOColors.getColor(io, IOColors.OutputType.LOG_WARNING));
+                    try {
+                        dist.install().get();
+                    } catch(InterruptedException | ExecutionException ex) {
+                        IOColorPrint.print(io, Bundle.DOWNLOAD_GRADLE_FAILED(dist.getVersion(), dist.getDistributionURI()),IOColors.getColor(io, IOColors.OutputType.LOG_FAILURE));
+                        throw new BuildException(Bundle.DOWNLOAD_GRADLE_FAILED(dist.getVersion(), dist.getDistributionURI()), ex);
+                    }
+                } catch (IOException ex) {}
             }
-
-            gconn.useGradleUserHomeDir(GradleSettings.getDefault().getGradleUserHome());
-
-            File projectDir = FileUtil.toFile(config.getProject().getProjectDirectory());
-            pconn = gconn.forProjectDirectory(projectDir).connect();
+            ProjectConnection pconn = config.getProject().getLookup().lookup(ProjectConnection.class);
 
             BuildLauncher buildLauncher = pconn.newBuild();
+
             GradleCommandLine cmd = config.getCommandLine();
             if (RunUtils.isAugmentedBuildEnabled(config.getProject())) {
                 cmd = new GradleCommandLine(cmd);
@@ -151,7 +185,10 @@ public final class GradleDaemonExecutor extends AbstractGradleExecutor {
             if (platformProvider != null) {
                 try {
                     buildLauncher.setJavaHome(platformProvider.getJavaHome());
-                } catch (FileNotFoundException ex) {
+                    Map<String, String> envs = new HashMap<>(System.getenv());
+                    envs.put("JAVA_HOME", platformProvider.getJavaHome().getCanonicalPath());
+                    buildLauncher.setEnvironmentVariables(envs);
+                } catch (IOException ex) {
                     io.getErr().println(Bundle.NO_PLATFORM(ex.getMessage()));
                     return;
                 }
@@ -168,23 +205,25 @@ public final class GradleDaemonExecutor extends AbstractGradleExecutor {
             buildLauncher.setStandardOutput(outStream);
             buildLauncher.setStandardError(errStream);
             buildLauncher.addProgressListener((ProgressEvent pe) -> {
-                handle.progress(pe.getDescription());
+                Lookups.executeWith(execLookup, () -> handle.progress(pe.getDescription()));
             });
 
             buildLauncher.withCancellationToken(cancelTokenSource.token());
             if (config.getProject() != null) {
                 Collection<? extends GradleProgressListenerProvider> providers = config.getProject().getLookup().lookupAll(GradleProgressListenerProvider.class);
                 for (GradleProgressListenerProvider provider : providers) {
-                    buildLauncher.addProgressListener(provider.getProgressListener(), provider.getSupportedOperationTypes());
+                    buildLauncher.addProgressListener(new ProgressLookupListener(provider.getProgressListener()), provider.getSupportedOperationTypes());
                 }
             }
             buildLauncher.run();
             StatusDisplayer.getDefault().setStatusText(Bundle.BUILD_SUCCESS(getProjectName()));
+            gradleTask.finish(0);
         } catch (BuildCancelledException ex) {
             showAbort();
         } catch (UncheckedException | BuildException ex) {
             if (!cancelling) {
                 StatusDisplayer.getDefault().setStatusText(Bundle.BUILD_FAILED(getProjectName()));
+                gradleTask.finish(1);
             } else {
                 // This can happen if cancelling a Gradle build which is running
                 // an external aplication
@@ -207,9 +246,6 @@ public final class GradleDaemonExecutor extends AbstractGradleExecutor {
             if (!handled) throw ex;
         } finally {
             BuildExecutionSupport.registerFinishedItem(item);
-            if (pconn != null) {
-                pconn.close();
-            }
             closeInOutErr();
             checkForExternalModifications();
             handle.finish();
@@ -252,11 +288,12 @@ public final class GradleDaemonExecutor extends AbstractGradleExecutor {
 
                 String relRoot = projectPath.relativize(rootPath).toString();
                 relRoot = relRoot.isEmpty() ? "." : relRoot;
-                commandLine.append(relRoot).append("/gradlew"); //NOI18N
+                commandLine.append(relRoot).append(gradlewExecutable());
             } else {
-                File gradleDistribution = RunUtils.evaluateGradleDistribution(null, false);
-                if (gradleDistribution != null) {
-                    File gradle = new File(gradleDistribution, "bin/gradle"); //NOI18N
+                GradleDistributionProvider pvd = config.getProject().getLookup().lookup(GradleDistributionProvider.class);
+                GradleDistribution dist = pvd != null ? pvd.getGradleDistribution() : null;
+                if (dist != null) {
+                    File gradle = new File(dist.getDistributionDir(), gradleExecutable());
                     commandLine.append(gradle.getAbsolutePath());
                 }
             }
@@ -310,4 +347,50 @@ public final class GradleDaemonExecutor extends AbstractGradleExecutor {
         return false;
     }
 
+    private static String gradlewExecutable() {
+        return Utilities.isWindows() ? "\\gradlew.bat" : "/gradlew"; //NOI18N
+    }
+
+    private static String gradleExecutable() {
+        return Utilities.isWindows() ? "bin\\gradle.bat" : "bin/gradle"; //NOI18N
+    }
+
+    public final ExecutorTask createTask(ExecutorTask process) {
+        assert gradleTask == null;
+        gradleTask = new GradleTask(process);
+        return gradleTask;
+    }
+
+    private static final class GradleTask extends ExecutorTask {
+        private final ExecutorTask delegate;
+        private Integer result;
+
+        GradleTask(ExecutorTask delegate) {
+            super(() -> {});
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void stop() {
+            this.delegate.stop();
+        }
+
+        @Override
+        public int result() {
+            if (result != null) {
+                return result;
+            }
+            return this.delegate.result();
+        }
+
+        @Override
+        public InputOutput getInputOutput() {
+            return this.delegate.getInputOutput();
+        }
+
+        public void finish(int result) {
+            this.result = result;
+            notifyFinished();
+        }
+    }
 }

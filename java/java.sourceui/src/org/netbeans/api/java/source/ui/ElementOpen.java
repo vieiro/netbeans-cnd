@@ -294,8 +294,10 @@ public final class ElementOpen {
         assert fo != null;
         
         try {
-            int[] offset = getOffset(fo, handle, cancel);
-            return new Object[] {fo, offset[0], offset[1]};
+            Object[] result = new Object[6];
+            result[0] = fo;
+            getOffset(fo, handle, result, cancel);
+            return result;
         } catch (IOException e) {
             Exceptions.printStackTrace(e);
             return null;
@@ -343,8 +345,11 @@ public final class ElementOpen {
     private static final int AWT_TIMEOUT = 1000;
     private static final int NON_AWT_TIMEOUT = 2000;
 
-    private static int[] getOffset(final FileObject fo, final ElementHandle<? extends Element> handle, final AtomicBoolean cancel) throws IOException {
-        final int[]  result = new int[] {-1, -1};
+    private static void getOffset(final FileObject fo, final ElementHandle<? extends Element> handle, final Object[] result, final AtomicBoolean cancel) throws IOException {
+        result[1] = -1;
+        result[2] = -1;
+        result[3] = -1;
+        result[4] = -1;
         
         final JavaSource js = JavaSource.forFileObject(fo);
         if (js != null) {
@@ -358,6 +363,7 @@ public final class ElementOpen {
                     } catch (IOException ioe) {
                         Exceptions.printStackTrace(ioe);
                     }
+                    result[5] = info.getCompilationUnit().getLineMap();
                     Element el = handle.resolve(info);
                     if (el == null) {
                         if (!SourceUtils.isScanInProgress()) {
@@ -375,7 +381,7 @@ public final class ElementOpen {
                         // Imprecise but should usually work:
                         Matcher m = Pattern.compile("(?m)^package (.+);$").matcher(fo.asText(/*FileEncodingQuery.getEncoding(fo).name()*/)); // NOI18N
                         if (m.find()) {
-                            result[0] = m.start();
+                            result[1] = m.start();
                         }
                         return;
                     }
@@ -388,15 +394,33 @@ public final class ElementOpen {
                     Tree elTree = v.declTree;
 
                     if (elTree != null) {
-                        result[0] = (int)info.getTrees().getSourcePositions().getStartPosition(cu, elTree);
-                        result[1] = (int)info.getTrees().getSourcePositions().getEndPosition(cu, elTree);
+                        result[1] = (int)info.getTrees().getSourcePositions().getStartPosition(cu, elTree);
+                        result[2] = (int)info.getTrees().getSourcePositions().getEndPosition(cu, elTree);
+                        int[] span = null;
+                        switch(elTree.getKind()) {
+                            case CLASS:
+                            case INTERFACE:
+                            case ENUM:
+                            case ANNOTATION_TYPE:
+                                span = info.getTreeUtilities().findNameSpan((ClassTree)elTree);
+                                break;
+                            case METHOD:
+                                span = info.getTreeUtilities().findNameSpan((MethodTree)elTree);
+                                break;
+                            case VARIABLE:
+                                span = info.getTreeUtilities().findNameSpan((VariableTree)elTree);
+                                break;
+                        }
+                        if (span != null) {
+                            result[3] = span[0];
+                            result[4] = span[1];
+                        }
                     }
                 }
             };
 
             js.runUserActionTask(t, true);
         }
-        return result;
     }
     
     // Private innerclasses ----------------------------------------------------

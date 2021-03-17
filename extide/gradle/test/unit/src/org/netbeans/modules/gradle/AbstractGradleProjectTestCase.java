@@ -20,23 +20,31 @@ package org.netbeans.modules.gradle;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import static junit.framework.TestCase.assertNotNull;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectManager;
 import org.netbeans.api.project.ui.OpenProjects;
 import org.netbeans.junit.NbTestCase;
-import org.netbeans.modules.apisupport.project.InstalledFileLocatorImpl;
+import org.netbeans.modules.gradle.api.NbGradleProject;
+import static org.netbeans.modules.gradle.api.NbGradleProject.Quality.FULL_ONLINE;
+import org.netbeans.modules.gradle.options.GradleExperimentalSettings;
 import org.netbeans.modules.project.uiapi.ProjectOpenedTrampoline;
 import org.netbeans.spi.project.ui.ProjectOpenedHook;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.filesystems.test.TestFileUtils;
+import org.openide.modules.DummyInstalledFileLocator;
 
 /**
  *
  * @author lkishalmi
  */
 public class AbstractGradleProjectTestCase extends NbTestCase {
+
+    @org.openide.util.lookup.ServiceProvider(service=org.openide.modules.InstalledFileLocator.class)
+    public static class InstalledFileLocator extends DummyInstalledFileLocator {
+    }
 
     public AbstractGradleProjectTestCase(String name) {
         super(name);
@@ -50,7 +58,8 @@ public class AbstractGradleProjectTestCase extends NbTestCase {
         super.setUp();
         clearWorkDir();
         destDirF = getTestNBDestDir();
-        InstalledFileLocatorImpl.registerDestDir(destDirF);
+        DummyInstalledFileLocator.registerDestDir(destDirF);
+        GradleExperimentalSettings.getDefault().setOpenLazy(false);
     }
 
     @Override
@@ -70,6 +79,16 @@ public class AbstractGradleProjectTestCase extends NbTestCase {
         return prj;
     }
 
+    protected void reloadProject(Project project) throws InterruptedException, ExecutionException {
+        NbGradleProjectImpl impl = (NbGradleProjectImpl) project;
+        NbGradleProjectImpl.RELOAD_RP.submit(() -> {
+            // A bit low level calls, just to allow UI interaction to
+            // Trust the project.
+            impl.project = GradleProjectCache.loadProject(impl, FULL_ONLINE, true, true);
+            NbGradleProjectImpl.ACCESSOR.doFireReload(NbGradleProject.get(impl));
+        }).get();
+    }
+    
     protected FileObject createGradleProject(String path, String buildScript, String settingsScript) throws IOException {
         FileObject ret = FileUtil.toFileObject(getWorkDir());
         if (path != null) {
@@ -77,7 +96,9 @@ public class AbstractGradleProjectTestCase extends NbTestCase {
                 ret = ret.getFileObject(p) != null ? ret.getFileObject(p): ret.createFolder(p);
             }
         }
-        TestFileUtils.writeFile(ret, "build.gradle", buildScript);
+        if (buildScript != null) {
+            TestFileUtils.writeFile(ret, "build.gradle", buildScript);
+        }
         if (settingsScript != null) {
             TestFileUtils.writeFile(ret, "settings.gradle", settingsScript);
         }

@@ -1,5 +1,5 @@
 #Signature file v4.1
-#Version 2.0
+#Version 2.7
 
 CLSS public abstract interface java.io.Serializable
 
@@ -442,6 +442,39 @@ meth public static org.netbeans.modules.gradle.api.execute.GradleCommandLine$Sta
 meth public static org.netbeans.modules.gradle.api.execute.GradleCommandLine$StackTrace[] values()
 supr java.lang.Enum<org.netbeans.modules.gradle.api.execute.GradleCommandLine$StackTrace>
 
+CLSS public final org.netbeans.modules.gradle.api.execute.GradleDistributionManager
+innr public final GradleDistribution
+meth public java.util.List<org.netbeans.modules.gradle.api.execute.GradleDistributionManager$GradleDistribution> availableDistributions(boolean) throws java.io.IOException
+meth public org.netbeans.modules.gradle.api.execute.GradleDistributionManager$GradleDistribution defaultDistribution()
+meth public org.netbeans.modules.gradle.api.execute.GradleDistributionManager$GradleDistribution distributionFromDir(java.io.File) throws java.io.IOException
+meth public org.netbeans.modules.gradle.api.execute.GradleDistributionManager$GradleDistribution distributionFromVersion(java.lang.String)
+meth public org.netbeans.modules.gradle.api.execute.GradleDistributionManager$GradleDistribution distributionFromVersion(java.lang.String,boolean)
+meth public org.netbeans.modules.gradle.api.execute.GradleDistributionManager$GradleDistribution distributionFromWrapper(java.io.File) throws java.io.IOException,java.net.URISyntaxException
+meth public static java.net.URI getWrapperDistributionURI(java.io.File) throws java.io.IOException,java.net.URISyntaxException
+meth public static org.netbeans.modules.gradle.api.execute.GradleDistributionManager get(java.io.File)
+supr java.lang.Object
+hfds CACHE,DIST_VERSION_PATTERN,DOWNLOAD_URI,JAVA_VERSION,JDK_COMPAT,MINIMUM_SUPPORTED_VERSION,RP,VERSION_BLACKLIST,gradleUserHome
+hcls DownloadTask
+
+CLSS public final org.netbeans.modules.gradle.api.execute.GradleDistributionManager$GradleDistribution
+ outer org.netbeans.modules.gradle.api.execute.GradleDistributionManager
+intf java.lang.Comparable<org.netbeans.modules.gradle.api.execute.GradleDistributionManager$GradleDistribution>
+meth public boolean equals(java.lang.Object)
+meth public boolean isAvailable()
+meth public boolean isBlackListed()
+meth public boolean isCompatibleWithJava(int)
+meth public boolean isCompatibleWithSystemJava()
+meth public int compareTo(org.netbeans.modules.gradle.api.execute.GradleDistributionManager$GradleDistribution)
+meth public int hashCode()
+meth public java.io.File getDistributionDir()
+meth public java.io.File getGradleUserHome()
+meth public java.lang.String getVersion()
+meth public java.lang.String toString()
+meth public java.net.URI getDistributionURI()
+meth public java.util.concurrent.Future<java.lang.Void> install()
+supr java.lang.Object
+hfds distributionDir,distributionURI,version
+
 CLSS public final org.netbeans.modules.gradle.api.execute.RunConfig
 cons public init(org.netbeans.api.project.Project,java.lang.String,java.lang.String,java.util.Set<org.netbeans.modules.gradle.api.execute.RunConfig$ExecFlag>,org.netbeans.modules.gradle.api.execute.GradleCommandLine)
 innr public final static !enum ExecFlag
@@ -471,8 +504,12 @@ meth public !varargs static org.netbeans.modules.gradle.api.execute.RunConfig cr
 meth public static boolean cancelGradle(org.netbeans.modules.gradle.api.execute.RunConfig)
 meth public static boolean isAugmentedBuildEnabled(org.netbeans.api.project.Project)
 meth public static boolean isCompileOnSaveEnabled(org.netbeans.api.project.Project)
+ anno 0 java.lang.Deprecated()
 meth public static boolean isIncludeOpenProjectsEnabled(org.netbeans.api.project.Project)
+meth public static boolean isProjectTrusted(org.netbeans.api.project.Project,boolean)
 meth public static java.io.File evaluateGradleDistribution(org.netbeans.api.project.Project,boolean)
+ anno 0 java.lang.Deprecated()
+meth public static java.lang.String[] evaluateActionArgs(org.netbeans.api.project.Project,java.lang.String,java.lang.String,org.openide.util.Lookup)
 meth public static org.netbeans.modules.gradle.api.execute.GradleCommandLine getDefaultCommandLine(org.netbeans.api.project.Project)
 meth public static org.netbeans.modules.gradle.api.execute.RunConfig createRunConfig(org.netbeans.api.project.Project,java.lang.String,java.lang.String,java.lang.String[])
  anno 0 java.lang.Deprecated()
@@ -481,7 +518,9 @@ meth public static org.openide.execution.ExecutorTask executeGradle(org.netbeans
 meth public static org.openide.filesystems.FileObject extractFileObjectfromLookup(org.openide.util.Lookup)
 meth public static org.openide.filesystems.FileObject[] extractFileObjectsfromLookup(org.openide.util.Lookup)
 meth public static org.openide.util.Pair getActivePlatform(java.lang.String)
+ anno 0 java.lang.Deprecated()
 meth public static org.openide.util.Pair getActivePlatform(org.netbeans.api.project.Project)
+ anno 0 java.lang.Deprecated()
 supr java.lang.Object
 hfds GRADLE_TASKS,LOG
 
@@ -523,6 +562,7 @@ innr public static SettingsFile
 intf java.io.Serializable
 meth public boolean equals(java.lang.Object)
 meth public boolean hasWrapper()
+meth public boolean isBuildSrcProject()
 meth public boolean isProject()
 meth public boolean isRootProject()
 meth public boolean isScriptlessSubProject()
@@ -549,6 +589,7 @@ fld public final static java.util.Set<org.netbeans.modules.gradle.spi.GradleFile
 fld public final static java.util.Set<org.netbeans.modules.gradle.spi.GradleFiles$Kind> PROPERTIES
 fld public final static java.util.Set<org.netbeans.modules.gradle.spi.GradleFiles$Kind> SCRIPTS
 fld public final static org.netbeans.modules.gradle.spi.GradleFiles$Kind BUILD_SCRIPT
+fld public final static org.netbeans.modules.gradle.spi.GradleFiles$Kind BUILD_SRC
 fld public final static org.netbeans.modules.gradle.spi.GradleFiles$Kind PROJECT_PROPERTIES
 fld public final static org.netbeans.modules.gradle.spi.GradleFiles$Kind ROOT_PROPERTIES
 fld public final static org.netbeans.modules.gradle.spi.GradleFiles$Kind ROOT_SCRIPT
@@ -571,17 +612,21 @@ meth public abstract org.gradle.tooling.events.ProgressListener getProgressListe
 
 CLSS public final org.netbeans.modules.gradle.spi.GradleSettings
 cons public init()
+ anno 0 java.lang.Deprecated()
 fld public final static java.lang.String PROP_ALWAYS_SHOW_OUTPUT = "alwaysShowOutput"
 fld public final static java.lang.String PROP_DISABLE_CACHE = "disableCache"
+ anno 0 java.lang.Deprecated()
 fld public final static java.lang.String PROP_DISPLAY_DESCRIPTION = "displayDescription"
 fld public final static java.lang.String PROP_DOWNLOAD_JAVADOC = "downloadJavaDoc"
 fld public final static java.lang.String PROP_DOWNLOAD_LIBS = "downloadLibs"
 fld public final static java.lang.String PROP_DOWNLOAD_SOURCES = "downloadSources"
 fld public final static java.lang.String PROP_GRADLE_DISTRIBUTION = "gradleHome"
+fld public final static java.lang.String PROP_GRADLE_EXEC_RULE = "gradleExecutionRule"
 fld public final static java.lang.String PROP_GRADLE_USER_HOME = "gradleUserHome"
 fld public final static java.lang.String PROP_GRADLE_VERSION = "gradleVersion"
 fld public final static java.lang.String PROP_HIDE_EMPTY_CONF = "hideEmptyConfiguration"
 fld public final static java.lang.String PROP_LAZY_OPEN_GROUPS = "lazyOpen"
+ anno 0 java.lang.Deprecated()
 fld public final static java.lang.String PROP_LOG_LEVEL = "logLevel"
 fld public final static java.lang.String PROP_OPT_CONFIGURE_ON_DEMAND = "configureOnDemand"
 fld public final static java.lang.String PROP_OPT_NO_REBUILD = "noRebuild"
@@ -598,14 +643,17 @@ fld public final static java.lang.String PROP_START_DAEMON_ON_START = "startDaem
 fld public final static java.lang.String PROP_USE_CUSTOM_GRADLE = "useCustomGradle"
 innr public final static !enum DownloadLibsRule
 innr public final static !enum DownloadMiscRule
+innr public final static !enum GradleExecutionRule
 meth public boolean getNoRebuild()
 meth public boolean isAlwaysShowOutput()
 meth public boolean isCacheDisabled()
+ anno 0 java.lang.Deprecated()
 meth public boolean isConfigureOnDemand()
 meth public boolean isDisplayDesctiption()
 meth public boolean isHideEmptyConfigurations()
 meth public boolean isOffline()
 meth public boolean isOpenLazy()
+ anno 0 java.lang.Deprecated()
 meth public boolean isPreferMaven()
 meth public boolean isReuseEditorOnStackTace()
 meth public boolean isReuseOutputTabs()
@@ -624,9 +672,11 @@ meth public org.netbeans.modules.gradle.api.execute.GradleCommandLine$StackTrace
 meth public org.netbeans.modules.gradle.spi.GradleSettings$DownloadLibsRule getDownloadLibs()
 meth public org.netbeans.modules.gradle.spi.GradleSettings$DownloadMiscRule getDownloadJavadoc()
 meth public org.netbeans.modules.gradle.spi.GradleSettings$DownloadMiscRule getDownloadSources()
+meth public org.netbeans.modules.gradle.spi.GradleSettings$GradleExecutionRule getGradleExecutionRule()
 meth public static org.netbeans.modules.gradle.spi.GradleSettings getDefault()
 meth public void setAlwaysShowOutput(boolean)
 meth public void setCacheDisabled(boolean)
+ anno 0 java.lang.Deprecated()
 meth public void setConfigureOnDemand(boolean)
 meth public void setDefaultLogLevel(org.netbeans.modules.gradle.api.execute.GradleCommandLine$LogLevel)
 meth public void setDefaultStackTrace(org.netbeans.modules.gradle.api.execute.GradleCommandLine$StackTrace)
@@ -635,12 +685,14 @@ meth public void setDistributionHome(java.lang.String)
 meth public void setDownloadJavadoc(org.netbeans.modules.gradle.spi.GradleSettings$DownloadMiscRule)
 meth public void setDownloadLibs(org.netbeans.modules.gradle.spi.GradleSettings$DownloadLibsRule)
 meth public void setDownloadSources(org.netbeans.modules.gradle.spi.GradleSettings$DownloadMiscRule)
+meth public void setGradleExecutionRule(org.netbeans.modules.gradle.spi.GradleSettings$GradleExecutionRule)
 meth public void setGradleUserHome(java.io.File)
 meth public void setGradleVersion(java.lang.String)
 meth public void setHideEmptyConfigurations(boolean)
 meth public void setNoRebuild(boolean)
 meth public void setOffline(boolean)
 meth public void setOpenLazy(boolean)
+ anno 0 java.lang.Deprecated()
 meth public void setPreferMaven(boolean)
 meth public void setReuseEditorOnStackTrace(boolean)
 meth public void setReuseOutputTabs(boolean)
@@ -651,7 +703,7 @@ meth public void setStartDaemonOnStart(boolean)
 meth public void setUseCustomGradle(boolean)
 meth public void setWrapperPreferred(boolean)
 supr java.lang.Object
-hfds INSTANCE
+hfds INSTANCE,preferences
 
 CLSS public final static !enum org.netbeans.modules.gradle.spi.GradleSettings$DownloadLibsRule
  outer org.netbeans.modules.gradle.spi.GradleSettings
@@ -671,6 +723,15 @@ meth public java.lang.String toString()
 meth public static org.netbeans.modules.gradle.spi.GradleSettings$DownloadMiscRule valueOf(java.lang.String)
 meth public static org.netbeans.modules.gradle.spi.GradleSettings$DownloadMiscRule[] values()
 supr java.lang.Enum<org.netbeans.modules.gradle.spi.GradleSettings$DownloadMiscRule>
+
+CLSS public final static !enum org.netbeans.modules.gradle.spi.GradleSettings$GradleExecutionRule
+ outer org.netbeans.modules.gradle.spi.GradleSettings
+fld public final static org.netbeans.modules.gradle.spi.GradleSettings$GradleExecutionRule ALWAYS
+fld public final static org.netbeans.modules.gradle.spi.GradleSettings$GradleExecutionRule TRUSTED_PROJECTS
+meth public java.lang.String toString()
+meth public static org.netbeans.modules.gradle.spi.GradleSettings$GradleExecutionRule valueOf(java.lang.String)
+meth public static org.netbeans.modules.gradle.spi.GradleSettings$GradleExecutionRule[] values()
+supr java.lang.Enum<org.netbeans.modules.gradle.spi.GradleSettings$GradleExecutionRule>
 
 CLSS public abstract interface org.netbeans.modules.gradle.spi.ProjectIconProvider
 meth public abstract boolean isGradleBadgeRequested()
@@ -729,17 +790,31 @@ meth public abstract boolean isActionEnabled(java.lang.String,org.netbeans.api.p
 meth public abstract java.io.InputStream defaultActionMapConfig()
 meth public abstract java.util.Set<java.lang.String> getSupportedActions()
 
+CLSS public abstract interface org.netbeans.modules.gradle.spi.actions.ProjectActionMappingProvider
+meth public abstract java.util.Set<java.lang.String> customizedActions()
+meth public abstract org.netbeans.modules.gradle.api.execute.ActionMapping findMapping(java.lang.String)
+
 CLSS public abstract interface org.netbeans.modules.gradle.spi.actions.ReplaceTokenProvider
 meth public abstract java.util.Map<java.lang.String,java.lang.String> createReplacements(java.lang.String,org.openide.util.Lookup)
 meth public abstract java.util.Set<java.lang.String> getSupportedTokens()
+meth public static java.lang.String replaceTokens(java.lang.String,java.util.Map<java.lang.String,java.lang.String>)
 
 CLSS public final org.netbeans.modules.gradle.spi.customizer.support.FilterPanelProvider
 cons public init(org.netbeans.spi.project.ui.support.ProjectCustomizer$CompositeCategoryProvider,java.lang.String)
+fld public final static java.lang.String ROOT_PROJECT = "ROOT-PROJECT"
 intf org.netbeans.spi.project.ui.support.ProjectCustomizer$CompositeCategoryProvider
 meth public javax.swing.JComponent createComponent(org.netbeans.spi.project.ui.support.ProjectCustomizer$Category,org.openide.util.Lookup)
 meth public org.netbeans.spi.project.ui.support.ProjectCustomizer$Category createCategory(org.openide.util.Lookup)
 supr java.lang.Object
 hfds original,plugin
+
+CLSS public abstract interface org.netbeans.modules.gradle.spi.execute.GradleDistributionProvider
+meth public abstract org.netbeans.modules.gradle.api.execute.GradleDistributionManager$GradleDistribution getGradleDistribution()
+meth public abstract void addChangeListener(javax.swing.event.ChangeListener)
+meth public abstract void removeChangeListener(javax.swing.event.ChangeListener)
+
+CLSS public abstract interface org.netbeans.modules.gradle.spi.execute.GradleJavaPlatformProvider
+meth public abstract java.io.File getJavaHome() throws java.io.FileNotFoundException
 
 CLSS public abstract org.netbeans.modules.gradle.spi.newproject.BaseGradleWizardIterator
 cons public init()
