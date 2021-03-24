@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -21,9 +21,9 @@ XREF=""
 ERROR=""
 QUITE=""
 
-function classpath() {
+classpath() {
 
-    local nbdist=${NBDIST-"../nbbuild/netbeans/"}
+    local nbdist=${NBDIST-"../../nbbuild/netbeans/"}
     local cnddist=${CNDDIST-"${nbdist}/cnd/"}
 
     CP=""
@@ -108,7 +108,7 @@ function classpath() {
     fi
 }
 
-function trace_classpath() {
+trace_classpath() {
     local paths=$@
     local ERROR=""
     for F in `echo ${paths} | awk -F${path_sep} '{ for( i=1; i<=NF; i++ ) print $i }'`; do
@@ -129,7 +129,7 @@ function trace_classpath() {
     fi
 }
 
-function params() {
+params() {
 
     while [ -n "$1" ]
     do
@@ -157,7 +157,7 @@ function params() {
 
 }
 
-function main() {
+main() {
 
     JAVA="${JAVA-`which java`}"
     DEFS=""
@@ -190,7 +190,8 @@ path_sep=":"
 ### understand path separator
 uname=`uname`
 #uname_prefix=`expr substr "${uname}" 1 6`
-uname_prefix=${uname:0:6}
+#uname_prefix=${uname:0:6}
+uname_prefix=`uname -s`
 if [ "${uname_prefix}" = "CYGWIN" ]; then
    path_sep=";"
 fi
