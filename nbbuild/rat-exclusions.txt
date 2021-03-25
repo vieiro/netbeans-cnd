@@ -48,6 +48,10 @@ enterprise/j2ee.dd/src/org/netbeans/modules/j2ee/dd/impl/web/model_4_0/*
 enterprise/j2ee.dd/src/org/netbeans/modules/j2ee/dd/impl/web/model_3_0_frag/*
 enterprise/j2ee.dd/src/org/netbeans/modules/j2ee/dd/impl/web/model_3_1_frag/*
 enterprise/j2ee.dd/src/org/netbeans/modules/j2ee/dd/impl/web/model_4_0_frag/*
+cnd/cnd.apt/src/org/netbeans/modules/cnd/apt/impl/support/generated/*
+cnd/cnd.asm/src/org/netbeans/modules/cnd/asm/base/generated/*
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/impl/services/evaluator/parser/generated/*
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/generated/*
 
 ###### user-specific files  
 **/nbproject/private/**
@@ -147,6 +151,19 @@ ide/properties/src/org/netbeans/modules/properties/sample.properties.template
 java/selenium2.java/src/org/netbeans/modules/selenium2/java/SeleneseIT.java.template
 java/testng.ui/src/org/netbeans/modules/testng/ui/resources/*.template
 websvccommon/websvc.saas.api/src/org/netbeans/modules/websvc/saas/oauth/*.template
+### Assorted cnd templates (headers, C++ classes, etc.)
+cnd/cnd.cncppunit/src/org/netbeans/modules/cnd/cncppunit/templates/cpp/*.template
+cnd/cnd.cncppunit/src/org/netbeans/modules/cnd/cncppunit/templates/cpp/cppunittest.group
+cnd/cnd.kit/hudson/*.template
+cnd/cnd.makeproject/src/org/netbeans/modules/cnd/makeproject/launchers/resources/simple-launcher.template
+cnd/cnd.script/src/org/netbeans/modules/cnd/script/resources/simple-shell.template
+cnd/cnd.ui/src/org/netbeans/modules/cnd/resources/templates/c/*.template
+cnd/cnd.ui/src/org/netbeans/modules/cnd/resources/templates/c/file_header.group
+cnd/cnd.ui/src/org/netbeans/modules/cnd/resources/templates/cpp/*.template
+cnd/cnd.ui/src/org/netbeans/modules/cnd/resources/templates/cpp/class.group
+cnd/cnd.ui/src/org/netbeans/modules/cnd/resources/templates/fortran/*.template
+cnd/cnd.ui/src/org/netbeans/modules/cnd/resources/templates/qt/*.template
+cnd/cnd.asm/src/org/netbeans/modules/cnd/asm/core/resources/*
 
 ###### do not natively support comments 
 **/*.mf
