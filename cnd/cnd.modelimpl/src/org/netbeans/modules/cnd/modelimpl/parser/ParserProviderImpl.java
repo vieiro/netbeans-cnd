@@ -87,11 +87,14 @@ public final class ParserProviderImpl extends CsmParserProvider {
         }
         if (APTLanguageSupport.FLAVOR_CPP11.equals(langFlavour)) {
             flags |= CPPParserEx.CPP_FLAVOR_CPP11;
+        }
+        /*
         } else if (APTLanguageSupport.FLAVOR_CPP14.equals(langFlavour)) {
             flags |= CPPParserEx.CPP_FLAVOR_CPP14;
         } else if (APTLanguageSupport.FLAVOR_CPP17.equals(langFlavour)) {
             flags |= CPPParserEx.CPP_FLAVOR_CPP17;
         }
+        */
         return flags;
     }
     

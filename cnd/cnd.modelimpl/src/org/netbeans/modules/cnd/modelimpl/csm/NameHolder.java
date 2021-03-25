@@ -279,12 +279,13 @@ public class NameHolder {
 	    switch( next.getType() ) {
 		case CPPTokenTypes.CSM_TYPE_BUILTIN:
 		case CPPTokenTypes.CSM_TYPE_COMPOUND:
-                case CPPTokenTypes.CSM_TYPE_ATOMIC:
-                    if (sb.charAt(sb.length()-1) != ' ') {
-                        sb.append(' ');
-                    }
-		    addTypeText(next, sb);
-                    break;
+// TODO: ATOMIC
+//                case CPPTokenTypes.CSM_TYPE_ATOMIC:
+//                    if (sb.charAt(sb.length()-1) != ' ') {
+//                        sb.append(' ');
+//                    }
+//		    addTypeText(next, sb);
+//                    break;
 		case CPPTokenTypes.CSM_PTR_OPERATOR:
 		    addTypeText(next, sb);
                     break;

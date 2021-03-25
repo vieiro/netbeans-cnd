@@ -1,0 +1,94 @@
+////
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+////
+
+= Post-donation changes
+
+The following changes have been made in this module in order to compile after
+the donation, and some pending enhancements and things to do.
+
+== Licenses
+
+The files CPPParserEx.java, cpparser.g and CPPSymbol.java seem to be in the
+public domain. We should add an ASF License for future changes. We sould
+investigate if this is OK.
+
+== CPPParserEx.java
+
+This file was not included in the donation. 
+
+In order to compile this module, we recovered an old-open source version from
+this commit in 2016:
+
+https://github.com/emilianbold/netbeans-releases/blob/ddf7b064d46d371e2d1c69f30176b7ddb11178c1/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/CPPParserEx.java
+
+After that commit Oracle added the CDDL license to the file, and changes
+afterwards retain this CDDL License, so changing that to Apache 2 License seems
+impossible.
+
+This version of CPPParserEx.java is, then, five years old as of this writing,
+and is missing different C++ features (possibly `C++14` and `C++17`
+enhancements).
+
+== cpparser.g
+
+This file was not included in the donation.
+
+In order to compile this module, we recovered an old-open source version from
+this commit in 2015:
+
+https://github.com/emilianbold/netbeans-releases/blob/56b0267c4f2252f9f7f55e6df47c98ac43a8d11a/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/cppparser.g
+
+After that commit Oracle added the CDDL license to the file, and changes
+afterwards retain this CDDL License, so changing that to Apache 2 License seems
+impossible.
+
+This version of cpparser.g is, then, six years old as of this writing, and is
+possibly missing new C++ features.
+
+== CPPSymbol.java
+
+This file was not included in the donation.
+
+In order to compile this module, we recovered an old-open source version from
+this commit in 2007:
+
+https://github.com/emilianbold/netbeans-releases/blob/ebeea9342ab3114bdf7d13ddb55394a924553b3d/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/CPPSymbol.java
+
+After that commit Oracle added the CDDL license to the file, and changes
+afterwards retain this CDDL License, so changing that to Apache 2 License seems
+impossible.
+
+== antlr-3.4-complete.jar
+
+It seems this module does not compile with latest Antlr 3.5.2 version, but
+compiles with antlr-3.4. The "complete" version of the file is not available
+in Maven Central, so an upload has been made to OSUOSL binary repository.
+
+== Shell scripts
+
+This module has some shell scripts in this directory, that seems to build a
+CND-specific release of NetBeans. 
+
+After the donation we changed some paths in the shell scripts (nbbuild is
+../../nbbuild in Apache NetBeans after cluster reorganization).
+
+The shell scripts have not been tested and need enhancements.
+
+
+

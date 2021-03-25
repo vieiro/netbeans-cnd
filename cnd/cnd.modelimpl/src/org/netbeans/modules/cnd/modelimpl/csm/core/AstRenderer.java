@@ -174,7 +174,8 @@ public class AstRenderer {
                         }
                         break;
                     }
-                    case CPPTokenTypes.CSM_FUNCTION_LIKE_VARIABLE_TEMPLATE_DECLARATION:
+// TODO: ATOMIC
+//                    case CPPTokenTypes.CSM_FUNCTION_LIKE_VARIABLE_TEMPLATE_DECLARATION:
                     case CPPTokenTypes.CSM_FUNCTION_LIKE_VARIABLE_DECLARATION:
                         if (isFuncLikeVariable(token, false)) {
                             if (renderFuncLikeVariable(token, currentNamespace, container, !isFuncLikeVariable(token, true))) {
@@ -435,8 +436,9 @@ public class AstRenderer {
                         return true;
                     } else if (child.getType() == CPPTokenTypes.CSM_TYPE_BUILTIN) {
                         return true;
-                    } else if (child.getType() == CPPTokenTypes.CSM_TYPE_ATOMIC) {
-                        return true;
+// TODO: ATOMIC
+//                    } else if (child.getType() == CPPTokenTypes.CSM_TYPE_ATOMIC) {
+//                        return true;
                     } else if (child.getType() == CPPTokenTypes.CSM_TYPE_COMPOUND) {
                         if (!isAbstractDeclarator(child.getNextSibling())) {
                             CsmType type = TypeFactory.createType(child, file, null, 0);
@@ -801,7 +803,8 @@ public class AstRenderer {
                     token = getFirstSiblingSkipQualifiers(token);
                 }
                 if (token != null && (token.getType() == CPPTokenTypes.CSM_TYPE_BUILTIN ||
-                        token.getType() == CPPTokenTypes.CSM_TYPE_ATOMIC ||
+// TODO: ATOMIC
+//                        token.getType() == CPPTokenTypes.CSM_TYPE_ATOMIC ||
                         token.getType() == CPPTokenTypes.CSM_TYPE_COMPOUND ||
                         token.getType() == CPPTokenTypes.LITERAL_struct ||
                         token.getType() == CPPTokenTypes.LITERAL_class ||
@@ -1142,12 +1145,13 @@ public class AstRenderer {
                                 break;
                             case CPPTokenTypes.CSM_TYPE_COMPOUND:
                             case CPPTokenTypes.CSM_TYPE_BUILTIN:
-                            case CPPTokenTypes.CSM_TYPE_ATOMIC:
-                                if (!cpp11StyleFunction) {
-                                    classifier = typeQuals != null ? typeQuals : curr;
-                                    typeBeginning = classifier;
-                                }
-                                break;
+// TODO: ATOMIC
+//                            case CPPTokenTypes.CSM_TYPE_ATOMIC:
+//                                if (!cpp11StyleFunction) {
+//                                    classifier = typeQuals != null ? typeQuals : curr;
+//                                    typeBeginning = classifier;
+//                                }
+//                                break;
                             case CPPTokenTypes.LITERAL_enum:
                                 if (AstUtil.findSiblingOfType(curr, CPPTokenTypes.RCURLY) != null) {
                                     results.enclosing = EnumImpl.create(curr, scope, file, fileContent, !isRenderingLocalContext());
@@ -1274,11 +1278,12 @@ public class AstRenderer {
                                 break;
                             case CPPTokenTypes.CSM_TYPE_COMPOUND:
                             case CPPTokenTypes.CSM_TYPE_BUILTIN: 
-                            case CPPTokenTypes.CSM_TYPE_ATOMIC: {
-                                classifier = typeQuals != null ? typeQuals : curr;
-                                typeToken = curr.getType();
-                                break;
-                            }
+// TODO: ATOMIC
+//                            case CPPTokenTypes.CSM_TYPE_ATOMIC: {
+//                                classifier = typeQuals != null ? typeQuals : curr;
+//                                typeToken = curr.getType();
+//                                break;
+//                            }
                             case CPPTokenTypes.LITERAL_class:
                             case CPPTokenTypes.LITERAL_struct:
                             case CPPTokenTypes.LITERAL_union: {
@@ -1621,7 +1626,8 @@ public class AstRenderer {
 
         if (tokType != null) {
             if (tokType.getType() == CPPTokenTypes.CSM_TYPE_BUILTIN ||
-                    tokType.getType() == CPPTokenTypes.CSM_TYPE_ATOMIC ||
+// TODO: ATOMIC
+//                    tokType.getType() == CPPTokenTypes.CSM_TYPE_ATOMIC ||
                     tokType.getType() == CPPTokenTypes.CSM_TYPE_COMPOUND) {
                 AST next = getFirstSiblingSkipQualifiers(
                     getFirstSiblingSkipFunctionSpecifiers(
@@ -1906,7 +1912,8 @@ public class AstRenderer {
         }
         if (typeof || tokType.getType() == CPPTokenTypes.CSM_TYPE_BUILTIN ||
                 tokType.getType() == CPPTokenTypes.CSM_TYPE_COMPOUND ||
-                tokType.getType() == CPPTokenTypes.CSM_TYPE_ATOMIC ||
+// TODO: ATOMIC
+//                tokType.getType() == CPPTokenTypes.CSM_TYPE_ATOMIC ||
                 tokType.getType() == CPPTokenTypes.CSM_QUALIFIED_ID && isThisReference ||
                 tokType.getType() == CPPTokenTypes.IDENT && isThisReference||
                 tokType.getType() == CPPTokenTypes.CSM_VARIABLE_DECLARATION) {
@@ -2834,7 +2841,8 @@ public class AstRenderer {
                 int type = token.getType();
                 switch( type ) {
                     case CPPTokenTypes.CSM_TYPE_BUILTIN:
-                    case CPPTokenTypes.CSM_TYPE_ATOMIC:
+// TODO: ATOMIC
+//                    case CPPTokenTypes.CSM_TYPE_ATOMIC:
                     case CPPTokenTypes.CSM_TYPE_COMPOUND:
                     case CPPTokenTypes.LITERAL_typename:
                     case CPPTokenTypes.LITERAL_struct:

@@ -16,15 +16,15 @@
 # specific language governing permissions and limitations
 # under the License.
 
-function main() {
+main() {
 
 	local clean="n"
 	local all="n"
 	local cluster="cnd"
 	local quiet="n"
 
-	if [ -d "../nbbuild" ]; then
-		nbbuild="../nbbuild"
+	if [ -d "../../nbbuild" ]; then
+		nbbuild="../../nbbuild"
 	else
 		if [ -d "nbbuild" ]; then
 			nbbuild="nbbuild"
@@ -125,7 +125,7 @@ function main() {
 	fi
 }
 
-function usage() {
+usage() {
 	echo ""
 	echo "Usage:"
 	echo ""

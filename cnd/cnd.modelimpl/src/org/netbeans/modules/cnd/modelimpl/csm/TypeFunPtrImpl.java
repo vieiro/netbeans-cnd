@@ -129,10 +129,11 @@ public final class TypeFunPtrImpl extends TypeImpl implements CsmFunctionPointer
                 if (typeASTEnd == null) {
                     typeASTEnd = AstUtil.findSiblingOfType(ast, CPPTokenTypes.CSM_TYPE_DECLTYPE);
                     typeASTStart = typeASTEnd;
-                    if (typeASTEnd == null) {
-                        typeASTEnd = AstUtil.findSiblingOfType(ast, CPPTokenTypes.CSM_TYPE_ATOMIC);
-                        typeASTStart = typeASTEnd;
-                    }
+// TODO: ATOMIC
+//                    if (typeASTEnd == null) {
+//                        typeASTEnd = AstUtil.findSiblingOfType(ast, CPPTokenTypes.CSM_TYPE_ATOMIC);
+//                        typeASTStart = typeASTEnd;
+//                    }
                 }
             }            
         }

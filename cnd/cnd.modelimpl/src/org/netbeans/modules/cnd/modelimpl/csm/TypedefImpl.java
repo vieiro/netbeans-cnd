@@ -271,9 +271,10 @@ public class TypedefImpl extends OffsetableDeclarationBase<CsmTypedef> implement
             switch (token.getType()) {
                 case CPPTokenTypes.CSM_TYPE_COMPOUND:
                 case CPPTokenTypes.CSM_TYPE_BUILTIN:
-                case CPPTokenTypes.CSM_TYPE_ATOMIC:
-                    classifier = token;
-                    break;
+// TODO: ATOMIC
+//                case CPPTokenTypes.CSM_TYPE_ATOMIC:
+//                    classifier = token;
+//                    break;
                 case CPPTokenTypes.LITERAL_struct:
                     AST next = token.getNextSibling();
                     if (next != null && next.getType() == CPPTokenTypes.CSM_QUALIFIED_ID) {

@@ -52,7 +52,7 @@
                 <include name="libs.antlr3.devel/external/binaries-list"/>
             </manifest>
         </downloadbinaries>
-        <property name="antlr3.jar" location="external/antlr-3.4.jar"/>
+        <property name="antlr3.jar" location="external/antlr-3.4-complete.jar" />
         <property name="antlr3.evaluator.grammar.dir" location="src/org/netbeans/modules/cnd/modelimpl/impl/services/evaluator/parser"/>
 
          <!-- New C++ Parser -->

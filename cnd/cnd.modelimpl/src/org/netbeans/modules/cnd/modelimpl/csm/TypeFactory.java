@@ -230,33 +230,34 @@ public class TypeFactory {
         
         AST ast = asts[0];
         AST typeStart = AstRenderer.getFirstSiblingSkipQualifiers(ast);
-        
-        if (typeStart != null && typeStart.getType() == CPPTokenTypes.CSM_TYPE_ATOMIC) {
-            // Render type_name inside atomic specifier as type_name inside specialization or function params
-            type = AstRenderer.renderType(typeStart.getFirstChild(), file, true, scope, true); 
-            if (type != null) {
-                if (type instanceof TypeFunPtrImpl) {
-                    TypeFunPtrImpl ptrT = (TypeFunPtrImpl) type;
-                    return new TypeFunPtrImpl(
-                            ptrT, 
-                            ptrT.getPointerDepth() + pointerDepth, 
-                            CsmTypes.TypeDescriptor.combineReferences(getReferenceValue(ptrT), reference), 
-                            ptrT.getArrayDepth() + arrayDepth, 
-                            ptrT.isConst() || (TypeImpl.initConstQualifiers(ast) != 0), 
-                            ptrT.isVolatile() || (TypeImpl.initVolatileQualifiers(ast) != 0)
-                    );
-                }
-                return new TypeImpl(
-                    type, 
-                    type.getPointerDepth() + pointerDepth, 
-                    CsmTypes.TypeDescriptor.combineReferences(getReferenceValue(type), reference), 
-                    type.getArrayDepth() + arrayDepth, 
-                    type.isConst() || (TypeImpl.initConstQualifiers(ast) != 0), 
-                    type.isVolatile() || (TypeImpl.initVolatileQualifiers(ast) != 0)
-                );
-            }
-            return TypeFactory.createBuiltinType("_Atomic", ptrOperator, arrayDepth, ast, file); // NOI18N
-        } else if (typeStart != null && typeStart.getType() == CPPTokenTypes.CSM_TYPE_COMPOUND && DeclTypeImpl.isDeclType(typeStart.getFirstChild())) {
+// TODO: ATOMIC
+//        if (typeStart != null && typeStart.getType() == CPPTokenTypes.CSM_TYPE_ATOMIC) {
+//            // Render type_name inside atomic specifier as type_name inside specialization or function params
+//            type = AstRenderer.renderType(typeStart.getFirstChild(), file, true, scope, true); 
+//            if (type != null) {
+//                if (type instanceof TypeFunPtrImpl) {
+//                    TypeFunPtrImpl ptrT = (TypeFunPtrImpl) type;
+//                    return new TypeFunPtrImpl(
+//                            ptrT, 
+//                            ptrT.getPointerDepth() + pointerDepth, 
+//                            CsmTypes.TypeDescriptor.combineReferences(getReferenceValue(ptrT), reference), 
+//                            ptrT.getArrayDepth() + arrayDepth, 
+//                            ptrT.isConst() || (TypeImpl.initConstQualifiers(ast) != 0), 
+//                            ptrT.isVolatile() || (TypeImpl.initVolatileQualifiers(ast) != 0)
+//                    );
+//                }
+//                return new TypeImpl(
+//                    type, 
+//                    type.getPointerDepth() + pointerDepth, 
+//                    CsmTypes.TypeDescriptor.combineReferences(getReferenceValue(type), reference), 
+//                    type.getArrayDepth() + arrayDepth, 
+//                    type.isConst() || (TypeImpl.initConstQualifiers(ast) != 0), 
+//                    type.isVolatile() || (TypeImpl.initVolatileQualifiers(ast) != 0)
+//                );
+//            }
+//            return TypeFactory.createBuiltinType("_Atomic", ptrOperator, arrayDepth, ast, file); // NOI18N
+//        } else if (typeStart != null && typeStart.getType() == CPPTokenTypes.CSM_TYPE_COMPOUND && DeclTypeImpl.isDeclType(typeStart.getFirstChild())) {
+        if (typeStart != null && typeStart.getType() == CPPTokenTypes.CSM_TYPE_COMPOUND && DeclTypeImpl.isDeclType(typeStart.getFirstChild())) {
             type = new DeclTypeImpl(
                 typeStart.getFirstChild(), 
                 file, 
