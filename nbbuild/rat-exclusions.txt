@@ -52,6 +52,7 @@ cnd/cnd.apt/src/org/netbeans/modules/cnd/apt/impl/support/generated/*
 cnd/cnd.asm/src/org/netbeans/modules/cnd/asm/base/generated/*
 cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/impl/services/evaluator/parser/generated/*
 cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/generated/*
+cnd/cnd.apt/src/org/netbeans/modules/cnd/apt/support/APTTokenTypes.java
 
 ###### user-specific files  
 **/nbproject/private/**
