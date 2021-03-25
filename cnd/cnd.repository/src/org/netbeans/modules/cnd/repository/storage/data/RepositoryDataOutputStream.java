@@ -56,7 +56,11 @@ public final class RepositoryDataOutputStream extends DataOutputStream implement
 
     @Override
     public void writeCharSequenceUTF(CharSequence s) throws IOException {
-        UTF.writeUTF(s, this);
+	// TODO: Optimize this
+        // NOTE: In NetBeans 8.2 this was run as UTF.writeUTF(s, this);
+	for(int i=0; i<s.length();i++) {
+		write(s.charAt(i));
+	}
     }
 
     @Override

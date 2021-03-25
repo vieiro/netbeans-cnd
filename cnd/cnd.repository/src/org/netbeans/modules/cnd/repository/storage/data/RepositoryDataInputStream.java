@@ -87,11 +87,6 @@ public final class RepositoryDataInputStream extends DataInputStream implements 
     }
 
     @Override
-    public CharSequence readCharSequenceUTF() throws IOException {
-        return UTF.readCharSequenceUTF(this);
-    }
-
-    @Override
     public int readUnitId() throws IOException {
         int rawData = readInt();
         UnitsConverter unitIDConverter = layersConverterProvider.getReadUnitsConverter();
@@ -127,5 +122,10 @@ public final class RepositoryDataInputStream extends DataInputStream implements 
         // for now we don't distinguish path dictionaries, but could in future
         // i.e. when system library is moved from local to remote fs
         return readFilePath();
+    }
+
+    @Override
+    public CharSequence readCharSequenceUTF() throws IOException {
+        return DataInputStream.readUTF(this);
     }
 }
