@@ -18,6 +18,7 @@
  */
 package org.netbeans.modules.cnd.repository.storage.data;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -56,11 +57,12 @@ public final class RepositoryDataOutputStream extends DataOutputStream implement
 
     @Override
     public void writeCharSequenceUTF(CharSequence s) throws IOException {
-	// TODO: Optimize this
-        // NOTE: In NetBeans 8.2 this was run as UTF.writeUTF(s, this);
-	for(int i=0; i<s.length();i++) {
-		write(s.charAt(i));
-	}
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(s.length());
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.writeUTF(s.toString());
+	dos.flush();
+	byte [] bytes = baos.toByteArray();
+	write(bytes);
     }
 
     @Override
