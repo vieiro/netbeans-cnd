@@ -131,6 +131,7 @@ ide/xml.xdm/test/unit/src/org/netbeans/modules/xml/xdm/**/*.xml
 ide/xml.xdm/test/unit/src/org/netbeans/modules/xml/xdm/**/*.xsd
 ide/xml/test/unit/src/org/netbeans/modules/xml/resources/*
 ide/xsl/test/unit/src/org/netbeans/modules/xsl/utils/data/*
+cnd/cnd.remote/tools/test/*
 
 ###### template file
 apisupport/apisupport.ant/src/org/netbeans/modules/apisupport/project/resources/license-*.txt
@@ -152,18 +153,30 @@ java/selenium2.java/src/org/netbeans/modules/selenium2/java/SeleneseIT.java.temp
 java/testng.ui/src/org/netbeans/modules/testng/ui/resources/*.template
 websvccommon/websvc.saas.api/src/org/netbeans/modules/websvc/saas/oauth/*.template
 ### Assorted cnd templates (headers, C++ classes, etc.)
+cnd/cnd.asm/src/org/netbeans/modules/cnd/asm/core/resources/*
 cnd/cnd.cncppunit/src/org/netbeans/modules/cnd/cncppunit/templates/cpp/*.template
 cnd/cnd.cncppunit/src/org/netbeans/modules/cnd/cncppunit/templates/cpp/cppunittest.group
 cnd/cnd.kit/hudson/*.template
 cnd/cnd.makeproject/src/org/netbeans/modules/cnd/makeproject/launchers/resources/simple-launcher.template
+cnd/cnd.script/src/org/netbeans/modules/cnd/script/resources/*
+cnd/cnd.script/src/org/netbeans/modules/cnd/script/resources/*
 cnd/cnd.script/src/org/netbeans/modules/cnd/script/resources/simple-shell.template
+cnd/cnd.simpleunit/src/org/netbeans/modules/cnd/simpleunit/templates/c/*.template
+cnd/cnd.simpleunit/src/org/netbeans/modules/cnd/simpleunit/templates/cpp/*.template
 cnd/cnd.ui/src/org/netbeans/modules/cnd/resources/templates/c/*.template
 cnd/cnd.ui/src/org/netbeans/modules/cnd/resources/templates/c/file_header.group
 cnd/cnd.ui/src/org/netbeans/modules/cnd/resources/templates/cpp/*.template
 cnd/cnd.ui/src/org/netbeans/modules/cnd/resources/templates/cpp/class.group
+cnd/cnd.ui/src/org/netbeans/modules/cnd/resources/templates/cpp/file_header.group
 cnd/cnd.ui/src/org/netbeans/modules/cnd/resources/templates/fortran/*.template
 cnd/cnd.ui/src/org/netbeans/modules/cnd/resources/templates/qt/*.template
-cnd/cnd.asm/src/org/netbeans/modules/cnd/asm/core/resources/*
+cnd/cnd.makeproject/samples_src/hellocmake/CMakeLists.txt
+cnd/cnd.makeproject/samples_src/hellocmake/src/CMakeLists.txt
+cnd/cnd.makeproject/samples_src/helloqt/HelloForm.ui
+cnd/cnd.editor/src/org/netbeans/modules/cnd/editor/resources/cplusplus/CCExample
+cnd/cnd.editor/src/org/netbeans/modules/cnd/editor/resources/cplusplus/CExample
+cnd/cnd.editor/src/org/netbeans/modules/cnd/editor/resources/cplusplus/HExample
+cnd/cnd.editor/src/org/netbeans/modules/cnd/editor/resources/fortran/FExample
 
 ###### do not natively support comments 
 **/*.mf
