@@ -60,7 +60,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.netbeans.libs.antlr.cnd</code-name-base>
+                    <code-name-base>org.netbeans.modules.cnd.antlr</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>

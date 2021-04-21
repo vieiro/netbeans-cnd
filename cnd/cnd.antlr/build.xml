@@ -19,6 +19,6 @@
     under the License.
 
 -->
-<project name="cnd/libs.antlr.cnd" default="netbeans" basedir=".">
+<project name="cnd/cnd.antlr" default="netbeans" basedir=".">
     <import file="../../nbbuild/templates/projectized.xml"/>
 </project>
