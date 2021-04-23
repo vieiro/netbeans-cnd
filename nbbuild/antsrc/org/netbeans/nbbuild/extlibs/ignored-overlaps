@@ -68,6 +68,9 @@ extide/gradle/external/gradle-4.10.2-bin.zip java/maven/external/aether-api-1.13
 # cnd/libs.clank uses a zip file that is expanded at compile time into different jar files.
 cnd/libs.clank/external/clank_0.3.9.zip cnd/libs.clank/external/clank_0.3.9.zip
 
+# The compile-time dependency with org-netbeans-modules-cnd-antlr-RELEASE82.jar is used in different cnd modules
+cnd/cnd.apt/external/org-netbeans-modules-cnd-antlr-RELEASE82.jar cnd/cnd.asm/external/org-netbeans-modules-cnd-antlr-RELEASE82.jar
+
 # These are the endorsed version of the javaee apis and create libraries, so they are better kept separate
 enterprise/javaee.api/external/javax.annotation-api-1.2.jar enterprise/javaee7.api/external/javax.annotation-api-1.2.jar
 enterprise/javaee7.api/external/javax.annotation-api-1.2.jar enterprise/websvc.restlib/external/javax.annotation-api-1.2.jar
