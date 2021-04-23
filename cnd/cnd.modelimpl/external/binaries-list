@@ -16,3 +16,13 @@
 # under the License.
 
 C51780D99464CBF45B0495C7646B442AB3C7B463 open-fortran-parser-0.7.1.2.zip
+
+# The antlr 3.4 compiler (compile-time dependency)
+7797E70E3F5CB4229695F08FF50333266CF81125 org.antlr:antlr:3.4
+8F011408269A8E42B8548687E137D8EEB56DF4B4 org.antlr:antlr-runtime:3.4
+467A2AA12BE6D0F0F68C70EECF6714AB733027AC org.antlr:ST4:4.0.4
+
+# NetBeans 8.2 cnd.antlr antlr compiler (based on antlr 2.7.7)
+# This is used at compile-time only. For a recreated runtime see module 'cnd.antlr'
+9F10268EDFBD85FAE2E2416585AE9F0C01B615E2 org-netbeans-modules-cnd-antlr-RELEASE82.jar
+

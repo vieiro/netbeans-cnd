@@ -39,7 +39,7 @@
 		<property name="antlr.folding.dir" location="src/org/netbeans/modules/cnd/modelimpl/antlr"/> 
 		-->
         <property name="antlr.output.dir" location="src/org/netbeans/modules/cnd/modelimpl/parser/generated"/>
-        <property name="antlr.jar" location="${cluster}/modules/ext/org-netbeans-modules-cnd-antlr.jar"/>
+        <property name="antlr.jar" location="external/org-netbeans-modules-cnd-antlr-RELEASE82.jar" />
         <property name="antlr.grammar.dir" location="src/org/netbeans/modules/cnd/modelimpl/parser"/>
 
         <property name="antlr.apt.grammar.dir" location="../cnd.apt/src/org/netbeans/modules/cnd/apt/impl/support"/>
@@ -52,7 +52,11 @@
                 <include name="libs.antlr3.devel/external/binaries-list"/>
             </manifest>
         </downloadbinaries>
-        <property name="antlr3.jar" location="external/antlr-3.4.jar"/>
+        <path id="antlr3.jar.cp">
+            <pathelement location="external/antlr-3.4.jar" />
+            <pathelement location="external/antlr-runtime-3.4.jar" />
+            <pathelement location="external/ST4-4.0.4.jar" />
+        </path>
         <property name="antlr3.evaluator.grammar.dir" location="src/org/netbeans/modules/cnd/modelimpl/impl/services/evaluator/parser"/>
 
          <!-- New C++ Parser -->
@@ -139,13 +143,13 @@
         <unzip src="${open.fortran.parser.src.dir}/open-fortran-parser-0.7.1.2.zip"
             dest="${antlr.grammar.dir}"/>
 
-        <echo message="ANTLR Parser Generator   Version 3.3" />
+        <echo message="ANTLR Parser Generator   Version 3.4" />
         <java classname="org.antlr.Tool" fork="true" failonerror="true">
             <!--<arg value="-trace"/>-->
             <arg value="-o"/>
             <arg value="${antlr.output.dir}"/>
             <arg value="${antlr.grammar.dir}/FortranParser.g"/>
-            <classpath path="${antlr3.jar}"/>
+            <classpath refid="antlr3.jar.cp" />
         </java>
 
         <replaceregexp file="${antlr.output.dir}/FortranParser.java"
@@ -163,13 +167,13 @@
                     tofile="${antlr3.cppparser.output.dir}/APTTokenTypes.tokens"
                     overwrite="true"/>
 
-        <echo message="ANTLR Parser Generator   Version 3.3" />
+        <echo message="ANTLR Parser Generator   Version 3.4" />
         <java classname="org.antlr.Tool" fork="true" failonerror="true">
             <arg value="-trace"/>
             <arg value="-o"/>
             <arg value="${antlr3.cppparser.output.dir}"/>
             <arg value="${antlr3.cppparser.grammar.dir}/CXXParser.g"/>
-            <classpath path="${antlr3.jar}"/>
+            <classpath refid="antlr3.jar.cp" />
         </java>
 
         <replaceregexp file="${antlr3.cppparser.output.dir}/CXXParser.java"
@@ -184,13 +188,13 @@
                     tofile="${antlr3.evaluator.output.dir}/APTTokenTypes.tokens"
                     overwrite="true"/>
 
-        <echo message="ANTLR Parser Generator   Version 3.3" />
+        <echo message="ANTLR Parser Generator   Version 3.4" />
         <java classname="org.antlr.Tool" fork="true" failonerror="true">
             <!--<arg value="-trace"/>-->
             <arg value="-o"/>
             <arg value="${antlr3.evaluator.output.dir}"/>
             <arg value="${antlr3.evaluator.grammar.dir}/Evaluator.g"/>
-            <classpath path="${antlr3.jar}"/>
+            <classpath refid="antlr3.jar.cp" />
         </java>
 
         <replaceregexp file="${antlr3.evaluator.output.dir}/EvaluatorParser.java"
