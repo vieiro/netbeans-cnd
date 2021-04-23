@@ -219,3 +219,22 @@ ide/xml.text/src/org/netbeans/modules/xml/text/resources/DTDExample
 ide/xml.text/src/org/netbeans/modules/xml/text/resources/XMLExample
 ide/xml.text/src/org/netbeans/modules/xml/text/resources/XMLExampleIndent
 ide/properties.syntax/src/org/netbeans/modules/properties/syntax/PropertiesExample
+
+## antlr generated files in cnd
+cnd/cnd.apt/src/org/netbeans/modules/cnd/apt/impl/support/generated/*
+cnd/cnd.apt/src/org/netbeans/modules/cnd/apt/support/APTTokenTypes.java
+cnd/cnd.asm/src/org/netbeans/modules/cnd/asm/base/generated/*
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/impl/services/evaluator/parser/generated/APTTokenTypes.tokens
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/impl/services/evaluator/parser/generated/EvaluatorParser.java
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/impl/services/evaluator/parser/generated/Evaluator.tokens
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/FortranLexicalPrepass.java
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/FortranParser2.g
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/FortranParserActionFactory.java
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/FortranParser.g
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/FortranStream.java
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/FortranToken.java
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/FortranTokenStream.java
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/IActionEnums.java
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/IFortranParserAction.java
+cnd/cnd.modelimpl/src/org/netbeans/modules/cnd/modelimpl/parser/generated/*
+
