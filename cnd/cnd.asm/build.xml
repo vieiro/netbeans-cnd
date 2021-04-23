@@ -35,8 +35,8 @@
     <target name="init-antlr">
         <property name="asm.output.dir" location="src/org/netbeans/modules/cnd/asm/base/generated"/>
         <property name="asm.base.dir" location="src/org/netbeans/modules/cnd/asm/base"/>
-        <property name="antlr.jar" location="${cluster}/modules/ext/org-netbeans-modules-cnd-antlr.jar"/>
-        <property name="d_antlr.jar" location="../../antlr/build/org-netbeans-modules-cnd-antlr.jar"/>
+        <property name="antlr.jar" location="external/org-netbeans-modules-cnd-antlr-RELEASE82.jar" />
+        <property name="d_antlr.jar" location="external/org-netbeans-modules-cnd-antlr-RELEASE82.jar" />
         <property name="asm.grammar.dir.att" location="src/org/netbeans/modules/cnd/asm/base/att"/>
         <property name="asm.grammar.dir.dis" location="src/org/netbeans/modules/cnd/asm/base/dis"/>
         <property name="asm.grammar.dir.ident" location="src/org/netbeans/modules/cnd/asm/base/ident"/>
