@@ -34,9 +34,9 @@ import org.netbeans.modules.cnd.apt.support.lang.APTLanguageSupport;
 import org.netbeans.modules.cnd.modelimpl.csm.TypeFactory;
 import org.netbeans.modules.cnd.modelimpl.csm.core.AstUtil;
 import org.netbeans.modules.cnd.modelimpl.impl.services.evaluator.ShiftedTokenStream;
-import org.netbeans.modules.cnd.modelimpl.parser.CPPParserEx;
+import org.netbeans.modules.cnd.modelimpl.parser.deprecated.CPPParserEx;
 import org.netbeans.modules.cnd.modelimpl.parser.ParserProviderImpl;
-import org.netbeans.modules.cnd.modelimpl.parser.generated.CPPTokenTypes;
+import org.netbeans.modules.cnd.modelimpl.parser.deprecated.CPPTokenTypes;
 import org.netbeans.modules.cnd.spi.model.TypesProvider;
 import org.netbeans.modules.cnd.utils.cache.CharSequenceUtils;
 

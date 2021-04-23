@@ -19,6 +19,7 @@
 
 package org.netbeans.modules.cnd.modelimpl.parser;
 
+import org.netbeans.modules.cnd.modelimpl.parser.deprecated.CPPParserEx;
 import java.util.List;
 import java.util.Map;
 import org.antlr.runtime.tree.CommonTree;

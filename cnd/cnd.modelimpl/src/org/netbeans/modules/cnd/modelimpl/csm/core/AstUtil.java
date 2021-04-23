@@ -30,7 +30,7 @@ import org.netbeans.modules.cnd.modelimpl.parser.OffsetableAST;
 import org.netbeans.modules.cnd.modelimpl.parser.OffsetableFakeAST;
 import org.netbeans.modules.cnd.modelimpl.parser.TokenBasedAST;
 import org.netbeans.modules.cnd.modelimpl.parser.TokenBasedFakeAST;
-import org.netbeans.modules.cnd.modelimpl.parser.generated.CPPTokenTypes;
+import org.netbeans.modules.cnd.modelimpl.parser.deprecated.CPPTokenTypes;
 import org.netbeans.modules.cnd.modelimpl.textcache.NameCache;
 import org.openide.util.CharSequences;
 

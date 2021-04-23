@@ -18,6 +18,7 @@
  */
 package org.netbeans.modules.cnd.modelimpl.parser;
 
+import org.netbeans.modules.cnd.modelimpl.parser.deprecated.CPPParserEx;
 import org.netbeans.modules.cnd.antlr.Token;
 import org.netbeans.modules.cnd.antlr.TokenStream;
 import org.netbeans.modules.cnd.api.model.CsmFile;
@@ -115,15 +116,16 @@ final class CPPStraightParserEx extends CPPParserEx {
             APTToken aptToken = (APTToken) t;
             Boolean preInclude = (Boolean) aptToken.getProperty(Boolean.class);
             CsmFile inclFile = (CsmFile) aptToken.getProperty(CsmFile.class);
-            if (inclFile != null) {
-                if (preInclude == Boolean.TRUE) {
-                    action.pushFile(inclFile);
-                    assert inclFile instanceof FileImpl;
-                } else {
-                    CsmFile popFile = action.popFile();
-                    assert popFile == inclFile;
-                }
-            }
+            throw new UnsupportedOperationException("Not supported yet.");
+//            if (inclFile != null) {
+//                if (preInclude == Boolean.TRUE) {
+//                    action.pushFile(inclFile);
+//                    assert inclFile instanceof FileImpl;
+//                } else {
+//                    CsmFile popFile = action.popFile();
+//                    assert popFile == inclFile;
+//                }
+//            }
         }
     }    
 }

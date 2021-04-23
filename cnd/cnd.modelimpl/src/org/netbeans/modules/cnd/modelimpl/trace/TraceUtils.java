@@ -28,7 +28,7 @@ import org.netbeans.modules.cnd.apt.support.APTMacroCallback;
 import org.netbeans.modules.cnd.apt.support.api.PreprocHandler;
 import org.netbeans.modules.cnd.apt.support.api.StartEntry;
 import org.netbeans.modules.cnd.modelimpl.debug.TraceFlags;
-import org.netbeans.modules.cnd.modelimpl.parser.generated.CPPParser;
+import org.netbeans.modules.cnd.modelimpl.parser.deprecated.CPPParser;
 
 /**
  * Misc trace-related utilities

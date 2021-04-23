@@ -31,7 +31,7 @@ import org.netbeans.modules.cnd.api.model.*;
 import org.netbeans.modules.cnd.api.model.services.CsmInstantiationProvider;
 import org.netbeans.modules.cnd.api.model.util.CsmKindUtilities;
 import org.netbeans.modules.cnd.modelimpl.content.file.FileContent;
-import org.netbeans.modules.cnd.modelimpl.parser.generated.CPPTokenTypes;
+import org.netbeans.modules.cnd.modelimpl.parser.deprecated.CPPTokenTypes;
 import org.netbeans.modules.cnd.modelimpl.csm.core.*;
 import static org.netbeans.modules.cnd.modelimpl.csm.core.OffsetableDeclarationBase.UNIQUE_NAME_SEPARATOR;
 import org.netbeans.modules.cnd.modelimpl.csm.resolver.Resolver;

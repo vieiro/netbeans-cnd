@@ -29,7 +29,7 @@ import org.netbeans.modules.cnd.modelimpl.csm.core.*;
 
 import org.netbeans.modules.cnd.antlr.collections.AST;
 import org.netbeans.modules.cnd.modelimpl.csm.ParameterImpl.ParameterBuilder;
-import org.netbeans.modules.cnd.modelimpl.parser.generated.CPPTokenTypes;
+import org.netbeans.modules.cnd.modelimpl.parser.deprecated.CPPTokenTypes;
 
 /**
  * Common ancestor for all ... statements

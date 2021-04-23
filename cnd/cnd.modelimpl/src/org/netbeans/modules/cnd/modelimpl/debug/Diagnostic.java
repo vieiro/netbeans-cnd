@@ -39,7 +39,7 @@ import org.netbeans.modules.cnd.api.model.CsmProject;
 import org.netbeans.modules.cnd.api.model.CsmUID;
 import org.netbeans.modules.cnd.modelimpl.csm.core.FileImpl;
 import org.netbeans.modules.cnd.modelimpl.csm.core.ProjectBase;
-import org.netbeans.modules.cnd.modelimpl.parser.generated.CPPParser;
+import org.netbeans.modules.cnd.modelimpl.parser.deprecated.CPPParser;
 import org.openide.util.Exceptions;
 
 /**
