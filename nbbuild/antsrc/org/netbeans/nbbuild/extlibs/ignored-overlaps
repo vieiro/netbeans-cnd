@@ -76,6 +76,17 @@ extide/gradle/external/gradle-6.7-bin.zip platform/o.apache.commons.codec/extern
 extide/gradle/external/gradle-6.7-bin.zip platform/o.apache.commons.io/external/commons-io-2.6.jar
 extide/gradle/external/gradle-6.7-bin.zip ide/o.eclipse.jgit/external/org.eclipse.jgit-5.7.0.202003110725-r.jar
 
+# cnd/libs.clank uses a zip file that is expanded at compile time into different jar files.
+cnd/libs.clank/external/clank_0.3.9.zip cnd/libs.clank/external/clank_0.3.9.zip
+
+# The compile-time dependency with org-netbeans-modules-cnd-antlr-RELEASE82.jar is used in different cnd modules
+cnd/cnd.apt/external/org-netbeans-modules-cnd-antlr-RELEASE82.jar cnd/cnd.asm/external/org-netbeans-modules-cnd-antlr-RELEASE82.jar
+cnd/cnd.apt/external/org-netbeans-modules-cnd-antlr-RELEASE82.jar cnd/cnd.modelimpl/external/org-netbeans-modules-cnd-antlr-RELEASE82.jar
+cnd/cnd.asm/external/org-netbeans-modules-cnd-antlr-RELEASE82.jar cnd/cnd.modelimpl/external/org-netbeans-modules-cnd-antlr-RELEASE82.jar
+
+# antlr3.4 is used in cnd.modelimpl as a compile-time dependency to generate Java from antlr grammars
+cnd/cnd.modelimpl/external/antlr-runtime-3.4.jar ide/libs.antlr3.runtime/external/antlr-runtime-3.4.jar
+
 # These are the endorsed version of the javaee apis and create libraries, so they are better kept separate
 enterprise/javaee.api/external/javax.annotation-api-1.2.jar enterprise/javaee7.api/external/javax.annotation-api-1.2.jar
 enterprise/javaee7.api/external/javax.annotation-api-1.2.jar enterprise/websvc.restlib/external/javax.annotation-api-1.2.jar
@@ -110,3 +121,5 @@ webcommon/javascript2.doc/external/testfiles-jsdoc-1.zip webcommon/javascript2.e
 webcommon/javascript2.editor/external/testfiles-jsdoc-1.zip webcommon/javascript2.extdoc/external/testfiles-jsdoc-1.zip are identical
 webcommon/javascript2.extdoc/external/testfiles-jsdoc-1.zip webcommon/javascript2.jsdoc/external/testfiles-jsdoc-1.zip are identical
 webcommon/javascript2.jsdoc/external/testfiles-jsdoc-1.zip webcommon/javascript2.sdoc/external/testfiles-jsdoc-1.zip are identical</failure>
+
+

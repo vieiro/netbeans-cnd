@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+
+<toolchaindefinition xmlns="http://www.netbeans.org/ns/cnd-toolchain-definition/1">
+    <cpp>
+        <compiler name="g++"/>
+        <version flags="--version"/>
+        <system_include_paths flags="-x c++ -E -v" parser="GNU"/>
+        <important_flags flags="-O(\W|$|-)|-O1|-O2|-O3|-O4|-O5|-Ofast|-Og|-Os|-Wpedantic|-Wvla|-ansi|-fPIC|-fPIE|-fbuilding-libgcc|-fcilkplus|-fcx-fortran-rules|-fcx-limited-range|-fdwarf2-cfi-asm|-ffast-math|-ffinite-math-only|-ffreestanding|-fgnu-tm|-fleading-underscore|-fno-exceptions|-fno-rtti|-fopenacc|-fopenmp|-fpic|-fpie|-freciprocal-math|-fsanitize=.*|-fshort-double|-fshort-wchar|-fsignaling-nans|-fsingle-precision-constant|-fsized-deallocation|-fstack-protector(\W|$|-)|-fstack-protector-all|-fstack-protector-strong|-funsafe-math-optimizations|-funsigned-char|-isysroot|-m128bit-long-double|-m16|-m32|-m3dnow|-m64|-m96bit-long-double|-mabm|-madx|-maes|-mandroid|-march=.*|-mavx(\W|$|-)|-mavx2|-mavx512bw|-mavx512cd|-mavx512dq|-mavx512er|-mavx512f|-mavx512ifma|-mavx512pf|-mavx512vbmi|-mavx512vl|-mbionic|-mbmi(\W|$|-)|-mbmi2|-mclflushopt|-mclwb|-mcx16|-mf16c|-mfma(\W|$|-)|-mfma4|-mfsgsbase|-mlong-double-128|-mlong-double-64|-mlwp|-mlzcnt|-mmpx|-mmwaitx|-mpclmul|-mpcommit|-mpopcnt|-mprefetchwt1|-mprfchw|-mrdrnd|-mrdseed|-mrtm|-msha|-msoft-float|-msse3|-msse4(\W|$|-)|-msse4.1|-msse4.2|-msse4a|-msse5|-mssse3|-msse5|-mtbm|-mtune=.*|-muclibc|-mx32|-mxop|-mxsave(\W|$|-)|-mxsavec|-mxsaveopt|-mxsaves|-nostdinc++|-nostdlib|-pedantic(\W|$|-)|-pedantic-errors|-pthreads|-std=.*|-xc($|\+\+$)"/>
+        <system_macros flags="-x c++ -E -dM" parser="GNU">
+            <macro stringvalue="__STDC__=1"/>
+        </system_macros>
+        <user_include flags="-I"/>
+        <user_file flags="-include "/>
+        <user_macro flags="-D"/>
+        <development_mode>
+            <fast_build flags=""/>
+            <debug flags="-g" default="true"/>
+            <performance_debug flags="-g -O"/>
+            <test_coverage flags="-g"/>
+            <diagnosable_release flags="-g -O2"/>
+            <release flags="-O2"/>
+            <performance_release flags="-O3"/>
+        </development_mode>
+        <warning_level>
+            <no_warnings flags="-w"/>
+            <default flags="" default="true"/>
+            <more_warnings flags="-Wall"/>
+            <warning2error flags="-Werror"/>
+        </warning_level>
+        <architecture>
+            <default flags="" default="true"/>
+            <bits_32 flags="-m32"/>
+            <bits_64 flags="-m64"/>
+        </architecture>
+        <strip flags="-s"/>
+        <cpp_standard>
+            <default flags="" default="true"/>
+            <cpp98 flags="-std=c++98"/>
+            <cpp11 flags="-std=c++11"/>
+            <cpp14 flags="-std=c++14"/>
+            <cpp17 flags="-std=c++17"/>
+        </cpp_standard>
+        <output_object_file flags="-o " />
+        <dependency_generation flags="-MMD -MP -MF &quot;$@.d&quot;" />
+        <precompiled_header flags="-o &quot;$@&quot;" suffix=".gch" append="true" />
+    </cpp>
+</toolchaindefinition>
