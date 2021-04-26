@@ -31,19 +31,9 @@ import org.netbeans.modules.cnd.utils.ComponentType;
  */
 public class APTTraceFlags {
 
-    public static final boolean USE_CLANK;
-    public static final boolean TRACE_PREPROC = Boolean.getBoolean("apt.clank.trace.pp"); // NOI18N
-    public static final boolean TRACE_PREPROC_STACKS = Boolean.getBoolean("apt.clank.trace.pp.stacks"); // NOI18N
-    private static final String APT_USE_CLANK_PROP = "apt.use.clank"; // NOI18N
-
     static {
-        String propUseClank = System.getProperty(APT_USE_CLANK_PROP); //NOI18N
         boolean val;
         boolean explicitlySet = false;
-        if (propUseClank != null) {
-            val = Boolean.parseBoolean(propUseClank);
-            explicitlySet = true;
-        } else {
             final ComponentType product = ComponentType.getComponent();
             switch (product) {
                 case CND:
@@ -61,16 +51,9 @@ public class APTTraceFlags {
                     APTUtils.LOG.severe("Unexpected product type: " + product); //NOI18N
                     break;
             }
-        }
-        USE_CLANK = val;
         if (!CndUtils.isUnitTestMode()) {
             // APTUtils.LOG has level SEVERE by default, so we can't use it here
-            String msg = (USE_CLANK ? "new" : "old"); // NOI18N
-            if (explicitlySet) {
-                msg += " (explicitly set by " + APT_USE_CLANK_PROP + "=" + propUseClank + ")"; // NOI18N
-            }
-            msg += " [ " + ComponentType.getFullName() + "]"; // NOI18N
-            Logger.getLogger(APTTraceFlags.class.getName()).log(Level.INFO, "C/C++ code model: using {0} preprocessor", msg); //NOI18N
+            Logger.getLogger(APTTraceFlags.class.getName()).log(Level.INFO, "C/C++ code model using cnd.apt preprocessor");
         }
     }
     

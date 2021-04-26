@@ -94,7 +94,6 @@ public final class APTDriver {
     }
 
     public static APTFile findAPTLight(APTFileBuffer buffer, APTFile.Kind aptKind) throws IOException {
-        assert !APTTraceFlags.USE_CLANK;
         APTFile out = null;
         if (buffer instanceof APTFileCache) {
             out = ((APTFileCache)buffer).getCachedAPTLight();
@@ -106,7 +105,6 @@ public final class APTDriver {
     }
     
     public static APTFile findAPT(APTFileBuffer buffer, APTFile.Kind aptKind) throws IOException {
-        assert !APTTraceFlags.USE_CLANK;
         APTFile out = null;
         if (buffer instanceof APTFileCache) {
             out = ((APTFileCache) buffer).getCachedAPT();

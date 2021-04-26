@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.netbeans.modules.cnd.apt.support;
 
 import java.util.HashMap;
@@ -29,7 +28,6 @@ import org.netbeans.modules.cnd.apt.debug.APTTraceFlags;
 import org.netbeans.modules.cnd.apt.impl.support.APTMacroCache;
 import org.netbeans.modules.cnd.apt.impl.support.SnapshotHolderCache;
 import org.netbeans.modules.cnd.apt.impl.support.APTSystemMacroMap;
-import org.netbeans.modules.cnd.apt.impl.support.clank.ClankSystemMacroMap;
 import org.netbeans.modules.cnd.apt.support.api.PPMacroMap;
 import org.netbeans.modules.cnd.apt.utils.APTUtils;
 import org.netbeans.modules.cnd.utils.FSPath;
@@ -38,56 +36,52 @@ import org.netbeans.modules.cnd.utils.FSPath;
  *
  */
 public final class APTSystemStorage {
+
     private final Map<String, PPMacroMap> allMacroMaps = new HashMap<String, PPMacroMap>();
     private final APTIncludePathStorage includesStorage;
     private final static String baseNewName = "#SYSTEM MACRO MAP# "; // NOI18N
     private final static APTSystemStorage instance = new APTSystemStorage();
-    
+
     private APTSystemStorage() {
         includesStorage = new APTIncludePathStorage();
     }
-    
+
     public static APTSystemStorage getInstance() {
         return instance;
     }
-    
+
     public PPMacroMap getMacroMap(String configID, List<String> sysMacros) {
         synchronized (allMacroMaps) {
             PPMacroMap map = allMacroMaps.get(configID);
             if (map == null) {
                 // create new one and put in map
-                if (APTTraceFlags.USE_CLANK) {
-                    map = new ClankSystemMacroMap(sysMacros);
-                } else {
-                    map = new APTSystemMacroMap(sysMacros);
-                }
+                map = new APTSystemMacroMap(sysMacros);
                 allMacroMaps.put(configID, map);
                 if (APTUtils.LOG.isLoggable(Level.FINE)) {
                     APTUtils.LOG.log(Level.FINE,
                             "new system macro map was added\n {0}", // NOI18N
-                            new Object[] { map });
+                            new Object[]{map});
                 }
             }
             return map;
         }
     }
-    
+
 //    // it's preferable to use getIncludes(String configID, List sysIncludes)
 //    public List<CharSequence> getIncludes(List<CharSequence> sysIncludes) {
 //        return includesStorage.get(sysIncludes);
 //    }
-    
     public List<IncludeDirEntry> getIncludes(CharSequence configID, List<IncludePath> sysIncludes) {
         return includesStorage.get(configID, sysIncludes);
-    }   
-    
+    }
+
     private void disposeImpl() {
         synchronized (allMacroMaps) {
             allMacroMaps.clear();
         }
         includesStorage.dispose();
     }
-    
+
     public static void dispose() {
         instance.disposeImpl();
         APTMacroCache.getManager().dispose();

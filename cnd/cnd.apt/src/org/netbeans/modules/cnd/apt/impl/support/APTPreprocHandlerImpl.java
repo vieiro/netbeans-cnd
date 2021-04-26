@@ -19,7 +19,6 @@
 
 package org.netbeans.modules.cnd.apt.impl.support;
 
-import org.netbeans.modules.cnd.apt.impl.support.clank.ClankIncludeHandlerImpl;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
@@ -130,17 +129,10 @@ public class APTPreprocHandlerImpl implements APTPreprocHandler {
 	Checksum checksum = new Adler32();
 	updateCrc(checksum, lang.toString());
 	updateCrc(checksum, flavor.toString());
-        if (inclHandler instanceof ClankIncludeHandlerImpl) {
-            assert APTTraceFlags.USE_CLANK;
-            updateCrcByFSPaths(checksum, ((ClankIncludeHandlerImpl)inclHandler).getSystemIncludePaths(), unitId);
-            updateCrcByFSPaths(checksum, ((ClankIncludeHandlerImpl)inclHandler).getUserIncludePaths(), unitId);
-            updateCrcByFSPaths(checksum, ((ClankIncludeHandlerImpl)inclHandler).getUserIncludeFilePaths(), unitId);
-        } else {
             assert inclHandler instanceof APTIncludeHandlerImpl : "unexpected class " + inclHandler.getClass();
             updateCrcByFSPaths(checksum, ((APTIncludeHandlerImpl)inclHandler).getSystemIncludePaths(), unitId);
             updateCrcByFSPaths(checksum, ((APTIncludeHandlerImpl)inclHandler).getUserIncludePaths(), unitId);
             updateCrcByFSPaths(checksum, ((APTIncludeHandlerImpl)inclHandler).getUserIncludeFilePaths(), unitId);
-        }
         long value = checksum.getValue();
         value += APTHandlersSupportImpl.getCompilationUnitCRC(macroMap);
 	return value;

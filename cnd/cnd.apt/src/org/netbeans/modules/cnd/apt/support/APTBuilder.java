@@ -36,12 +36,10 @@ public final class APTBuilder {
     }
 
     public static APTFile buildAPT(FileSystem fileSystem, CharSequence path, TokenStream ts, APTFile.Kind aptKind) {
-        CndUtils.assertTrueInConsole(!APTTraceFlags.USE_CLANK, "Not For Clank Mode");
         return new APTBuilderImpl().buildAPT(fileSystem, path, ts, aptKind);
     }
     
     public static APT buildAPTLight(APT apt) {
-        CndUtils.assertTrueInConsole(!APTTraceFlags.USE_CLANK, "Not For Clank Mode");
         return APTBuilderImpl.buildAPTLight(apt);
     }
 }

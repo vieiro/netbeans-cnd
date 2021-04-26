@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.netbeans.modules.cnd.apt.utils;
 
 import org.netbeans.modules.cnd.antlr.Token;
@@ -43,8 +42,6 @@ import org.netbeans.modules.cnd.apt.impl.support.APTLiteLiteralToken;
 import org.netbeans.modules.cnd.apt.impl.support.APTMacroParamExpansion;
 import org.netbeans.modules.cnd.apt.impl.support.APTTestToken;
 import org.netbeans.modules.cnd.apt.impl.support.MacroExpandedToken;
-import org.netbeans.modules.cnd.apt.impl.support.clank.ClankDriverImpl;
-import org.netbeans.modules.cnd.apt.impl.support.clank.ClankMacroExpandedToken;
 import org.netbeans.modules.cnd.apt.impl.support.generated.APTExprParser;
 import org.netbeans.modules.cnd.apt.support.lang.APTBaseLanguageFilter;
 import org.netbeans.modules.cnd.apt.support.APTTokenTypes;
@@ -68,10 +65,11 @@ import org.openide.util.CharSequences;
  * APT utilities
  */
 public class APTUtils {
+
     public static final Logger LOG = Logger.getLogger("org.netbeans.modules.cnd.apt"); // NOI18N
-    
+
     public static final String SCOPE = "::"; // NOI18N
-            
+
     public static final int NOT_AN_EXPANDED_TOKEN = -1;
 
     static {
@@ -122,18 +120,20 @@ public class APTUtils {
         APTDriver.dumpStatistics();
     }
 
-    /** Creates a new instance of APTUtils */
+    /**
+     * Creates a new instance of APTUtils
+     */
     private APTUtils() {
     }
 
     public static int hash(int h) {
         // Spread bits to regularize both segment and index locations,
         // using variant of single-word Wang/Jenkins hash.
-        h += (h <<  15) ^ 0xffffcd7d;
+        h += (h << 15) ^ 0xffffcd7d;
         h ^= (h >>> 10);
-        h += (h <<   3);
-        h ^= (h >>>  6);
-        h += (h <<   2) + (h << 14);
+        h += (h << 3);
+        h ^= (h >>> 6);
+        h += (h << 2) + (h << 14);
         return h ^ (h >>> 16);
     }
 
@@ -177,7 +177,7 @@ public class APTUtils {
             _token.setTextID(CharSequences.create(buf, start, count));
         } else if (_token instanceof APTCommentToken) {
             // no need to set text in comment token, but set text len
-            ((APTCommentToken)_token).setTextLength(count);
+            ((APTCommentToken) _token).setTextLength(count);
         } else if (_token instanceof APTConstTextToken) {
             // no need to set text in const token
         } else if (_token instanceof APTLiteConstTextToken || _token instanceof APTLiteLiteralToken) {
@@ -223,23 +223,23 @@ public class APTUtils {
                 }
             } while (nodeBuilder.accept(null, next));
             // special check for macros without values, we must set it to be 1
-            if (((APTDefineNode)nodeBuilder.getNode()).getBody().isEmpty() && look4Equal) {
+            if (((APTDefineNode) nodeBuilder.getNode()).getBody().isEmpty() && look4Equal) {
                 nodeBuilder.accept(null, APTUtils.DEF_MACRO_BODY);
             }
         } catch (TokenStreamException ex) {
             APTUtils.LOG.log(Level.SEVERE, "error on lexing macros {0}\n\t{1}", new Object[]{macroText, ex.getMessage()});
         }
-        return (APTDefineNode)nodeBuilder.getNode();
+        return (APTDefineNode) nodeBuilder.getNode();
     }
 
-    public static APTToken createAPTToken(int type, int startOffset, int endOffset, 
+    public static APTToken createAPTToken(int type, int startOffset, int endOffset,
             int startColumn, int startLine, int endColumn, int endLine, int literalType) {
         // TODO: optimize factory
-        if (APTLiteConstTextToken.isApplicable(type, startOffset, startColumn, startLine)){
+        if (APTLiteConstTextToken.isApplicable(type, startOffset, startColumn, startLine)) {
             return new APTLiteConstTextToken(type, startOffset, startColumn, startLine);
-        } else if (APTLiteLiteralToken.isApplicable(type, startOffset, startColumn, startLine, literalType)){
+        } else if (APTLiteLiteralToken.isApplicable(type, startOffset, startColumn, startLine, literalType)) {
             return new APTLiteLiteralToken(startOffset, startColumn, startLine, literalType);
-        } else if (APTLiteIdToken.isApplicable(type, startOffset, startColumn, startLine)){
+        } else if (APTLiteIdToken.isApplicable(type, startOffset, startColumn, startLine)) {
             return new APTLiteIdToken(startOffset, startColumn, startLine);
         }
         APTToken out = createAPTToken(type);
@@ -260,21 +260,21 @@ public class APTUtils {
         out.setTextID(text);
         return out;
     }
-    
+
     public static APTToken createAPTToken(int type) {
         // Preprocessor tokens can be made constText, but we can get '#define' and '# define'
         // which have different text. so for now they are treated as usual tokens
         if (isPreprocessorToken(type)) {
-            return APTTraceFlags.USE_APT_TEST_TOKEN ? (APTToken)new APTTestToken() : new APTBaseToken();
+            return APTTraceFlags.USE_APT_TEST_TOKEN ? (APTToken) new APTTestToken() : new APTBaseToken();
         }
         switch (type) {
             // IDs
             case APTTokenTypes.IDENT:
             case APTTokenTypes.ID_DEFINED:
-                // Strings and chars
+            // Strings and chars
             case APTTokenTypes.STRING_LITERAL:
             case APTTokenTypes.CHAR_LITERAL:
-                // Numbers
+            // Numbers
             case APTTokenTypes.DECIMALINT:
             case APTTokenTypes.HEXADECIMALINT:
             case APTTokenTypes.BINARYINT:
@@ -282,18 +282,19 @@ public class APTUtils {
             case APTTokenTypes.FLOATTWO:
             case APTTokenTypes.OCTALINT:
             case APTTokenTypes.NUMBER:
-                // Include strings
+            // Include strings
             case APTTokenTypes.INCLUDE_STRING:
             case APTTokenTypes.SYS_INCLUDE_STRING:
-                return APTTraceFlags.USE_APT_TEST_TOKEN ? (APTToken)new APTTestToken() : new APTBaseToken();
-                
-                // Comments
+                return APTTraceFlags.USE_APT_TEST_TOKEN ? (APTToken) new APTTestToken() : new APTBaseToken();
+
+            // Comments
             case APTTokenTypes.CPP_COMMENT:
             case APTTokenTypes.COMMENT:
             case APTTokenTypes.FORTRAN_COMMENT:
                 return new APTCommentToken();
-                
-            default: /*assert(APTConstTextToken.constText[type] != null) : "Do not know text for constText token of type " + type;  // NOI18N*/
+
+            default:
+                /*assert(APTConstTextToken.constText[type] != null) : "Do not know text for constText token of type " + type;  // NOI18N*/
                 return new APTConstTextToken();
         }
     }
@@ -316,33 +317,33 @@ public class APTUtils {
         // use simple stringize
         return stringize(ts, false);
     }
-    
+
     public static String toString(TokenStream ts) {
         StringBuilder retValue = new StringBuilder();
         try {
-            for (Token token = ts.nextToken();!isEOF(token);) {
-                assert(token != null) : "list of tokens must not have 'null' elements"; // NOI18N
+            for (Token token = ts.nextToken(); !isEOF(token);) {
+                assert (token != null) : "list of tokens must not have 'null' elements"; // NOI18N
                 retValue.append(token.toString());
-                
-                token=ts.nextToken();
-                
+
+                token = ts.nextToken();
+
                 if (!isEOF(token)) {
                     retValue.append(" "); // NOI18N
                 }
             }
         } catch (TokenStreamException ex) {
-            LOG.log(Level.SEVERE, "error on converting token stream to text\n{0}", new Object[] { ex }); // NOI18N
+            LOG.log(Level.SEVERE, "error on converting token stream to text\n{0}", new Object[]{ex}); // NOI18N
         }
         return retValue.toString();
     }
-    
+
     public static CharSequence stringize(TokenStream ts, boolean inIncludeDirective) {
         StringBuilder retValue = new StringBuilder();
         try {
-            for (APTToken token = (APTToken)ts.nextToken();!isEOF(token);) {
-                assert(token != null) : "list of tokens must not have 'null' elements"; // NOI18N
+            for (APTToken token = (APTToken) ts.nextToken(); !isEOF(token);) {
+                assert (token != null) : "list of tokens must not have 'null' elements"; // NOI18N
                 retValue.append(token.getTextID());
-                APTToken next =(APTToken)ts.nextToken();
+                APTToken next = (APTToken) ts.nextToken();
                 if (!isEOF(next) && !inIncludeDirective) { // disable for IZ#124635
                     // if tokens were without spaces => no space
                     // if were with spaces => insert only one space
@@ -351,18 +352,18 @@ public class APTUtils {
                 token = next;
             }
         } catch (TokenStreamException ex) {
-            LOG.log(Level.SEVERE, "error on stringizing token stream\n{0}", new Object[] { ex }); // NOI18N
+            LOG.log(Level.SEVERE, "error on stringizing token stream\n{0}", new Object[]{ex}); // NOI18N
         }
         return retValue;
     }
-    
+
     public static String macros2String(Collection<? extends CharSequence> macros) {
         StringBuilder retValue = new StringBuilder();
         retValue.append("MACROS (sorted ").append(macros.size()).append("):\n"); // NOI18N
         List<CharSequence> macrosSorted = new ArrayList<CharSequence>(macros);
         Collections.sort(macrosSorted, CharSequences.comparator());
         for (CharSequence macro : macrosSorted) {
-            assert(macro != null);
+            assert (macro != null);
             retValue.append(macro);
             retValue.append("'\n"); // NOI18N
         }
@@ -376,13 +377,13 @@ public class APTUtils {
         Collections.sort(macrosSorted, CharSequences.comparator());
         for (CharSequence key : macrosSorted) {
             APTMacro macro = macros.get(key);
-            assert(macro != null);
+            assert (macro != null);
             retValue.append(macro);
             retValue.append("'\n"); // NOI18N
         }
         return retValue.toString();
     }
-    
+
     public static CharSequence includes2String(List<IncludeDirEntry> includePaths) {
         StringBuilder retValue = new StringBuilder();
         for (Iterator<IncludeDirEntry> it = includePaths.iterator(); it.hasNext();) {
@@ -394,12 +395,12 @@ public class APTUtils {
         }
         return retValue;
     }
-    
+
     public static boolean isPreprocessorToken(Token token) {
         assert (token != null);
         return isPreprocessorToken(token.getType());
     }
-    
+
     public static boolean isPreprocessorToken(int/*APTTokenTypes*/ ttype) {
         switch (ttype) {
             case APTTokenTypes.PREPROC_DIRECTIVE:
@@ -421,7 +422,7 @@ public class APTUtils {
                 return false;
         }
     }
-    
+
     public static boolean isID(Token token) {
         return token != null && token.getType() == APTTokenTypes.IDENT;
     }
@@ -446,20 +447,20 @@ public class APTUtils {
         }
         return false;
     }
-    
+
     public static boolean isEOF(Token token) {
         assert (token != null);
         return token == null || isEOF(token.getType());
     }
-    
+
     public static boolean isEOF(int ttype) {
         return ttype == APTTokenTypes.EOF || ttype == EOF3;
     }
-    
+
     public static boolean isVaArgsToken(APTToken token) {
         return token != null && token.getTextID().equals(VA_ARGS_TOKEN.getTextID());
     }
-    
+
     public static boolean isStartConditionNode(int/*APT.Type*/ ntype) {
         switch (ntype) {
             case APT.Type.IFDEF:
@@ -470,7 +471,7 @@ public class APTUtils {
                 return false;
         }
     }
-    
+
     public static boolean isStartOrSwitchConditionNode(int/*APT.Type*/ ntype) {
         switch (ntype) {
             case APT.Type.IFDEF:
@@ -483,11 +484,11 @@ public class APTUtils {
                 return false;
         }
     }
-    
+
     public static boolean isEndCondition(Token token) {
         return isEndCondition(token.getType());
     }
-    
+
     public static boolean isEndCondition(int/*APTTokenTypes*/ ttype) {
         switch (ttype) {
             case APTTokenTypes.ELIF:
@@ -509,12 +510,12 @@ public class APTUtils {
                 return false;
         }
     }
-    
+
     public static boolean isCommentToken(Token token) {
         assert (token != null);
         return isCommentToken(token.getType());
     }
-    
+
     public static boolean isCommentToken(int ttype) {
         switch (ttype) {
             case APTTokenTypes.COMMENT:
@@ -525,12 +526,12 @@ public class APTUtils {
                 return false;
         }
     }
-    
+
     public static boolean isOpenBracket(Token token) {
         assert (token != null);
         return isOpenBracket(token.getType());
     }
-    
+
     public static boolean isOpenBracket(int ttype) {
         switch (ttype) {
             case APTTokenTypes.LCURLY:
@@ -541,12 +542,12 @@ public class APTUtils {
                 return false;
         }
     }
-    
+
     public static boolean isCloseBracket(Token token) {
         assert (token != null);
         return isCloseBracket(token.getType());
     }
-    
+
     public static boolean isCloseBracket(int ttype) {
         switch (ttype) {
             case APTTokenTypes.RCURLY:
@@ -557,7 +558,7 @@ public class APTUtils {
                 return false;
         }
     }
-    
+
     public static int getMatchBracket(int ttype) {
         switch (ttype) {
             case APTTokenTypes.RCURLY:
@@ -575,10 +576,10 @@ public class APTUtils {
             default:
                 return APTUtils.EOF_TOKEN.EOF_TYPE;
         }
-    }    
-    
+    }
+
     public static boolean isEndDirectiveToken(int ttype) {
-        switch(ttype) {
+        switch (ttype) {
             case APTTokenTypes.END_PREPROC_DIRECTIVE:
             case APTTokenTypes.EOF:
                 return true;
@@ -587,12 +588,10 @@ public class APTUtils {
     }
 
     public static boolean isMacroExpandedToken(Token token) {
-        if(token instanceof MacroExpandedToken) {
+        if (token instanceof MacroExpandedToken) {
             return true;
         } else if (token instanceof APTBaseLanguageFilter.FilterToken) {
-            return isMacroExpandedToken(((APTBaseLanguageFilter.FilterToken)token).getOriginalToken());
-        } else if (token instanceof ClankMacroExpandedToken) {
-            return true;
+            return isMacroExpandedToken(((APTBaseLanguageFilter.FilterToken) token).getOriginalToken());
         }
         return false;
     }
@@ -604,8 +603,6 @@ public class APTUtils {
             return isMacroParamExpandedToken(((MacroExpandedToken) token).getTo());
         } else if (token instanceof APTBaseLanguageFilter.FilterToken) {
             return isMacroParamExpandedToken(((APTBaseLanguageFilter.FilterToken) token).getOriginalToken());
-        } else if (token instanceof ClankMacroExpandedToken) {
-            return isMacroParamExpandedToken(((ClankMacroExpandedToken) token).getTo());
         }
         return false;
     }
@@ -617,17 +614,13 @@ public class APTUtils {
             return getExpandedToken(((MacroExpandedToken) token).getTo());
         } else if (token instanceof APTBaseLanguageFilter.FilterToken) {
             return getExpandedToken(((APTBaseLanguageFilter.FilterToken) token).getOriginalToken());
-        } else if (token instanceof ClankMacroExpandedToken) {
-            return getExpandedToken(((ClankMacroExpandedToken) token).getTo());
         }
         return token;
     }
-    
+
     public static int getExpandedTokenMarker(APTToken token) {
         if (token instanceof APTBaseLanguageFilter.FilterToken) {
             return getExpandedTokenMarker(((APTBaseLanguageFilter.FilterToken) token).getOriginalToken());
-        } else if (token instanceof ClankMacroExpandedToken) {
-            return ((ClankMacroExpandedToken) token).getMacroIndex();
         } else if (isMacroExpandedToken(token)) {
             APTToken expanded = getExpandedToken(token);
             return expanded.getOffset();
@@ -636,10 +629,10 @@ public class APTUtils {
     }
 
     public static boolean areAdjacent(APTToken left, APTToken right) {
-        while ((left instanceof MacroExpandedToken || left instanceof ClankMacroExpandedToken)
-            && (right instanceof MacroExpandedToken || right instanceof ClankMacroExpandedToken)) {
-            left = (left instanceof MacroExpandedToken) ? ((MacroExpandedToken) left).getTo() : ((ClankMacroExpandedToken) left).getTo();
-            right = (right instanceof MacroExpandedToken) ? ((MacroExpandedToken) right).getTo() : ((ClankMacroExpandedToken) right).getTo();
+        while ((left instanceof MacroExpandedToken)
+                && (right instanceof MacroExpandedToken)) {
+            left = ((MacroExpandedToken) left).getTo();
+            right = ((MacroExpandedToken) right).getTo();
         }
 //        if (left instanceof APTToken && right instanceof APTToken) {
         return (left).getEndOffset() == (right).getOffset();
@@ -650,31 +643,27 @@ public class APTUtils {
     }
 
     public static List<APTToken> toList(TokenStream ts) {
-        if (ts instanceof ClankDriverImpl.ArrayBasedAPTTokenStream) {
-            return ((ClankDriverImpl.ArrayBasedAPTTokenStream) ts).toList();
-        } else {
-            LinkedList<APTToken> tokens = new LinkedList<APTToken>();
-            try {
-                APTToken token = (APTToken) ts.nextToken();
-                while (!isEOF(token)) {
-                    assert (token != null) : "list of tokens must not have 'null' elements"; // NOI18N
-                    tokens.add(token);
-                    token = (APTToken) ts.nextToken();
-                }
-            } catch (TokenStreamException ex) {
-                LOG.log(Level.INFO, "error on converting token stream to list", ex.getMessage()); // NOI18N
+        LinkedList<APTToken> tokens = new LinkedList<APTToken>();
+        try {
+            APTToken token = (APTToken) ts.nextToken();
+            while (!isEOF(token)) {
+                assert (token != null) : "list of tokens must not have 'null' elements"; // NOI18N
+                tokens.add(token);
+                token = (APTToken) ts.nextToken();
             }
-            return tokens;
+        } catch (TokenStreamException ex) {
+            LOG.log(Level.INFO, "error on converting token stream to list", ex.getMessage()); // NOI18N
         }
+        return tokens;
     }
-    
+
     public static Object getTextKey(String text) {
         assert (text != null);
         assert (text.length() > 0);
         // now use text as is, but it will be faster to use textID
         return text;
     }
-    
+
     public static APTToken createAPTToken(APTToken token, int ttype) {
         APTToken newToken;
         if (APTTraceFlags.USE_APT_TEST_TOKEN) {
@@ -684,11 +673,11 @@ public class APTUtils {
         }
         return newToken;
     }
-    
+
     public static APTToken createAPTToken(APTToken token) {
         return createAPTToken(token, token.getType());
     }
-    
+
     public static APTToken createAPTToken() {
         APTToken newToken;
         if (APTTraceFlags.USE_APT_TEST_TOKEN) {
@@ -698,16 +687,17 @@ public class APTUtils {
         }
         return newToken;
     }
-    
+
     public static final APTToken VA_ARGS_TOKEN; // support ELLIPSIS for IZ#83949 in macros
     public static final APTToken EMPTY_ID_TOKEN; // support ELLIPSIS for IZ#83949 in macros
     public static final APTToken COMMA_TOKEN; // support ELLIPSIS for IZ#83949 in macros
     public static final APTToken DEF_MACRO_BODY; //support "1" as content of #defined tokens without body IZ#122091
+
     static {
         VA_ARGS_TOKEN = createAPTToken();
         VA_ARGS_TOKEN.setType(APTTokenTypes.IDENT);
         VA_ARGS_TOKEN.setText("__VA_ARGS__"); // NOI18N
-        
+
         EMPTY_ID_TOKEN = createAPTToken();
         EMPTY_ID_TOKEN.setType(APTTokenTypes.IDENT);
         EMPTY_ID_TOKEN.setText(""); // NOI18N        
@@ -715,77 +705,78 @@ public class APTUtils {
         COMMA_TOKEN = createAPTToken(APTTokenTypes.COMMA);
         COMMA_TOKEN.setType(APTTokenTypes.COMMA);
         COMMA_TOKEN.setText(","); // NOI18N             
-        
+
         DEF_MACRO_BODY = createAPTToken();
         DEF_MACRO_BODY.setType(APTTokenTypes.NUMBER);
         DEF_MACRO_BODY.setText("1"); // NOI18N
     }
-    
-    public static final APTToken EOF_TOKEN = new APTEOFToken();    
+
+    public static final APTToken EOF_TOKEN = new APTEOFToken();
     public static final APTToken EOF_TOKEN2 = new APTEOFTokenAntlr3();
     private static final int EOF3 = -1; // EOF in Antrl3 is -1
-    
+
     public static final TokenStream EMPTY_STREAM = new TokenStream() {
         @Override
         public Token nextToken() throws TokenStreamException {
             return EOF_TOKEN;
         }
     };
-    
+
     private static final class APTEOFToken extends APTTokenAbstact {
+
         public APTEOFToken() {
         }
-        
+
         @Override
         public int getOffset() {
             throw new UnsupportedOperationException("getOffset must not be used"); // NOI18N
         }
-        
+
         @Override
         public void setOffset(int o) {
             throw new UnsupportedOperationException("setOffset must not be used"); // NOI18N
         }
-        
+
         @Override
         public int getEndOffset() {
             throw new UnsupportedOperationException("getEndOffset must not be used"); // NOI18N
         }
-        
+
         @Override
         public void setEndOffset(int o) {
             throw new UnsupportedOperationException("setEndOffset must not be used"); // NOI18N
         }
-        
+
         @Override
         public CharSequence getTextID() {
             throw new UnsupportedOperationException("getTextID must not be used"); // NOI18N
         }
-        
+
         @Override
         public void setTextID(CharSequence id) {
             throw new UnsupportedOperationException("setTextID must not be used"); // NOI18N
         }
-        
+
         @Override
         public int getEndColumn() {
             throw new UnsupportedOperationException("getEndColumn must not be used"); // NOI18N
         }
-        
+
         @Override
         public void setEndColumn(int c) {
             throw new UnsupportedOperationException("setEndColumn must not be used"); // NOI18N
         }
-        
+
         @Override
         public int getEndLine() {
             throw new UnsupportedOperationException("getEndLine must not be used"); // NOI18N
         }
-        
+
         @Override
         public void setEndLine(int l) {
             throw new UnsupportedOperationException("setEndLine must not be used"); // NOI18N
         }
-        
+
         @Override
         public int getType() {
             return APTTokenTypes.EOF;
@@ -820,11 +811,11 @@ public class APTUtils {
         @Override
         public String toString() {
             return "<EOF>"; // NOI18N
-        }        
+        }
     }
 
-
     private static final class APTEOFTokenAntlr3 extends APTTokenAbstact {
+
         public APTEOFTokenAntlr3() {
         }
 

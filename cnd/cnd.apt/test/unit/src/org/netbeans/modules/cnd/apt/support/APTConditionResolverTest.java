@@ -97,9 +97,6 @@ public class APTConditionResolverTest {
     }
 
     private void doTestSizeof(String src, String macroName, String maxValue, String testMacro, int sizeof) {
-        if (APTTraceFlags.USE_CLANK) {
-            return;
-        }
         APTFileMacroMap mmap = new APTFileMacroMap(null, Arrays.asList(macroName+"="+maxValue));
         APTMacro macro__INT_MAX__ = mmap.getMacro(APTUtils.createIDENT(CharSequences.create(macroName)));
         assertNotNull(macro__INT_MAX__);
@@ -122,9 +119,6 @@ public class APTConditionResolverTest {
                                                             "#endif";
     @Test
     public void testLongVsUint() {
-        if (APTTraceFlags.USE_CLANK) {
-            return;
-        }
         // #229008 - inaccuracy tests: MySQL project has unresolved includes (#error zzzz)
         APTFileMacroMap mmap = new APTFileMacroMap(null, Collections.<String>emptyList());
         APTFile.Kind aptKind = APTFile.Kind.C_CPP;

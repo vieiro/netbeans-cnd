@@ -35,15 +35,6 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.netbeans.libs.clank</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <release-version>1</release-version>
-                        <specification-version>0.5.25</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
                     <code-name-base>org.netbeans.libs.antlr.cnd</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -147,15 +138,9 @@
                 </test-type>
             </test-dependencies>
             <friend-packages>
-                <friend>com.microchip.mplab.nbide.csmbridge</friend>
-                <friend>com.sun.tools.cnd.accessor</friend>
-                <friend>com.sun.tools.dwarf.lwmodel</friend>
-                <friend>com.sun.tools.tuxedo.codemodel.bridge</friend>
-                <friend>com.sun.tools.tuxedo.source</friend>
                 <friend>org.netbeans.modules.cnd.completion</friend>
                 <friend>org.netbeans.modules.cnd.highlight</friend>
                 <friend>org.netbeans.modules.cnd.indexing</friend>
-                <friend>org.netbeans.modules.cnd.model.jclank.bridge</friend>
                 <friend>org.netbeans.modules.cnd.modelimpl</friend>
                 <friend>org.netbeans.modules.cnd.modelui</friend>
                 <package>org.netbeans.modules.cnd.apt.debug</package>

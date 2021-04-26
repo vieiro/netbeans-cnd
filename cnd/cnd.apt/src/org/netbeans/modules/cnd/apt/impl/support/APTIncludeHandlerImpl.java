@@ -78,7 +78,6 @@ public class APTIncludeHandlerImpl implements APTIncludeHandler {
                                     List<IncludeDirEntry> systemIncludePaths,
                                     List<IncludeDirEntry> userIncludePaths,
                                     List<IncludeDirEntry> userIncludeFilePaths, APTFileSearch fileSearch) {
-        assert !APTTraceFlags.USE_CLANK;
         Parameters.notNull("startFile", startFile);
         this.startFile = startFile;
         this.systemIncludePaths = systemIncludePaths;
@@ -175,7 +174,6 @@ public class APTIncludeHandlerImpl implements APTIncludeHandler {
         private int hashCode = 0;
         
         protected StateImpl(APTIncludeHandlerImpl handler) {
-            assert !APTTraceFlags.USE_CLANK;
             this.systemIncludePaths = handler.systemIncludePaths;
             this.userIncludePaths = handler.userIncludePaths;
             this.userIncludeFilePaths = handler.userIncludeFilePaths;
@@ -190,7 +188,6 @@ public class APTIncludeHandlerImpl implements APTIncludeHandler {
         
         private StateImpl(StateImpl other, boolean cleanState) {
             CndUtils.assertTrueInConsole(cleanState == true, "This constructor is only for creating clean states");
-            assert !APTTraceFlags.USE_CLANK;
             // shared information
             this.startFile = other.startFile;
             

@@ -31,12 +31,6 @@ public class APTFileNodeTest extends NbTestSuite {
 
     public APTFileNodeTest() {
         super("APT File Node tests");
-        if (!APTTraceFlags.USE_CLANK) {
-            // this is the test for non-clank mode only
-            this.addTestSuite(GuardDetectorTestCase.class);
-        } else {
-            Logger.getLogger("APTFileNodeTest").info("GuardDetectorTestCase is for non-Clank mode only");
-        }
     }
 
     public static Test suite() {
