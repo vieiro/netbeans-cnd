@@ -49,7 +49,7 @@ import org.netbeans.modules.cnd.makeproject.api.configurations.MakeConfiguration
 import org.netbeans.modules.cnd.testrunner.spi.TestHandlerFactory;
 import org.netbeans.modules.cnd.testrunner.spi.TestHandlerFactoryProvider;
 import org.netbeans.modules.cnd.testrunner.ui.CndTestRunnerNodeFactory;
-import org.netbeans.modules.cnd.testrunner.ui.CndUnitHandlerFactory;
+// import org.netbeans.modules.cnd.testrunner.ui.CndUnitHandlerFactory;
 import org.netbeans.modules.cnd.testrunner.ui.TestRunnerLineConvertor;
 import org.netbeans.modules.cnd.utils.CndUtils;
 import org.netbeans.modules.gsf.testrunner.ui.api.Manager;
@@ -225,7 +225,7 @@ public class TestRunnerActionHandler implements ProjectActionHandler, ExecutionL
         session.setRerunHandler(this);
 
         manager = Manager.getInstance();
-        CndUnitHandlerFactory predefinedFactory = new CndUnitHandlerFactory();
+        // CndUnitHandlerFactory predefinedFactory = new CndUnitHandlerFactory();
 
         List<TestHandlerFactory> factories = new ArrayList<TestHandlerFactory>();
         
@@ -233,7 +233,7 @@ public class TestRunnerActionHandler implements ProjectActionHandler, ExecutionL
         for (TestHandlerFactoryProvider provider : providers) {
             factories.add(provider.getFactory());
         }
-        factories.add(predefinedFactory);
+        // factories.add(predefinedFactory);
         
         return new TestRunnerLineConvertor(manager, session, factories);
     }

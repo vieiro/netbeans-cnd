@@ -44,7 +44,7 @@ public final class CndCallstackFrameNode extends CallstackFrameNode {
     public Action getPreferredAction() {
         // If it's a diff failure line, the default action is to diff it!
         if (displayName != null) {
-            ComparisonFailure failure = CndUnitHandlerFactory.getComparisonFailure(displayName);
+            ComparisonFailure failure = null; // CndUnitHandlerFactory.getComparisonFailure(displayName);
             if (failure != null) {
                 return new DiffViewAction(failure);
             }
