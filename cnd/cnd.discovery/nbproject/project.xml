@@ -347,11 +347,6 @@
                         <test/>
                     </test-dependency>
                     <test-dependency>
-                        <code-name-base>org.netbeans.modules.cnd.apt</code-name-base>
-                        <recursive/>
-                        <compile-dependency/>
-                    </test-dependency>
-                    <test-dependency>
                         <code-name-base>org.netbeans.modules.cnd.asm</code-name-base>
                         <recursive/>
                         <compile-dependency/>
@@ -383,11 +378,6 @@
                     <test-dependency>
                         <code-name-base>org.netbeans.modules.cnd.modeldiscovery</code-name-base>
                         <compile-dependency/>
-                    </test-dependency>
-                    <test-dependency>
-                        <code-name-base>org.netbeans.modules.cnd.modelimpl</code-name-base>
-                        <compile-dependency/>
-                        <test/>
                     </test-dependency>
                     <test-dependency>
                         <code-name-base>org.netbeans.modules.cnd.remote</code-name-base>

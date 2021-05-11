@@ -33,7 +33,7 @@ import org.netbeans.modules.cnd.api.model.CsmProject;
 import org.netbeans.modules.cnd.api.model.services.CsmSelect;
 import org.netbeans.modules.cnd.api.model.xref.CsmIncludeHierarchyResolver;
 import org.netbeans.modules.cnd.api.model.xref.CsmReference;
-import org.netbeans.modules.cnd.modelimpl.trace.TraceModel;
+// import org.netbeans.modules.cnd.modelimpl.trace.TraceModel;
 import org.netbeans.modules.cnd.modelutil.CsmUtilities;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
@@ -151,12 +151,14 @@ public class TestReparseAction extends TestProjectActionBase {
             }
         }
         
+        /*
         TraceModel.getFileErrors(fileImpl, new TraceModel.ErrorListener() {
             @Override
             public void error(String text, int line, int column) {
                 printError(out, fileImpl, line, column, text);
             }
         });
+        */
     }
 
     private void printError(OutputWriter out, CsmFile fileImpl, int line, int column, String text) {

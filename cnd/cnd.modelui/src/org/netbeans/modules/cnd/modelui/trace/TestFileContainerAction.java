@@ -21,7 +21,7 @@ package org.netbeans.modules.cnd.modelui.trace;
 
 import java.util.Collection;
 import org.netbeans.modules.cnd.api.model.CsmProject;
-import org.netbeans.modules.cnd.modelimpl.trace.CodeModelDiagnostic;
+// import org.netbeans.modules.cnd.modelimpl.trace.CodeModelDiagnostic;
 import org.openide.util.NbBundle;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
@@ -62,9 +62,9 @@ public class TestFileContainerAction extends TestProjectActionBase {
         InputOutput io = IOProvider.getDefault().getIO("file container for " + project.getName(), false); // NOI18N
         io.select();
         final OutputWriter out = io.getOut();
-        CodeModelDiagnostic.dumpFileContainer(project, out);
+        // CodeModelDiagnostic.dumpFileContainer(project, out);
         for(CsmProject lib : project.getLibraries()){
-            CodeModelDiagnostic.dumpFileContainer(lib, out);
+            // CodeModelDiagnostic.dumpFileContainer(lib, out);
         }
         out.close();
     }

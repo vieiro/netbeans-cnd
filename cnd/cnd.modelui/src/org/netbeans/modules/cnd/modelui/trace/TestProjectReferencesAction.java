@@ -33,7 +33,7 @@ import org.netbeans.modules.cnd.api.model.CsmFile;
 import org.netbeans.modules.cnd.api.model.CsmProgressAdapter;
 import org.netbeans.modules.cnd.api.model.CsmProject;
 import org.netbeans.modules.cnd.api.model.xref.CsmReferenceKind;
-import org.netbeans.modules.cnd.modelimpl.trace.TraceXRef;
+// import org.netbeans.modules.cnd.modelimpl.trace.TraceXRef;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.util.Cancellable;
@@ -268,6 +268,8 @@ public class TestProjectReferencesAction extends TestProjectActionBase {
                 filesMap.clear();
             }
         }
+
+        /*
         TraceXRef.traceProjectRefsStatistics(p, filesMap, new TraceXRef.StatisticsParameters(interestedElems, analyzeStatistics,
                 (reportUnresolved == null) ? true : reportUnresolved.booleanValue(), reportIndex, numThreads, passedThreshold), out, err, new CsmProgressAdapter() {
             private volatile int handled = 0;
@@ -289,6 +291,7 @@ public class TestProjectReferencesAction extends TestProjectActionBase {
                 time[1] = System.currentTimeMillis();
             }
         }, canceled);
+        */
         handle.finish();
         out.println("Analyzing " + p.getName() + " took " + (time[1]-time[0]) + "ms"); // NOI18N
         if (timeThreshold > 0) {

@@ -19,7 +19,6 @@
 package org.netbeans.modules.cnd.modelui.trace;
 
 import java.awt.Dialog;
-import org.netbeans.modules.cnd.modelimpl.trace.TraceUtils;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.util.NbBundle;
@@ -59,6 +58,7 @@ public class ParserOptions extends javax.swing.JPanel {
         dialog.setMinimumSize(dialog.getPreferredSize());
         dialog.setVisible(true);
         if (dd.getValue() == DialogDescriptor.OK_OPTION) {
+            /*
             TraceUtils.updateTraceFlag(CND_MODELIMPL_CPP_PARSER_ACTION, panel.cppParserAction.isSelected());
             TraceUtils.updateTraceFlag(CND_MODELIMPL_EXCL_COMPOUND, panel.excludeCompound.isSelected());
             TraceUtils.updateTraceFlag(CND_MODELIMPL_CPP_PARSER_NEW_GRAMMAR, panel.newGrammar.isSelected());
@@ -66,6 +66,7 @@ public class ParserOptions extends javax.swing.JPanel {
             TraceUtils.updateTraceFlag(CND_MODELIMPL_CPP_PARSER_ACTION_TRACE, panel.traceParserAction.isSelected());
             TraceUtils.updateTraceFlag(CND_MODELIMPL_CPP_PARSER_RULES_TRACE, panel.traceParserRule.isSelected());
             TraceUtils.updateTraceFlag(CND_MODELIMPL_CPP_PARSER_SHOW_AST, panel.showAST.isSelected());
+            */
         }
     }
     

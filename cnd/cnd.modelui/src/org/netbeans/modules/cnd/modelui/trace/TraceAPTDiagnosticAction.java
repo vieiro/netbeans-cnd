@@ -21,7 +21,7 @@ package org.netbeans.modules.cnd.modelui.trace;
 import java.util.Collection;
 import javax.swing.Action;
 import org.netbeans.modules.cnd.api.model.CsmProject;
-import org.netbeans.modules.cnd.apt.utils.APTUtils;
+// import org.netbeans.modules.cnd.apt.utils.APTUtils;
 import org.openide.util.NbBundle;
 import org.openide.util.SharedClassObject;
 
@@ -32,7 +32,7 @@ public class TraceAPTDiagnosticAction extends TestProjectActionBase {
 
     @Override
     protected void performAction(Collection<CsmProject> projects) {
-        APTUtils.dumpStatistics();
+        // APTUtils.dumpStatistics();
     }
 
     @Override
