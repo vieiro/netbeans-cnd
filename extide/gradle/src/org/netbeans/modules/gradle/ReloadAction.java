@@ -35,6 +35,7 @@ import org.openide.util.NbBundle;
 import org.netbeans.modules.gradle.api.GradleProjects;
 
 import static org.netbeans.modules.gradle.Bundle.*;
+import org.netbeans.modules.gradle.api.GradleBaseProject;
 import static org.netbeans.modules.gradle.api.NbGradleProject.Quality.FULL_ONLINE;
 
 /**
@@ -42,7 +43,7 @@ import static org.netbeans.modules.gradle.api.NbGradleProject.Quality.FULL_ONLIN
  * @author lkishalmi
  */
 @SuppressWarnings(value = "serial")
-@ActionID(id = "org.netbeans.modules.maven.refresh", category = "Project")
+@ActionID(id = "org.netbeans.modules.gradle.refresh", category = "Project")
 @ActionRegistration(displayName = "#ACT_Reload_Project", lazy=false)
 @ActionReference(position = 1700, path = "Projects/" + NbGradleProject.GRADLE_PROJECT_TYPE + "/Actions")
 @NbBundle.Messages("ACT_Reload_Project=Reload Project")
@@ -65,6 +66,9 @@ public class ReloadAction  extends AbstractAction implements ContextAwareAction 
         }
     }
 
+    @NbBundle.Messages({
+        "ACT_ReloadingProject=Reloading"
+    })
     @Override public void actionPerformed(ActionEvent event) {
         Set<Project> reload = new LinkedHashSet<>();
         for (NbGradleProjectImpl prj : context.lookupAll(NbGradleProjectImpl.class)) {
@@ -77,7 +81,9 @@ public class ReloadAction  extends AbstractAction implements ContextAwareAction 
                 NbGradleProjectImpl.RELOAD_RP.submit(() -> {
                     // A bit low level calls, just to allow UI interaction to
                     // Trust the project.
-                    impl.project = GradleProjectCache.loadProject(impl, FULL_ONLINE, true, true);
+                    GradleProjectLoader loader = impl.getLookup().lookup(GradleProjectLoader.class);
+                    GradleBaseProject gbp = GradleBaseProject.get(project);
+                    impl.project = loader.loadProject(FULL_ONLINE, ACT_ReloadingProject(), true, true);
                     NbGradleProjectImpl.ACCESSOR.doFireReload(NbGradleProject.get(impl));
                 });
             }

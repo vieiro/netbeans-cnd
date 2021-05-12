@@ -19,10 +19,10 @@
 
 package org.netbeans.modules.gradle;
 
+import org.netbeans.modules.gradle.loaders.GradleProjectLoaderImpl;
 import org.netbeans.modules.gradle.spi.GradleFiles;
 import org.netbeans.modules.gradle.api.NbGradleProject;
 import org.netbeans.modules.gradle.api.NbGradleProject.Quality;
-import org.netbeans.modules.gradle.spi.GradleSettings;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ProjectState;
@@ -51,10 +52,12 @@ import static org.netbeans.modules.gradle.api.NbGradleProject.Quality.*;
 import static java.util.logging.Level.*;
 
 import java.util.logging.Logger;
+import org.gradle.tooling.ProjectConnection;
 import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.api.annotations.common.SuppressWarnings;
 import org.netbeans.api.project.ui.ProjectProblems;
 import org.netbeans.modules.gradle.api.GradleBaseProject;
+import org.netbeans.modules.gradle.options.GradleExperimentalSettings;
 import org.netbeans.spi.project.CacheDirectoryProvider;
 import org.netbeans.spi.project.support.LookupProviderSupport;
 import org.netbeans.spi.project.ui.ProjectOpenedHook;
@@ -164,11 +167,14 @@ public final class NbGradleProjectImpl implements Project {
                 aux,
                 aux.getProblemProvider(),
                 new GradleAuxiliaryPropertiesImpl(this),
-                new GradleSharabilityQueryImpl(this),
                 UILookupMergerSupport.createProjectOpenHookMerger(new ProjectOpenedHookImpl()),
                 UILookupMergerSupport.createProjectProblemsProviderMerger(),
                 UILookupMergerSupport.createRecommendedTemplatesMerger(),
                 UILookupMergerSupport.createPrivilegedTemplatesMerger(),
+                LookupProviderSupport.createSourcesMerger(),
+                LookupProviderSupport.createSharabilityQueryMerger(),
+                new GradleProjectLoaderImpl(this),
+                new GradleProjectErrorNotifications(),
                 state
         );
     }
@@ -245,17 +251,22 @@ public final class NbGradleProjectImpl implements Project {
     }
 
     private GradleProject loadProject() {
-        return loadProject(false, aimedQuality);
+        return loadProject(null, false, aimedQuality);
     }
 
-    private GradleProject loadProject(boolean ignoreCache, Quality aim, String... args) {
-        GradleProject prj = GradleProjectCache.loadProject(this, aim, ignoreCache, false, args);
+    private GradleProject loadProject(String desc, boolean ignoreCache, Quality aim, String... args) {
+        GradleProjectLoader loader = getLookup().lookup(GradleProjectLoader.class);
+        GradleProject prj = loader != null ? loader.loadProject(aim, desc, ignoreCache,  false, args) : null;
         return prj;
     }
-
-    void reloadProject(final boolean ignoreCache, final Quality aim, final String... args) {
-        RELOAD_RP.post(() -> {
-            project = loadProject(ignoreCache, aim, args);
+    
+    RequestProcessor.Task reloadProject(final boolean ignoreCache, final Quality aim, final String... args) {
+        return reloadProject(null,  ignoreCache, aim, args);
+    }
+    
+    RequestProcessor.Task reloadProject(String desc, final boolean ignoreCache, final Quality aim, final String... args) {
+        return RELOAD_RP.post(() -> {
+            project = loadProject(desc, ignoreCache, aim, args);
             ACCESSOR.doFireReload(watcher);
         });
     }
@@ -284,6 +295,77 @@ public final class NbGradleProjectImpl implements Project {
             return "Unloaded Gradle Project: " + gradleFiles.toString();
         }
     }
+    
+    final RequestProcessor GRADLE_PRIMING_RP = new RequestProcessor("gradle-project-resolver", 1); //NOI18N
+
+    // @GuardedBy(this)
+    private CompletableFuture<GradleProject>    primingBuild;
+
+    boolean isProjectPrimingRequired() {
+        GradleProject gp = getGradleProject();
+        return gp.getQuality().notBetterThan(EVALUATED) || !gp.getProblems().isEmpty();
+    }
+    
+    /**
+     * The core implementation is tied to project quality itself, so it is extracted here from
+     * {@link GradleProjectProblemProvider}. 
+     * <p>
+     * <b>Note: Priming build makes the project trusted</b>
+     * 
+     * @return future that produces the result.
+     */
+    @NbBundle.Messages({
+        "# {0} - project name",
+        "ACT_PrimingProject=Preparing project {0}"
+    })
+    CompletableFuture<GradleProject> primeProject() {
+        CompletableFuture<GradleProject> ret;
+        synchronized (this) {
+            if (primingBuild != null && !primingBuild.isDone()) {
+                // avoid priming twice, piggyback on the old one
+                LOG.log(Level.FINER, "Priming build runs for {0}: {1}", new Object[] { this, primingBuild });
+                return primingBuild;
+            }
+            ret = new CompletableFuture<>();
+            primingBuild = ret;
+        }
+        LOG.log(Level.FINER, "Submitting priming build runs for {0}: {1}", new Object[] { this, ret });
+        GRADLE_PRIMING_RP.submit(() -> {
+            try {
+                // this was explicitly invoked as project action, or problem resolution. Same level as
+                // Build project, so trust the project.
+                ProjectTrust.getDefault().trustProject(this, true);
+                GradleProjectLoader loader = getLookup().lookup(GradleProjectLoader.class);
+                GradleProject gradleProject = loader.loadProject(FULL_ONLINE, Bundle.ACT_PrimingProject(project.getBaseProject().getName()), true, true);
+                LOG.log(Level.FINER, "Priming finished, reloading {0}: {1}", project);
+                fireProjectReload(false);
+                ret.complete(gradleProject);
+            } catch (Throwable t) {
+                LOG.log(Level.FINER, t, () -> String.format("Priming errored for %s", project));
+                ret.completeExceptionally(t);
+                if (t instanceof ThreadDeath) {
+                    throw t;
+                }
+            }
+        });
+        return ret;
+    }
+    
+    public static File getCacheDir(GradleFiles gf) {
+        return getCacheDir(gf.getRootDir(), gf.getProjectDir());
+    }
+
+    public static File getCacheDir(GradleProject gp) {
+        GradleBaseProject base = gp.getBaseProject();
+        return getCacheDir(base.getRootDir(), base.getProjectDir());
+    }
+
+    private static File getCacheDir(File rootDir, File projectDir) {
+        int code = Math.abs(projectDir.getAbsolutePath().hashCode());
+        String dirName = projectDir.getName() + "-" + code; //NOI18N
+        File dir = new File(rootDir, ".gradle/nb-cache/" + dirName); //NOI18N
+        return dir;
+    }
 
     private class ProjectOpenedHookImpl extends ProjectOpenedHook {
 
@@ -296,7 +378,7 @@ public final class NbGradleProjectImpl implements Project {
                     ProjectProblems.showAlert(NbGradleProjectImpl.this);
                 }
             };
-            if (GradleSettings.getDefault().isOpenLazy()) {
+            if (GradleExperimentalSettings.getDefault().isOpenLazy()) {
                 RELOAD_RP.post(open, 100);
             } else {
                 open.run();
@@ -308,6 +390,8 @@ public final class NbGradleProjectImpl implements Project {
             setAimedQuality(Quality.FALLBACK);
             detachAllUpdater();
             dumpProject();
+            getLookup().lookup(ProjectConnection.class).close();
+            getLookup().lookup(GradleProjectErrorNotifications.class).clear();
         }
     }
 
@@ -320,7 +404,7 @@ public final class NbGradleProjectImpl implements Project {
 
         @Override
         public FileObject getCacheDirectory() throws IOException {
-            return FileUtil.createFolder(GradleProjectCache.getCacheDir(gradleFiles));
+            return FileUtil.createFolder(getCacheDir(gradleFiles));
         }
     }
 
@@ -336,7 +420,7 @@ public final class NbGradleProjectImpl implements Project {
             watcherRef = new WeakReference<>(watcher);
             Lookup general = Lookups.forPath("Projects/" + NbGradleProject.GRADLE_PROJECT_TYPE + "/Lookup"); //NOI18N
             pluginLookups.put(NB_GENERAL, general); //NOI18N
-            check();
+            setLookups(general);
             watcher.addPropertyChangeListener(WeakListeners.propertyChange(this, watcher));
         }
 
@@ -345,25 +429,27 @@ public final class NbGradleProjectImpl implements Project {
             NbGradleProject watcher = watcherRef.get();
             if (watcher != null) {
                 lookupsChanged = !watcher.isGradleProjectLoaded();
-                GradleBaseProject prj = watcher.projectLookup(GradleBaseProject.class);
-                Set<String> currentPlugins = new HashSet<>(prj.getPlugins());
-                if (prj.isRoot()) {
-                    currentPlugins.add(NB_ROOT_PLUGIN);
-                }
-                for (String cp : currentPlugins) {
-                    //Add Lookups for new plugins
-                    if (!pluginLookups.containsKey(cp)) {
-                        Lookup pluginLookup = Lookups.forPath("Projects/" + NbGradleProject.GRADLE_PLUGIN_TYPE + "/" + cp + "/Lookup"); //NOI18N
-                        pluginLookups.put(cp, pluginLookup);
-                        lookupsChanged = true;
+                if (watcher.isGradleProjectLoaded()) {
+                    GradleBaseProject prj = watcher.projectLookup(GradleBaseProject.class);
+                    Set<String> currentPlugins = new HashSet<>(prj.getPlugins());
+                    if (prj.isRoot()) {
+                        currentPlugins.add(NB_ROOT_PLUGIN);
                     }
-                }
-                Iterator<String> it = pluginLookups.keySet().iterator();
-                while (it.hasNext()) {
-                    String oldPlugin = it.next();
-                    if (!currentPlugins.contains(oldPlugin) && !NB_GENERAL.equals(oldPlugin)) {
-                        it.remove();
-                        lookupsChanged = true;
+                    for (String cp : currentPlugins) {
+                        //Add Lookups for new plugins
+                        if (!pluginLookups.containsKey(cp)) {
+                            Lookup pluginLookup = Lookups.forPath("Projects/" + NbGradleProject.GRADLE_PLUGIN_TYPE + "/" + cp + "/Lookup"); //NOI18N
+                            pluginLookups.put(cp, pluginLookup);
+                            lookupsChanged = true;
+                        }
+                    }
+                    Iterator<String> it = pluginLookups.keySet().iterator();
+                    while (it.hasNext()) {
+                        String oldPlugin = it.next();
+                        if (!currentPlugins.contains(oldPlugin) && !NB_GENERAL.equals(oldPlugin)) {
+                            it.remove();
+                            lookupsChanged = true;
+                        }
                     }
                 }
             }
@@ -429,10 +515,12 @@ public final class NbGradleProjectImpl implements Project {
             filesToWatch = fileProvider.getFiles();
             if (filesToWatch != null) {
                 for (File f : filesToWatch) {
-                    try {
-                        FileUtil.addFileChangeListener(this, f);
-                    } catch (IllegalArgumentException ex) {
-                        assert false : "Project opened twice in a row";
+                    if (f != null) {
+                        try {
+                            FileUtil.addFileChangeListener(this, f);
+                        } catch (IllegalArgumentException ex) {
+                            assert false : "Project opened twice in a row";
+                        }
                     }
                 }
             }
@@ -441,10 +529,12 @@ public final class NbGradleProjectImpl implements Project {
         synchronized void detachAll() {
             if (filesToWatch != null) {
                 for (File f : filesToWatch) {
-                    try {
-                        FileUtil.removeFileChangeListener(this, f);
-                    } catch (IllegalArgumentException ex) {
-                        assert false : "Project closed twice in a row";
+                    if (f != null) {
+                        try {
+                            FileUtil.removeFileChangeListener(this, f);
+                        } catch (IllegalArgumentException ex) {
+                            assert false : "Project closed twice in a row";
+                        }
                     }
                 }
             }

@@ -37,7 +37,8 @@ import org.openide.util.NbBundle.Messages;
 @MIMEResolver.ExtensionRegistration(
         displayName = "#LBL_HPP_LOADER",
         mimeType = MIMETypes.HPP,
-        extension = {"hpp", "hxx", "hh", "h++"}
+        extension = {"hpp", "hxx", "hh", "h++"},
+        position = 1000300
 )
 @DataObject.Registration(
         mimeType = MIMETypes.HPP,
@@ -95,6 +96,17 @@ import org.openide.util.NbBundle.Messages;
             path = "Loaders/" + MIMETypes.HPP + "/Actions",
             id = @ActionID(category = "System", id = "org.openide.actions.PropertiesAction"),
             position = 1400
+    ),
+    @ActionReference(
+            path = "Editors/" + MIMETypes.CPP + "/Popup",
+            id = @ActionID(category = "Refactoring", id = "org.netbeans.modules.refactoring.api.ui.WhereUsedAction"),
+            position = 1400
+    ),
+    @ActionReference(
+            path = "Editors/" + MIMETypes.CPP + "/Popup",
+            id = @ActionID(category = "Refactoring", id = "org.netbeans.modules.refactoring.api.ui.RenameAction"),
+            position = 1500,
+            separatorAfter = 1550
     )
 })
 @GrammarRegistration(grammar="resources/cpp.tmLanguage.json", mimeType=MIMETypes.HPP)

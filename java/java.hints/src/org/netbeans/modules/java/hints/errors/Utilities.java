@@ -449,10 +449,13 @@ public class Utilities {
             return null;
         }
         
+        diff.commit();
+        return computeChangeInfo(target, diff, tag);
+    }
+        
+    public static ChangeInfo computeChangeInfo(FileObject target, final ModificationResult diff, final Object tag) {
         List<? extends Difference> differences = diff.getDifferences(target);
         ChangeInfo result = null;
-        
-        diff.commit();
         
         try {
             if (differences != null) {
@@ -3134,7 +3137,8 @@ public class Utilities {
                             }
                             break;
                         } else {
-                            if (leftTreeName != null && leftTreeName.contentEquals(getLeftTreeName(statements.get(0)))) {
+                            Name exprTree = getLeftTreeName(statements.get(0));
+                            if (leftTreeName != null && exprTree != null && leftTreeName.contentEquals(exprTree)) {
                                 break;
                             } else {
                                 return false;
@@ -3152,7 +3156,8 @@ public class Utilities {
                             }
                             firstCase = false;
                         }
-                        if (leftTreeName != null && leftTreeName.contentEquals(getLeftTreeName(statements.get(0)))) {
+                        Name exprTree = getLeftTreeName(statements.get(0));
+                        if (leftTreeName != null && exprTree != null && leftTreeName.contentEquals(exprTree)) {
                             break;
                         } else {
                             return false;
