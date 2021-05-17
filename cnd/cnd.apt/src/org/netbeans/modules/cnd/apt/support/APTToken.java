@@ -19,8 +19,8 @@
 
 package org.netbeans.modules.cnd.apt.support;
 
-import org.netbeans.modules.cnd.antlr.Token;
 import java.io.Serializable;
+import org.antlr.v4.runtime.Token;
 
 /**
  * interface for APT tokens

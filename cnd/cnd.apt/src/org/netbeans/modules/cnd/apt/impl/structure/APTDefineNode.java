@@ -26,8 +26,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
+import org.netbeans.modules.cnd.apt.impl.support.generated.APTLexer;
 import org.netbeans.modules.cnd.debug.DebugUtils;
-import org.netbeans.modules.cnd.apt.support.APTTokenTypes;
 import org.netbeans.modules.cnd.apt.structure.APT;
 import org.netbeans.modules.cnd.apt.structure.APTDefine;
 import org.netbeans.modules.cnd.apt.structure.APTFile;
@@ -166,16 +166,16 @@ public class APTDefineNode extends APTMacroBaseNode implements APTDefine, Serial
                             int index = params.size()-1;
                             // check if any named variadic parameter to replace by VA_ARGS_TOKEN
                             APTToken lastParam = params.get(index);
-                            if (lastParam.getType() == APTTokenTypes.ELLIPSIS) {
+                            if (lastParam.getType() == APTLexer.ELLIPSIS) {
                                 assert lastParam instanceof APTBaseLanguageFilter.FilterToken : "it must be filtered ellipsis token " + lastParam;
                                 APTToken originalToken = ((APTBaseLanguageFilter.FilterToken)lastParam).getOriginalToken();
                                 assert originalToken != null;
-                                assert originalToken.getType() == APTTokenTypes.IDENT : "original token must be ID " + originalToken;
+                                assert originalToken.getType() == APTLexer.IDENTIFIER : "original token must be ID " + originalToken;
                                 CharSequence name = originalToken.getTextID();
                                 params.set(index, APTUtils.VA_ARGS_TOKEN);
                                 for (int i = 0; i < bodyTokens.size(); i++) {
                                     APTToken cur = bodyTokens.get(i);
-                                    if (cur.getType() == APTTokenTypes.IDENT && cur.getTextID().equals(name)) {
+                                    if (cur.getType() == APTLexer.IDENTIFIER && cur.getTextID().equals(name)) {
                                         bodyTokens.set(i, APTUtils.VA_ARGS_TOKEN);
                                     }
                                 }
@@ -206,7 +206,7 @@ public class APTDefineNode extends APTMacroBaseNode implements APTDefine, Serial
                     }
                     case AFTER_MACRO_NAME:
                     {
-                        if (token.getType() == APTTokenTypes.FUN_LIKE_MACRO_LPAREN) {
+                        if (token.getType() == APTLexer.FUN_LIKE_MACRO_LPAREN) {
                             params = new ArrayList<APTToken>();
                             node.stateAndHashCode = IN_PARAMS;
                         } else {
@@ -221,14 +221,14 @@ public class APTDefineNode extends APTMacroBaseNode implements APTDefine, Serial
                     case IN_PARAMS:
                     {
                         switch (token.getType()) {
-                            case APTTokenTypes.IDENT:
+                            case APTLexer.IDENTIFIER:
                                 params.add(token);
                                 node.stateAndHashCode = IN_PARAMS_AFTER_ID;
                                 break;
-                            case APTTokenTypes.RPAREN:
+                            case APTLexer.RPAREN:
                                 node.stateAndHashCode = IN_BODY;
                                 break;
-                            case APTTokenTypes.ELLIPSIS:
+                            case APTLexer.ELLIPSIS:
                                 // support ELLIPSIS for IZ#83949
                                 params.add(APTUtils.VA_ARGS_TOKEN);
                                 node.stateAndHashCode = IN_PARAMS_AFTER_ELLIPSIS;
@@ -246,7 +246,7 @@ public class APTDefineNode extends APTMacroBaseNode implements APTDefine, Serial
                     case IN_PARAMS_AFTER_ELLIPSIS:
                     {
                         switch (token.getType()) {
-                            case APTTokenTypes.RPAREN:
+                            case APTLexer.RPAREN:
                                 node.stateAndHashCode = IN_BODY;
                                 break;
                             default:
@@ -262,10 +262,10 @@ public class APTDefineNode extends APTMacroBaseNode implements APTDefine, Serial
                     case IN_PARAMS_AFTER_ID:
                     {
                         switch (token.getType()) {
-                            case APTTokenTypes.RPAREN:
+                            case APTLexer.RPAREN:
                                 node.stateAndHashCode = IN_BODY;
                                 break;
-                            case APTTokenTypes.ELLIPSIS:
+                            case APTLexer.ELLIPSIS:
                                 //previous parameter is variadic named token
                                 // #195560 - more support for variadic variables in macro
                                 if (params.isEmpty()) {
@@ -274,12 +274,12 @@ public class APTDefineNode extends APTMacroBaseNode implements APTDefine, Serial
                                 } else {
                                     int index = params.size() - 1;
                                     APTToken last = params.get(index);
-                                    token = new APTBaseLanguageFilter.FilterToken(last, APTTokenTypes.ELLIPSIS);
+                                    token = new APTBaseLanguageFilter.FilterToken(last, APTLexer.ELLIPSIS);
                                     params.set(index, token);
                                     node.stateAndHashCode = IN_PARAMS_AFTER_ELLIPSIS;
                                 }
                                 break;
-                            case APTTokenTypes.COMMA:
+                            case APTLexer.COMMA:
                                 node.stateAndHashCode = IN_PARAMS;
                                 break;
                             default:
@@ -299,10 +299,10 @@ public class APTDefineNode extends APTMacroBaseNode implements APTDefine, Serial
                             bodyTokens = new ArrayList<APTToken>();
                         }
                         // check for errors with sharp for function like macro:
-                        if (token.getType() == APTTokenTypes.SHARP && params != null) {
+                        if (token.getType() == APTLexer.SHARP && params != null) {
                             node.stateAndHashCode = IN_BODY_AFTER_SHARP;
                             // there is a special case of escaping sharp by putting it between parens like '(#)'
-                            if (bodyTokens.size() > 0 && bodyTokens.get(bodyTokens.size() - 1).getType() == APTTokenTypes.LPAREN) {
+                            if (bodyTokens.size() > 0 && bodyTokens.get(bodyTokens.size() - 1).getType() == APTLexer.LPAREN) {
                                 node.stateAndHashCode = IN_BODY_AFTER_LPAREN_AND_SHARP;
                             }
                         }
@@ -316,12 +316,12 @@ public class APTDefineNode extends APTMacroBaseNode implements APTDefine, Serial
                         // skip comments
                         if (APTUtils.isCommentToken(token.getType())) {
                             // stay in the current state
-                        } else if (token.getType() == APTTokenTypes.IDENT) {
+                        } else if (token.getType() == APTLexer.IDENTIFIER) {
                             // error check: token after # must be parameter or it must be # with leading LPAREN
                             node.stateAndHashCode = (node.stateAndHashCode == IN_BODY_AFTER_LPAREN_AND_SHARP) || isInParamList(token) ? IN_BODY : ERROR;
                         } else {
                             // special case is '(#)' - sharp between parens
-                            if (node.stateAndHashCode == IN_BODY_AFTER_LPAREN_AND_SHARP && token.getType() == APTTokenTypes.RPAREN) {
+                            if (node.stateAndHashCode == IN_BODY_AFTER_LPAREN_AND_SHARP && token.getType() == APTLexer.RPAREN) {
                                 node.stateAndHashCode = IN_BODY;
                             } else {
                                 // only id is accepted after #

@@ -19,16 +19,16 @@
 
 package org.netbeans.modules.cnd.apt.utils;
 
-import org.netbeans.modules.cnd.antlr.TokenStream;
-import org.netbeans.modules.cnd.antlr.TokenStreamException;
 import java.util.logging.Level;
+import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.TokenStream;
 import org.netbeans.modules.cnd.apt.support.APTToken;
 import org.netbeans.modules.cnd.apt.support.APTTokenStream;
 
 /**
  * filter to remove comments from token stream
  */
-public class APTCommentsFilter implements TokenStream, APTTokenStream {
+public class APTCommentsFilter implements TokenSource, APTTokenStream {
     private final TokenStream orig;
     
     /** Creates a new instance of APTCommentsFilter */

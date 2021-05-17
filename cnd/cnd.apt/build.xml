@@ -28,34 +28,40 @@
     
     <target name="compile" depends="antlr,projectized-common.compile">
     </target>
- 
+
     <target name="init-antlr">
+        <path id="antlr4.compiler.classpath">
+            <pathelement location="external/antlr4-4.7.2.jar" />
+            <pathelement location="external/antlr-runtime-3.5.2.jar" />
+            <pathelement location="external/ST4-4.1.jar" />
+            <pathelement location="../../ide/libs.antlr4.runtime/external/antlr4-runtime-4.7.2.jar" />
+        </path>
         <property name="antlr.apt.output.dir" location="src/org/netbeans/modules/cnd/apt/impl/support/generated"/>
-        <property name="antlr.jar" location="${cluster}/modules/ext/org-netbeans-modules-cnd-antlr.jar"/>
-        <property name="antlr.apt.grammar.dir" location="src/org/netbeans/modules/cnd/apt/impl/support"/>
-        <property name="antlr.apt.output.tokenTypes" location="src/org/netbeans/modules/cnd/apt/support/APTTokenTypes.java"/>
+        <property name="antlr.apt.grammar.dir" location="src/org/netbeans/modules/cnd/apt/impl/support/antlr4"/>
     </target>
     
     <target name="clean" depends="projectized-common.clean, init-antlr">
         <delete dir="${antlr.apt.output.dir}"/>   
-        <delete file="${antlr.apt.output.tokenTypes}"/>
     </target>
     
     <target name="check-up-to-date">
-        <uptodate property="antlr.up-to-date" targetfile="${antlr.apt.output.dir}/APTGeneratedTokenTypes.txt">
-            <srcfiles dir="${antlr.apt.grammar.dir}" includes="*.g"/>
+        <uptodate property="antlr.up-to-date" targetfile="${antlr.apt.output.dir}/APTLexer.java">
+            <srcfiles dir="${antlr.apt.grammar.dir}" includes="*.g4"/>
         </uptodate>
         <echo message="antlr checkUptodate result: ${antlr.up-to-date}"/>
     </target>
     
     <target name="antlr" depends="init-antlr, check-up-to-date" unless="antlr.up-to-date">
         <mkdir dir="${antlr.apt.output.dir}"/>
-        <java classname="org.netbeans.modules.cnd.antlr.Tool" fork="true">
+        <pathconvert property="antlr4.compiler.classpath-as-text" refid="antlr4.compiler.classpath" />
+        <echo message="ANTLR 4 Compiler with classpath ${antlr4.compiler.classpath-as-text}" />
+        <java classname="org.antlr.v4.Tool" fork="true" failonerror="true">
             <arg value="-o"/>
             <arg value="${antlr.apt.output.dir}"/>
-            <arg value="${antlr.apt.grammar.dir}/aptlexer.g"/>
-            <classpath path="${antlr.jar}"/>
+            <arg value="${antlr.apt.grammar.dir}/APTLexer.g4"/>
+            <classpath refid="antlr4.compiler.classpath" />
         </java>        
+        <!--
         <java classname="org.netbeans.modules.cnd.antlr.Tool" fork="true">
             <arg value="-o"/>
             <arg value="${antlr.apt.output.dir}"/>
@@ -74,20 +80,27 @@
 
         <copy file="${antlr.apt.output.dir}/APTGeneratedTokenTypes.java"
             tofile="${antlr.apt.output.tokenTypes}"/>
+        -->
         <!-- change class name -->
+        <!--
         <replaceregexp file="${antlr.apt.output.tokenTypes}" byline="true">
             <regexp pattern="APTGeneratedTokenTypes"/>
             <substitution expression="APTTokenTypes"/>
         </replaceregexp>
+        -->
         <!-- remove unnecessary import statements -->
+        <!--
         <replaceregexp file="${antlr.apt.output.tokenTypes}" byline="true">
             <regexp pattern="import.*"/>
             <substitution expression=""/>
         </replaceregexp>        
+        -->
         <!-- change package name -->
+        <!--
         <replaceregexp file="${antlr.apt.output.tokenTypes}" byline="true">
             <regexp pattern="package org.netbeans.modules.cnd.apt.impl.support.generated;"/>
             <substitution expression="package org.netbeans.modules.cnd.apt.support;"/>
         </replaceregexp>                
+        -->
     </target>    
 </project>

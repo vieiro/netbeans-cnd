@@ -22,15 +22,12 @@ package org.netbeans.modules.cnd.apt.impl.structure;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
-import org.netbeans.modules.cnd.antlr.TokenStream;
-import org.netbeans.modules.cnd.antlr.TokenStreamException;
-import org.netbeans.modules.cnd.antlr.TokenStreamRecognitionException;
+import org.antlr.v4.runtime.TokenStream;
 import org.netbeans.modules.cnd.apt.impl.support.generated.APTLexer;
 import org.netbeans.modules.cnd.apt.structure.APT;
 import org.netbeans.modules.cnd.apt.structure.APTFile;
 import org.netbeans.modules.cnd.apt.structure.APTPragma;
 import org.netbeans.modules.cnd.apt.support.APTToken;
-import org.netbeans.modules.cnd.apt.support.APTTokenTypes;
 import org.netbeans.modules.cnd.apt.utils.APTCommentsFilter;
 import org.netbeans.modules.cnd.apt.utils.APTTraceUtils;
 import org.netbeans.modules.cnd.apt.utils.APTUtils;
@@ -100,7 +97,7 @@ public final class APTBuilderImpl {
         return outApt;
     }
 
-    private void buildFileAPT(APTFileNode aptFile, TokenStream ts) throws TokenStreamException {
+    private void buildFileAPT(APTFileNode aptFile, TokenStream ts) {
         GuardDetector guardDetector = new GuardDetector(aptFile, ts);
         APTToken lastToken = nonRecursiveBuild(aptFile, ts, guardDetector);
         aptFile.setGuard(guardDetector.getGuard());
@@ -130,7 +127,7 @@ public final class APTBuilderImpl {
     //////Build APT without recursion (a little bit faster, can be tuned even more)
     private LinkedList<Pair> nodeStack = new LinkedList<Pair>();
 
-    private APTToken nonRecursiveBuild(APTFileNode aptFile, TokenStream stream, GuardDetector guardDetector) throws TokenStreamException {
+    private APTToken nonRecursiveBuild(APTFileNode aptFile, TokenStream stream, GuardDetector guardDetector) {
         assert(stream != null);
         Pair root = new Pair(aptFile);
         APTToken nextToken = (APTToken) stream.nextToken();
@@ -194,32 +191,32 @@ public final class APTBuilderImpl {
         assert (!APTUtils.isEOF(token));
         int ttype = token.getType();
         switch (ttype) {
-            case APTTokenTypes.IF:
+            case APTLexer.IF:
                 return new APTIfNode(token);
-            case APTTokenTypes.IFDEF:
+            case APTLexer.IFDEF:
                 return new APTIfdefNode(token);
-            case APTTokenTypes.IFNDEF:
+            case APTLexer.IFNDEF:
                 return new APTIfndefNode(token);
-            case APTTokenTypes.INCLUDE:
+            case APTLexer.INCLUDE:
                 return new APTIncludeNode(token);
-            case APTTokenTypes.INCLUDE_NEXT:
+            case APTLexer.INCLUDE_NEXT:
                 return new APTIncludeNextNode(token);
-            case APTTokenTypes.ELIF:
+            case APTLexer.ELIF:
                 return new APTElifNode(token);
-            case APTTokenTypes.ELSE:
+            case APTLexer.ELSE:
                 return new APTElseNode(token);
-            case APTTokenTypes.ENDIF:
+            case APTLexer.ENDIF:
                 return new APTEndifNode(token);
-            case APTTokenTypes.DEFINE:
+            case APTLexer.DEFINE:
                 return new APTDefineNode.Builder(token);
-            case APTTokenTypes.UNDEF:
+            case APTLexer.UNDEF:
                 return new APTUndefineNode(token);
-            case APTTokenTypes.ERROR:
-		return new APTErrorNode(token);
-            case APTTokenTypes.PRAGMA:
+            case APTLexer.ERROR:
+		        return new APTErrorNode(token);
+            case APTLexer.PRAGMA:
                 return new APTPragmaNode(token);
-            case APTTokenTypes.LINE:
-            case APTTokenTypes.PREPROC_DIRECTIVE:
+            case APTLexer.LINE:
+            case APTLexer.PREPROC_DIRECTIVE:
                 return new APTUnknownNode(token);
             default:
                 assert (!APTUtils.isPreprocessorToken(ttype)) :

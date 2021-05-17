@@ -19,9 +19,6 @@
 
 package org.netbeans.modules.cnd.apt.utils;
 
-import org.netbeans.modules.cnd.antlr.Token;
-import org.netbeans.modules.cnd.antlr.TokenStream;
-import org.netbeans.modules.cnd.antlr.TokenStreamException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
 import org.netbeans.modules.cnd.apt.debug.APTTraceFlags;
 import org.netbeans.modules.cnd.apt.impl.structure.APTDefineNode;
 import org.netbeans.modules.cnd.apt.impl.structure.APTNodeBuilder;
@@ -46,8 +45,8 @@ import org.netbeans.modules.cnd.apt.impl.support.MacroExpandedToken;
 import org.netbeans.modules.cnd.apt.impl.support.clank.ClankDriverImpl;
 import org.netbeans.modules.cnd.apt.impl.support.clank.ClankMacroExpandedToken;
 import org.netbeans.modules.cnd.apt.impl.support.generated.APTExprParser;
+import org.netbeans.modules.cnd.apt.impl.support.generated.APTLexer;
 import org.netbeans.modules.cnd.apt.support.lang.APTBaseLanguageFilter;
-import org.netbeans.modules.cnd.apt.support.APTTokenTypes;
 import org.netbeans.modules.cnd.apt.structure.APT;
 import org.netbeans.modules.cnd.apt.structure.APTDefine;
 import org.netbeans.modules.cnd.apt.structure.APTFile;
@@ -107,7 +106,7 @@ public class APTUtils {
     }
 
     public static String getAPTTokenName(int type) {
-        if (type == APTTokenTypes.IDENT) {
+        if (type == APTLexer.IDENT) {
             return "ID"; // NOI18N
         } else if (type == EOF_TOKEN2.getType()) {
             return "EOF3"; // NOI18N
@@ -216,7 +215,7 @@ public class APTUtils {
             boolean look4Equal = true;
             do {
                 next = (APTToken) stream.nextToken();
-                if (look4Equal && (next.getType() == APTTokenTypes.ASSIGNEQUAL)) {
+                if (look4Equal && (next.getType() == APTLexer.ASSIGNEQUAL)) {
                     // skip the first equal token, it's delimeter
                     look4Equal = false;
                     next = (APTToken) stream.nextToken();
@@ -255,8 +254,8 @@ public class APTUtils {
 
     public static APTToken createIDENT(CharSequence text) {
         assert CharSequences.isCompact(text);
-        APTToken out = createAPTToken(APTTokenTypes.IDENT);
-        out.setType(APTTokenTypes.IDENT);
+        APTToken out = createAPTToken(APTLexer.IDENT);
+        out.setType(APTLexer.IDENT);
         out.setTextID(text);
         return out;
     }
@@ -269,28 +268,28 @@ public class APTUtils {
         }
         switch (type) {
             // IDs
-            case APTTokenTypes.IDENT:
-            case APTTokenTypes.ID_DEFINED:
+            case APTLexer.IDENT:
+            case APTLexer.ID_DEFINED:
                 // Strings and chars
-            case APTTokenTypes.STRING_LITERAL:
-            case APTTokenTypes.CHAR_LITERAL:
+            case APTLexer.STRING_LITERAL:
+            case APTLexer.CHAR_LITERAL:
                 // Numbers
-            case APTTokenTypes.DECIMALINT:
-            case APTTokenTypes.HEXADECIMALINT:
-            case APTTokenTypes.BINARYINT:
-            case APTTokenTypes.FLOATONE:
-            case APTTokenTypes.FLOATTWO:
-            case APTTokenTypes.OCTALINT:
-            case APTTokenTypes.NUMBER:
+            case APTLexer.DECIMALINT:
+            case APTLexer.HEXADECIMALINT:
+            case APTLexer.BINARYINT:
+            case APTLexer.FLOATONE:
+            case APTLexer.FLOATTWO:
+            case APTLexer.OCTALINT:
+            case APTLexer.NUMBER:
                 // Include strings
-            case APTTokenTypes.INCLUDE_STRING:
-            case APTTokenTypes.SYS_INCLUDE_STRING:
+            case APTLexer.INCLUDE_STRING:
+            case APTLexer.SYS_INCLUDE_STRING:
                 return APTTraceFlags.USE_APT_TEST_TOKEN ? (APTToken)new APTTestToken() : new APTBaseToken();
                 
                 // Comments
-            case APTTokenTypes.CPP_COMMENT:
-            case APTTokenTypes.COMMENT:
-            case APTTokenTypes.FORTRAN_COMMENT:
+            case APTLexer.CPP_COMMENT:
+            case APTLexer.COMMENT:
+            case APTLexer.FORTRAN_COMMENT:
                 return new APTCommentToken();
                 
             default: /*assert(APTConstTextToken.constText[type] != null) : "Do not know text for constText token of type " + type;  // NOI18N*/
@@ -400,22 +399,22 @@ public class APTUtils {
         return isPreprocessorToken(token.getType());
     }
     
-    public static boolean isPreprocessorToken(int/*APTTokenTypes*/ ttype) {
+    public static boolean isPreprocessorToken(int/*APTLexer*/ ttype) {
         switch (ttype) {
-            case APTTokenTypes.PREPROC_DIRECTIVE:
-            case APTTokenTypes.INCLUDE:
-            case APTTokenTypes.INCLUDE_NEXT:
-            case APTTokenTypes.DEFINE:
-            case APTTokenTypes.UNDEF:
-            case APTTokenTypes.IFDEF:
-            case APTTokenTypes.IFNDEF:
-            case APTTokenTypes.IF:
-            case APTTokenTypes.ELIF:
-            case APTTokenTypes.ELSE:
-            case APTTokenTypes.ENDIF:
-            case APTTokenTypes.PRAGMA:
-            case APTTokenTypes.LINE:
-            case APTTokenTypes.ERROR:
+            case APTLexer.PREPROC_DIRECTIVE:
+            case APTLexer.INCLUDE:
+            case APTLexer.INCLUDE_NEXT:
+            case APTLexer.DEFINE:
+            case APTLexer.UNDEF:
+            case APTLexer.IFDEF:
+            case APTLexer.IFNDEF:
+            case APTLexer.IF:
+            case APTLexer.ELIF:
+            case APTLexer.ELSE:
+            case APTLexer.ENDIF:
+            case APTLexer.PRAGMA:
+            case APTLexer.LINE:
+            case APTLexer.ERROR:
                 return true;
             default:
                 return false;
@@ -423,7 +422,7 @@ public class APTUtils {
     }
     
     public static boolean isID(Token token) {
-        return token != null && token.getType() == APTTokenTypes.IDENT;
+        return token != null && token.getType() == APTLexer.IDENT;
     }
 
     public static boolean isFortranKeyword(int tokenType) {
@@ -437,10 +436,10 @@ public class APTUtils {
     public static boolean isInt(Token token) {
         if (token != null) {
             switch (token.getType()) {
-                case APTTokenTypes.DECIMALINT:
-                case APTTokenTypes.HEXADECIMALINT:
-                case APTTokenTypes.OCTALINT:
-                case APTTokenTypes.BINARYINT:
+                case APTLexer.DECIMALINT:
+                case APTLexer.HEXADECIMALINT:
+                case APTLexer.OCTALINT:
+                case APTLexer.BINARYINT:
                     return true;
             }
         }
@@ -453,7 +452,7 @@ public class APTUtils {
     }
     
     public static boolean isEOF(int ttype) {
-        return ttype == APTTokenTypes.EOF || ttype == EOF3;
+        return ttype == APTLexer.EOF || ttype == EOF3;
     }
     
     public static boolean isVaArgsToken(APTToken token) {
@@ -488,11 +487,11 @@ public class APTUtils {
         return isEndCondition(token.getType());
     }
     
-    public static boolean isEndCondition(int/*APTTokenTypes*/ ttype) {
+    public static boolean isEndCondition(int/*APTLexer*/ ttype) {
         switch (ttype) {
-            case APTTokenTypes.ELIF:
-            case APTTokenTypes.ELSE:
-            case APTTokenTypes.ENDIF:
+            case APTLexer.ELIF:
+            case APTLexer.ELSE:
+            case APTLexer.ENDIF:
                 return true;
             default:
                 return false;
@@ -517,9 +516,9 @@ public class APTUtils {
     
     public static boolean isCommentToken(int ttype) {
         switch (ttype) {
-            case APTTokenTypes.COMMENT:
-            case APTTokenTypes.CPP_COMMENT:
-            case APTTokenTypes.FORTRAN_COMMENT:
+            case APTLexer.COMMENT:
+            case APTLexer.CPP_COMMENT:
+            case APTLexer.FORTRAN_COMMENT:
                 return true;
             default:
                 return false;
@@ -533,9 +532,9 @@ public class APTUtils {
     
     public static boolean isOpenBracket(int ttype) {
         switch (ttype) {
-            case APTTokenTypes.LCURLY:
-            case APTTokenTypes.LPAREN:
-            case APTTokenTypes.LSQUARE:
+            case APTLexer.LCURLY:
+            case APTLexer.LPAREN:
+            case APTLexer.LSQUARE:
                 return true;
             default:
                 return false;
@@ -549,9 +548,9 @@ public class APTUtils {
     
     public static boolean isCloseBracket(int ttype) {
         switch (ttype) {
-            case APTTokenTypes.RCURLY:
-            case APTTokenTypes.RPAREN:
-            case APTTokenTypes.RSQUARE:
+            case APTLexer.RCURLY:
+            case APTLexer.RPAREN:
+            case APTLexer.RSQUARE:
                 return true;
             default:
                 return false;
@@ -560,18 +559,18 @@ public class APTUtils {
     
     public static int getMatchBracket(int ttype) {
         switch (ttype) {
-            case APTTokenTypes.RCURLY:
-                return APTTokenTypes.LCURLY;
-            case APTTokenTypes.RPAREN:
-                return APTTokenTypes.LPAREN;
-            case APTTokenTypes.RSQUARE:
-                return APTTokenTypes.LSQUARE;
-            case APTTokenTypes.LCURLY:
-                return APTTokenTypes.RCURLY;
-            case APTTokenTypes.LPAREN:
-                return APTTokenTypes.RPAREN;
-            case APTTokenTypes.LSQUARE:
-                return APTTokenTypes.RSQUARE;
+            case APTLexer.RCURLY:
+                return APTLexer.LCURLY;
+            case APTLexer.RPAREN:
+                return APTLexer.LPAREN;
+            case APTLexer.RSQUARE:
+                return APTLexer.LSQUARE;
+            case APTLexer.LCURLY:
+                return APTLexer.RCURLY;
+            case APTLexer.LPAREN:
+                return APTLexer.RPAREN;
+            case APTLexer.LSQUARE:
+                return APTLexer.RSQUARE;
             default:
                 return APTUtils.EOF_TOKEN.EOF_TYPE;
         }
@@ -579,8 +578,8 @@ public class APTUtils {
     
     public static boolean isEndDirectiveToken(int ttype) {
         switch(ttype) {
-            case APTTokenTypes.END_PREPROC_DIRECTIVE:
-            case APTTokenTypes.EOF:
+            case APTLexer.END_PREPROC_DIRECTIVE:
+            case APTLexer.EOF:
                 return true;
         }
         return false;
@@ -705,19 +704,19 @@ public class APTUtils {
     public static final APTToken DEF_MACRO_BODY; //support "1" as content of #defined tokens without body IZ#122091
     static {
         VA_ARGS_TOKEN = createAPTToken();
-        VA_ARGS_TOKEN.setType(APTTokenTypes.IDENT);
+        VA_ARGS_TOKEN.setType(APTLexer.IDENT);
         VA_ARGS_TOKEN.setText("__VA_ARGS__"); // NOI18N
         
         EMPTY_ID_TOKEN = createAPTToken();
-        EMPTY_ID_TOKEN.setType(APTTokenTypes.IDENT);
+        EMPTY_ID_TOKEN.setType(APTLexer.IDENT);
         EMPTY_ID_TOKEN.setText(""); // NOI18N        
 
-        COMMA_TOKEN = createAPTToken(APTTokenTypes.COMMA);
-        COMMA_TOKEN.setType(APTTokenTypes.COMMA);
+        COMMA_TOKEN = createAPTToken(APTLexer.COMMA);
+        COMMA_TOKEN.setType(APTLexer.COMMA);
         COMMA_TOKEN.setText(","); // NOI18N             
         
         DEF_MACRO_BODY = createAPTToken();
-        DEF_MACRO_BODY.setType(APTTokenTypes.NUMBER);
+        DEF_MACRO_BODY.setType(APTLexer.NUMBER);
         DEF_MACRO_BODY.setText("1"); // NOI18N
     }
     
@@ -788,7 +787,7 @@ public class APTUtils {
         
         @Override
         public int getType() {
-            return APTTokenTypes.EOF;
+            return APTLexer.EOF;
         }
 
         @Override
