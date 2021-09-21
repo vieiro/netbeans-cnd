@@ -48,6 +48,7 @@ import org.netbeans.api.java.source.support.ErrorAwareTreePathScanner;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
+import org.netbeans.api.lexer.TokenUtilities;
 import org.netbeans.modules.editor.indent.spi.Context;
 import org.netbeans.modules.editor.indent.spi.ExtraLock;
 import org.netbeans.modules.editor.indent.spi.ReformatTask;
@@ -593,6 +594,12 @@ public class Reformatter implements ReformatTask {
                     case TreeShims.BINDING_PATTERN:
                         ret = scanBindingPattern(tree, p);
                         break;
+                    case TreeShims.GUARDED_PATTERN:
+                        ret = scanGuardedPattern(tree, p);
+                        break;
+                    case TreeShims.PARENTHESIZED_PATTERN:
+                        ret = scanParenthesizedPattern(tree, p);
+                        break;
                     case TreeShims.RECORD:
                         ret = scanRecord((ClassTree) tree, p);
                         break;
@@ -954,6 +961,11 @@ public class Reformatter implements ReformatTask {
                         wrapToken(cs.wrapExtendsImplementsKeyword(), 1, id == INTERFACE ? EXTENDS : IMPLEMENTS);
                         wrapList(cs.wrapExtendsImplementsList(), cs.alignMultilineImplements(), true, COMMA, impls);
                     }
+                    List<? extends Tree> perms = TreeShims.getPermits(node);
+                    if (perms != null && !perms.isEmpty()) {
+                        wrapToken(cs.wrapExtendsImplementsKeyword(), 1, EXTENDS); 
+                        wrapList(cs.wrapExtendsImplementsList(), cs.alignMultilineImplements(), true, COMMA, perms);
+                    }
                 } finally {
                     continuationIndent = old;
                 }
@@ -1162,8 +1174,21 @@ public class Reformatter implements ReformatTask {
                             space();
                         }
                     } else if (afterAnnotation) {
+                        WrapStyle newWrapStyle = cs.wrapAnnotations();
+                        if (parent instanceof ClassTree) {
+                            for (Tree member : ((ClassTree) parent).getMembers()) {
+                                if (member.getKind().toString().equals(TreeShims.RECORD)) {
+                                    ClassTree cls = (ClassTree) member;
+                                    for (Tree recMember : cls.getMembers()) {
+                                        if (recMember.equals(getCurrentPath().getLeaf())) {
+                                            newWrapStyle = WrapStyle.WRAP_NEVER;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         if (org.netbeans.api.java.source.TreeUtilities.CLASS_TREE_KINDS.contains(parent.getKind()) || parent.getKind() == Tree.Kind.BLOCK) {
-                            switch (cs.wrapAnnotations()) {
+                            switch (newWrapStyle) {
                                 case WRAP_ALWAYS:
                                     newline();
                                     break;
@@ -2790,6 +2815,47 @@ public class Reformatter implements ReformatTask {
             return true;
         }
 
+        private Boolean scanGuardedPattern(Tree node, Void p) {
+            try {
+                Tree gpt = TreeShims.getGuardedPattern(node);
+                if (gpt != null) {
+                    if (scanParenthesizedPattern(gpt, p) == false) {
+                        Name name = TreeShims.getBinding(gpt);
+                        Tree type = TreeShims.getBindingPatternType(gpt);
+                        scan(type, p);
+                        if (name != null) {
+                            removeWhiteSpace(IDENTIFIER);
+                        }
+                    }
+                }
+            } catch (RuntimeException ex) {
+                return false;
+            }
+
+            ExpressionTree exprTree = TreeShims.getGuardedExpression(node);
+            if (exprTree != null) {
+                accept(IDENTIFIER);
+                removeWhiteSpace(IDENTIFIER);
+                scan(exprTree, p);
+            }
+            return true;
+        }
+
+        private Boolean scanParenthesizedPattern(Tree node, Void p) {
+            try {
+                Tree ppt = TreeShims.getParenthesizedPattern(node);
+                if (ppt != null) {
+                    if (scanGuardedPattern(ppt, p) == false) {
+                        scanBindingPattern(ppt, p);
+                    }
+                    removeWhiteSpace(IDENTIFIER);
+                }
+            } catch (RuntimeException ex) {
+                return false;
+            }
+            return true;
+        }
+
         private Boolean handleYield(Tree node, Void p) {
             ExpressionTree exprTree = TreeShims.getYieldValue(node);
             if (exprTree != null) {
@@ -2911,20 +2977,44 @@ public class Reformatter implements ReformatTask {
 
         @Override
         public Boolean visitCase(CaseTree node, Void p) {
-            List<? extends ExpressionTree> exprs = TreeShims.getExpressions(node);
-            if (exprs.size() > 0) {
+            List<? extends Tree> labels = TreeShims.getLabels(node);
+            if (labels != null && labels.size() > 0) {
+                if (tokens.token().id() == JavaTokenId.DEFAULT && labels.get(0).getKind().toString().equals(TreeShims.DEFAULT_CASE_LABEL)) {
+                    accept(DEFAULT);
+                } else {
+                    accept(CASE);
+                    space();
+                    for (Tree label : labels) {
+                        if (label.getKind().toString().equals(TreeShims.DEFAULT_CASE_LABEL)) {
+                            removeWhiteSpace(JavaTokenId.DEFAULT);
+                            accept(DEFAULT);
+                        } else if (label.getKind().toString().equals(TreeShims.BINDING_PATTERN)
+                                || label.getKind().toString().equals(TreeShims.PARENTHESIZED_PATTERN)
+                                || label.getKind().toString().equals(TreeShims.GUARDED_PATTERN)) {
+                            removeWhiteSpace(JavaTokenId.IDENTIFIER);
+                            scan(label, p);
+                        } else if (label.getKind().toString().equals(TreeShims.NULL_LITERAL)) {
+                            removeWhiteSpace(JavaTokenId.NULL);
+                            scan(label, p);
+                        } else {
+                            scan(label, p);
+                        }
+                    }
+                }
+            } else if (TreeShims.getExpressions(node).size() > 0) {
+                List<? extends ExpressionTree> exprs = TreeShims.getExpressions(node);
                 accept(CASE);
                 space();
-                for (ExpressionTree exp : exprs) {
+                exprs.forEach(exp -> {
                     scan(exp, p);
-                }
+                });
             } else {
                 accept(DEFAULT);
             }
             List<? extends StatementTree> statements = node.getStatements();
             Tree caseBody = null;
             if(statements != null)
-            accept(COLON);
+                accept(COLON);
             else {
                 space();
                 accept(ARROW);
@@ -2958,6 +3048,24 @@ public class Reformatter implements ReformatTask {
             }
             indent = old;
             return true;
+        }
+
+        private void removeWhiteSpace(JavaTokenId forToken) {
+            do {
+                if (tokens.offset() >= endPos) {
+                    break;
+                }
+                if (tokens.token().id() == forToken) {
+                    break;
+                }
+                if (tokens.token().id() == WHITESPACE) {
+                    String text = tokens.token().text().toString();
+                    String ind = getIndent();
+                    if (!ind.equals(text)) {
+                        addDiff(new Diff(tokens.offset(), tokens.offset() + tokens.token().length(), " "));
+                    }
+                }
+            } while (tokens.moveNext());
         }
 
         @Override
@@ -3523,6 +3631,21 @@ public class Reformatter implements ReformatTask {
                         if (tokenId.fixedText() != null && tokenId.fixedText().contentEquals(tokens.token().text())) {
                             contains = true;
                             break;
+                        }
+                    }
+                    if (TokenUtilities.textEquals(tokens.token().text(), "sealed") || TokenUtilities.textEquals(tokens.token().text(), "permits")) {
+                        contains = true;
+                    }
+                    if (TokenUtilities.textEquals(tokens.token().text(), "non") && tokens.moveNext()) {
+                        if (TokenUtilities.textEquals(tokens.token().text(), "-") && tokens.moveNext()) {
+                            if (TokenUtilities.textEquals(tokens.token().text(), "sealed")) {// NOI18N
+                                contains = true;
+                            } else {
+                                tokens.movePrevious();
+                                tokens.movePrevious();
+                            }
+                        } else {
+                            tokens.movePrevious();
                         }
                     }
                 }
@@ -5604,4 +5727,3 @@ public class Reformatter implements ReformatTask {
         }
     }
 }
-

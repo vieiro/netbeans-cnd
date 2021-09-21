@@ -1,5 +1,5 @@
 #Signature file v4.1
-#Version 1.91
+#Version 1.95
 
 CLSS public abstract interface java.io.Serializable
 
@@ -21,7 +21,6 @@ meth public final java.lang.String name()
 meth public java.lang.String toString()
 meth public static <%0 extends java.lang.Enum<{%%0}>> {%%0} valueOf(java.lang.Class<{%%0}>,java.lang.String)
 supr java.lang.Object
-hfds name,ordinal
 
 CLSS public abstract interface !annotation java.lang.FunctionalInterface
  anno 0 java.lang.annotation.Documented()
@@ -781,7 +780,7 @@ meth public void enableFeature(org.netbeans.modules.css.lib.api.properties.Gramm
 meth public void removeGrammarResolverListener(org.netbeans.modules.css.lib.api.properties.GrammarResolverListener)
 meth public void setFeature(org.netbeans.modules.css.lib.api.properties.GrammarResolver$Feature,java.lang.Object)
 supr java.lang.Object
-hfds FEATURES,LISTENERS,LOG,LOGGER,LOGGERS,grammar,lastResolved,resolvedSomething,resolvedTokens,tokenizer
+hfds FEATURES,LISTENERS,LOG,LOGGER,LOGGERS,globalValues,grammar,lastResolved,resolvedSomething,resolvedTokens,tokenizer
 hcls InputState
 
 CLSS public final static !enum org.netbeans.modules.css.lib.api.properties.GrammarResolver$Feature
@@ -1050,6 +1049,7 @@ innr public static Angle
 innr public static Anything
 innr public static Date
 innr public static Decibel
+innr public static Flex
 innr public static Frequency
 innr public static HashColor
 innr public static HashColorAplha
@@ -1095,6 +1095,13 @@ meth public boolean accepts(java.lang.String)
 supr org.netbeans.modules.css.lib.api.properties.TokenAcceptor$TokenImageAcceptor
 
 CLSS public static org.netbeans.modules.css.lib.api.properties.TokenAcceptor$Decibel
+ outer org.netbeans.modules.css.lib.api.properties.TokenAcceptor
+cons public init(java.lang.String)
+meth protected java.util.List<java.lang.String> postfixes()
+supr org.netbeans.modules.css.lib.api.properties.TokenAcceptor$NumberPostfixAcceptor
+hfds POSTFIXES
+
+CLSS public static org.netbeans.modules.css.lib.api.properties.TokenAcceptor$Flex
  outer org.netbeans.modules.css.lib.api.properties.TokenAcceptor
 cons public init(java.lang.String)
 meth protected java.util.List<java.lang.String> postfixes()

@@ -19,29 +19,70 @@
 
 package org.netbeans.modules.cpplite.debugger;
 
+import java.io.File;
 import java.util.List;
+
+import org.netbeans.api.annotations.common.NullAllowed;
 
 /**
  *
  * @author lahvac
  */
-public class CPPLiteDebuggerConfig {
+public final class CPPLiteDebuggerConfig {
 
     private final List<String> executable;
+    private final File directory;
+    @NullAllowed
+    private final Long processId;
+    private final String debugger;
 
-    public CPPLiteDebuggerConfig(List<String> executable) {
+    public CPPLiteDebuggerConfig(List<String> executable, File directory, @NullAllowed Long processId, String debugger) {
         this.executable = executable;
-    }
-    
-    public String getDisplayName() {
-        return "XXX: displayName";
+        this.directory = directory;
+        this.processId = processId;
+        this.debugger = debugger;
     }
 
-    public String getDebuggingName() {
-        return "XXX: debugging name (debug)";
+    public String getDisplayName() {
+        return (!executable.isEmpty()) ? executable.get(0) : "<empty>";
     }
-    
+
+    /**
+     * Get the executable with arguments.
+     */
     public List<String> getExecutable() {
         return executable;
+    }
+
+    /**
+     * Get the directory in which the executable command is to be launched.
+     */
+    public File getDirectory() {
+        return directory;
+    }
+
+    /**
+     * Check if debugger should attach to a running process. Get the process ID
+     * from {@link #getAttachProcessId()}.
+     */
+    public boolean isAttach() {
+        return processId != null;
+    }
+
+    /**
+     * Get the process ID to attach to.
+     *
+     * @return the process ID
+     * @throws IllegalStateException when {@link #isAttach()} is false.
+     */
+    public long getAttachProcessId() {
+        if (processId == null) {
+            throw new IllegalStateException("No process to attach to.");
+        }
+        return processId;
+    }
+
+    public String getDebugger() {
+        return debugger;
     }
 }

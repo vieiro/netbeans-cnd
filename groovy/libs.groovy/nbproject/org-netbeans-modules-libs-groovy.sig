@@ -1,5 +1,5 @@
 #Signature file v4.1
-#Version 2.6
+#Version 2.10
 
 CLSS public abstract interface groovy.lang.AdaptingMetaClass
 intf groovy.lang.MetaClass
@@ -1110,6 +1110,7 @@ meth public java.lang.String toString()
 meth public java.util.Iterator<java.lang.Comparable> iterator()
 meth public java.util.List<java.lang.Comparable> step(int)
 meth public java.util.List<java.lang.Comparable> subList(int,int)
+meth public org.codehaus.groovy.runtime.RangeInfo subListBorders(int)
 meth public void step(int,groovy.lang.Closure)
 supr java.util.AbstractList<java.lang.Comparable>
 hfds from,hashCodeCache,inclusive,reverse,size,stepSize,to
@@ -4377,7 +4378,6 @@ meth public void write(char[],int,int) throws java.io.IOException
 meth public void write(int) throws java.io.IOException
 meth public void write(java.lang.String,int,int) throws java.io.IOException
 supr java.io.Writer
-hfds se
 
 CLSS public java.io.PrintWriter
 cons public init(java.io.File) throws java.io.FileNotFoundException
@@ -4426,7 +4426,6 @@ meth public void write(int)
 meth public void write(java.lang.String)
 meth public void write(java.lang.String,int,int)
 supr java.io.Writer
-hfds autoFlush,formatter,lineSeparator,psOut,trouble
 
 CLSS public abstract interface java.io.Serializable
 
@@ -4448,7 +4447,6 @@ meth public void write(int) throws java.io.IOException
 meth public void write(java.lang.String) throws java.io.IOException
 meth public void write(java.lang.String,int,int) throws java.io.IOException
 supr java.lang.Object
-hfds WRITE_BUFFER_SIZE,writeBuffer
 
 CLSS public abstract interface java.lang.Appendable
 meth public abstract java.lang.Appendable append(char) throws java.io.IOException
@@ -4466,7 +4464,6 @@ cons public init(java.lang.Object)
 cons public init(java.lang.String,java.lang.Throwable)
 cons public init(long)
 supr java.lang.Error
-hfds serialVersionUID
 
 CLSS public abstract interface java.lang.AutoCloseable
 meth public abstract void close() throws java.lang.Exception
@@ -4515,8 +4512,6 @@ meth public void setClassAssertionStatus(java.lang.String,boolean)
 meth public void setDefaultAssertionStatus(boolean)
 meth public void setPackageAssertionStatus(java.lang.String,boolean)
 supr java.lang.Object
-hfds assertionLock,classAssertionStatus,classes,defaultAssertionStatus,defaultDomain,loadedLibraryNames,nativeLibraries,nativeLibraryContext,nocerts,package2certs,packageAssertionStatus,packages,parallelLockMap,parent,scl,sclSet,sys_paths,systemNativeLibraries,usr_paths
-hcls NativeLibrary,ParallelLoaders
 
 CLSS public abstract interface java.lang.Cloneable
 
@@ -4544,7 +4539,6 @@ meth public final java.lang.String name()
 meth public java.lang.String toString()
 meth public static <%0 extends java.lang.Enum<{%%0}>> {%%0} valueOf(java.lang.Class<{%%0}>,java.lang.String)
 supr java.lang.Object
-hfds name,ordinal
 
 CLSS public java.lang.Error
 cons protected init(java.lang.String,java.lang.Throwable,boolean,boolean)
@@ -4553,7 +4547,6 @@ cons public init(java.lang.String)
 cons public init(java.lang.String,java.lang.Throwable)
 cons public init(java.lang.Throwable)
 supr java.lang.Throwable
-hfds serialVersionUID
 
 CLSS public java.lang.Exception
 cons protected init(java.lang.String,java.lang.Throwable,boolean,boolean)
@@ -4562,7 +4555,6 @@ cons public init(java.lang.String)
 cons public init(java.lang.String,java.lang.Throwable)
 cons public init(java.lang.Throwable)
 supr java.lang.Throwable
-hfds serialVersionUID
 
 CLSS public abstract interface !annotation java.lang.FunctionalInterface
  anno 0 java.lang.annotation.Documented()
@@ -4574,7 +4566,6 @@ CLSS public java.lang.IndexOutOfBoundsException
 cons public init()
 cons public init(java.lang.String)
 supr java.lang.RuntimeException
-hfds serialVersionUID
 
 CLSS public abstract interface java.lang.Iterable<%0 extends java.lang.Object>
 meth public abstract java.util.Iterator<{java.lang.Iterable%0}> iterator()
@@ -4606,7 +4597,6 @@ cons public init(java.lang.String)
 cons public init(java.lang.String,java.lang.Throwable)
 cons public init(java.lang.Throwable)
 supr java.lang.Exception
-hfds serialVersionUID
 
 CLSS public java.lang.Throwable
 cons protected init(java.lang.String,java.lang.Throwable,boolean,boolean)
@@ -4629,8 +4619,6 @@ meth public void printStackTrace(java.io.PrintStream)
 meth public void printStackTrace(java.io.PrintWriter)
 meth public void setStackTrace(java.lang.StackTraceElement[])
 supr java.lang.Object
-hfds CAUSE_CAPTION,EMPTY_THROWABLE_ARRAY,NULL_CAUSE_MESSAGE,SELF_SUPPRESSION_MESSAGE,SUPPRESSED_CAPTION,SUPPRESSED_SENTINEL,UNASSIGNED_STACK,backtrace,cause,detailMessage,serialVersionUID,stackTrace,suppressedExceptions
-hcls PrintStreamOrWriter,SentinelHolder,WrappedPrintStream,WrappedPrintWriter
 
 CLSS public abstract interface java.lang.annotation.Annotation
 meth public abstract boolean equals(java.lang.Object)
@@ -4675,7 +4663,6 @@ meth public static java.net.URLClassLoader newInstance(java.net.URL[])
 meth public static java.net.URLClassLoader newInstance(java.net.URL[],java.lang.ClassLoader)
 meth public void close() throws java.io.IOException
 supr java.security.SecureClassLoader
-hfds acc,closeables,ucp
 
 CLSS public java.security.SecureClassLoader
 cons protected init()
@@ -4684,7 +4671,6 @@ meth protected final java.lang.Class<?> defineClass(java.lang.String,byte[],int,
 meth protected final java.lang.Class<?> defineClass(java.lang.String,java.nio.ByteBuffer,java.security.CodeSource)
 meth protected java.security.PermissionCollection getPermissions(java.security.CodeSource)
 supr java.lang.ClassLoader
-hfds debug,initialized,pdcache
 
 CLSS public abstract java.util.AbstractCollection<%0 extends java.lang.Object>
 cons protected init()
@@ -4704,7 +4690,6 @@ meth public java.lang.Object[] toArray()
 meth public java.lang.String toString()
 meth public void clear()
 supr java.lang.Object
-hfds MAX_ARRAY_SIZE
 
 CLSS public abstract java.util.AbstractList<%0 extends java.lang.Object>
 cons protected init()
@@ -4727,7 +4712,6 @@ meth public void clear()
 meth public {java.util.AbstractList%0} remove(int)
 meth public {java.util.AbstractList%0} set(int,{java.util.AbstractList%0})
 supr java.util.AbstractCollection<{java.util.AbstractList%0}>
-hcls Itr,ListItr
 
 CLSS public abstract java.util.AbstractMap<%0 extends java.lang.Object, %1 extends java.lang.Object>
 cons protected init()
@@ -4751,7 +4735,6 @@ meth public {java.util.AbstractMap%1} get(java.lang.Object)
 meth public {java.util.AbstractMap%1} put({java.util.AbstractMap%0},{java.util.AbstractMap%1})
 meth public {java.util.AbstractMap%1} remove(java.lang.Object)
 supr java.lang.Object
-hfds keySet,values
 
 CLSS public java.util.ArrayList<%0 extends java.lang.Object>
 cons public init()
@@ -4793,8 +4776,6 @@ meth public {java.util.ArrayList%0} get(int)
 meth public {java.util.ArrayList%0} remove(int)
 meth public {java.util.ArrayList%0} set(int,{java.util.ArrayList%0})
 supr java.util.AbstractList<{java.util.ArrayList%0}>
-hfds DEFAULTCAPACITY_EMPTY_ELEMENTDATA,DEFAULT_CAPACITY,EMPTY_ELEMENTDATA,MAX_ARRAY_SIZE,elementData,serialVersionUID,size
-hcls ArrayListSpliterator,Itr,ListItr,SubList
 
 CLSS public abstract interface java.util.Collection<%0 extends java.lang.Object>
 intf java.lang.Iterable<{java.util.Collection%0}>
@@ -4859,7 +4840,6 @@ intf java.io.Serializable
 meth public java.lang.Object getSource()
 meth public java.lang.String toString()
 supr java.lang.Object
-hfds serialVersionUID
 
 CLSS public java.util.HashMap<%0 extends java.lang.Object, %1 extends java.lang.Object>
 cons public init()
@@ -4894,8 +4874,6 @@ meth public {java.util.HashMap%1} putIfAbsent({java.util.HashMap%0},{java.util.H
 meth public {java.util.HashMap%1} remove(java.lang.Object)
 meth public {java.util.HashMap%1} replace({java.util.HashMap%0},{java.util.HashMap%1})
 supr java.util.AbstractMap<{java.util.HashMap%0},{java.util.HashMap%1}>
-hfds DEFAULT_INITIAL_CAPACITY,DEFAULT_LOAD_FACTOR,MAXIMUM_CAPACITY,MIN_TREEIFY_CAPACITY,TREEIFY_THRESHOLD,UNTREEIFY_THRESHOLD,entrySet,loadFactor,modCount,serialVersionUID,size,table,threshold
-hcls EntryIterator,EntrySet,EntrySpliterator,HashIterator,HashMapSpliterator,KeyIterator,KeySet,KeySpliterator,Node,TreeNode,ValueIterator,ValueSpliterator,Values
 
 CLSS public java.util.Hashtable<%0 extends java.lang.Object, %1 extends java.lang.Object>
 cons public init()
@@ -4937,8 +4915,6 @@ meth public {java.util.Hashtable%1} putIfAbsent({java.util.Hashtable%0},{java.ut
 meth public {java.util.Hashtable%1} remove(java.lang.Object)
 meth public {java.util.Hashtable%1} replace({java.util.Hashtable%0},{java.util.Hashtable%1})
 supr java.util.Dictionary<{java.util.Hashtable%0},{java.util.Hashtable%1}>
-hfds ENTRIES,KEYS,MAX_ARRAY_SIZE,VALUES,count,entrySet,keySet,loadFactor,modCount,serialVersionUID,table,threshold,values
-hcls Entry,EntrySet,Enumerator,KeySet,ValueCollection
 
 CLSS public abstract interface java.util.Iterator<%0 extends java.lang.Object>
 meth public abstract boolean hasNext()
@@ -7063,7 +7039,6 @@ cons public init(org.codehaus.groovy.ast.expr.Expression,org.codehaus.groovy.ast
 meth public boolean isDynamic()
 meth public java.lang.Class getTypeClass()
 meth public java.lang.String getText()
-meth public org.codehaus.groovy.ast.ClassNode getType()
 meth public org.codehaus.groovy.ast.expr.Expression getExpression()
 meth public org.codehaus.groovy.ast.expr.Expression getMethodName()
 meth public org.codehaus.groovy.ast.expr.Expression transformExpression(org.codehaus.groovy.ast.expr.ExpressionTransformer)
@@ -7636,6 +7611,9 @@ meth public static org.codehaus.groovy.ast.expr.VariableExpression varX(java.lan
 meth public static org.codehaus.groovy.ast.expr.VariableExpression varX(org.codehaus.groovy.ast.Variable)
 meth public static org.codehaus.groovy.ast.stmt.BlockStatement block(org.codehaus.groovy.ast.VariableScope,java.util.List<org.codehaus.groovy.ast.stmt.Statement>)
 meth public static org.codehaus.groovy.ast.stmt.CatchStatement catchS(org.codehaus.groovy.ast.Parameter,org.codehaus.groovy.ast.stmt.Statement)
+meth public static org.codehaus.groovy.ast.stmt.IfStatement ifElseS(org.codehaus.groovy.ast.expr.Expression,org.codehaus.groovy.ast.stmt.Statement,org.codehaus.groovy.ast.stmt.Statement)
+meth public static org.codehaus.groovy.ast.stmt.IfStatement ifS(org.codehaus.groovy.ast.expr.Expression,org.codehaus.groovy.ast.expr.Expression)
+meth public static org.codehaus.groovy.ast.stmt.IfStatement ifS(org.codehaus.groovy.ast.expr.Expression,org.codehaus.groovy.ast.stmt.Statement)
 meth public static org.codehaus.groovy.ast.stmt.Statement assignNullS(org.codehaus.groovy.ast.expr.Expression)
 meth public static org.codehaus.groovy.ast.stmt.Statement assignS(org.codehaus.groovy.ast.expr.Expression,org.codehaus.groovy.ast.expr.Expression)
 meth public static org.codehaus.groovy.ast.stmt.Statement createConstructorStatementDefault(org.codehaus.groovy.ast.FieldNode)
@@ -7644,9 +7622,6 @@ meth public static org.codehaus.groovy.ast.stmt.Statement ctorSuperS(org.codehau
 meth public static org.codehaus.groovy.ast.stmt.Statement ctorThisS()
 meth public static org.codehaus.groovy.ast.stmt.Statement ctorThisS(org.codehaus.groovy.ast.expr.Expression)
 meth public static org.codehaus.groovy.ast.stmt.Statement declS(org.codehaus.groovy.ast.expr.Expression,org.codehaus.groovy.ast.expr.Expression)
-meth public static org.codehaus.groovy.ast.stmt.Statement ifElseS(org.codehaus.groovy.ast.expr.Expression,org.codehaus.groovy.ast.stmt.Statement,org.codehaus.groovy.ast.stmt.Statement)
-meth public static org.codehaus.groovy.ast.stmt.Statement ifS(org.codehaus.groovy.ast.expr.Expression,org.codehaus.groovy.ast.expr.Expression)
-meth public static org.codehaus.groovy.ast.stmt.Statement ifS(org.codehaus.groovy.ast.expr.Expression,org.codehaus.groovy.ast.stmt.Statement)
 meth public static org.codehaus.groovy.ast.stmt.Statement returnS(org.codehaus.groovy.ast.expr.Expression)
 meth public static org.codehaus.groovy.ast.stmt.Statement safeExpression(org.codehaus.groovy.ast.expr.Expression,org.codehaus.groovy.ast.expr.Expression)
 meth public static org.codehaus.groovy.ast.stmt.Statement stmt(org.codehaus.groovy.ast.expr.Expression)
@@ -7780,7 +7755,9 @@ meth public org.codehaus.groovy.classgen.asm.WriterController getController()
 meth public org.codehaus.groovy.control.SourceUnit getSourceUnit()
 meth public static boolean containsSpreadExpression(org.codehaus.groovy.ast.expr.Expression)
 meth public static boolean isNullConstant(org.codehaus.groovy.ast.expr.Expression)
+ anno 0 java.lang.Deprecated()
 meth public static boolean isThisExpression(org.codehaus.groovy.ast.expr.Expression)
+ anno 0 java.lang.Deprecated()
 meth public static boolean samePackages(java.lang.String,java.lang.String)
 meth public static int argumentSize(org.codehaus.groovy.ast.expr.Expression)
 meth public static org.codehaus.groovy.ast.FieldNode getDeclaredFieldOfCurrentClassOrAccessibleFieldOfSuper(org.codehaus.groovy.ast.ClassNode,org.codehaus.groovy.ast.ClassNode,java.lang.String,boolean)
@@ -8007,7 +7984,7 @@ meth public void visitConstructorCallExpression(org.codehaus.groovy.ast.expr.Con
 meth public void visitField(org.codehaus.groovy.ast.FieldNode)
 meth public void visitProperty(org.codehaus.groovy.ast.PropertyNode)
 supr org.codehaus.groovy.classgen.InnerClassVisitorHelper
-hfds PUBLIC_SYNTHETIC,classNode,currentField,currentMethod,inClosure,processingObjInitStatements,sourceUnit,thisField
+hfds classNode,currentField,currentMethod,inClosure,processingObjInitStatements,sourceUnit
 
 CLSS public abstract org.codehaus.groovy.classgen.InnerClassVisitorHelper
 cons public init()
@@ -8041,7 +8018,6 @@ cons public init(org.codehaus.groovy.control.SourceUnit,boolean)
 meth protected org.codehaus.groovy.control.SourceUnit getSourceUnit()
 meth protected void visitConstructorOrMethod(org.codehaus.groovy.ast.MethodNode,boolean)
 meth public void prepareVisit(org.codehaus.groovy.ast.ClassNode)
-meth public void visitAnnotations(org.codehaus.groovy.ast.AnnotatedNode)
 meth public void visitBinaryExpression(org.codehaus.groovy.ast.expr.BinaryExpression)
 meth public void visitBlockStatement(org.codehaus.groovy.ast.stmt.BlockStatement)
 meth public void visitCatchStatement(org.codehaus.groovy.ast.stmt.CatchStatement)
@@ -8058,7 +8034,7 @@ meth public void visitProperty(org.codehaus.groovy.ast.PropertyNode)
 meth public void visitPropertyExpression(org.codehaus.groovy.ast.expr.PropertyExpression)
 meth public void visitVariableExpression(org.codehaus.groovy.ast.expr.VariableExpression)
 supr org.codehaus.groovy.ast.ClassCodeVisitorSupport
-hfds currentClass,currentScope,headScope,inConstructor,isSpecialConstructorCall,recurseInnerClasses,source,stateStack
+hfds currentClass,currentScope,inConstructor,inSpecialConstructorCall,recurseInnerClasses,source,stateStack
 hcls StateStackElement
 
 CLSS public org.codehaus.groovy.classgen.Verifier
@@ -8827,14 +8803,32 @@ meth public boolean isClosuresAllowed()
 meth public boolean isIndirectImportCheckEnabled()
 meth public boolean isMethodDefinitionAllowed()
 meth public boolean isPackageAllowed()
+meth public java.util.List<java.lang.Class<? extends org.codehaus.groovy.ast.expr.Expression>> getAllowedExpressions()
+meth public java.util.List<java.lang.Class<? extends org.codehaus.groovy.ast.expr.Expression>> getDisallowedExpressions()
 meth public java.util.List<java.lang.Class<? extends org.codehaus.groovy.ast.expr.Expression>> getExpressionsBlacklist()
 meth public java.util.List<java.lang.Class<? extends org.codehaus.groovy.ast.expr.Expression>> getExpressionsWhitelist()
+meth public java.util.List<java.lang.Class<? extends org.codehaus.groovy.ast.stmt.Statement>> getAllowedStatements()
+meth public java.util.List<java.lang.Class<? extends org.codehaus.groovy.ast.stmt.Statement>> getDisallowedStatements()
 meth public java.util.List<java.lang.Class<? extends org.codehaus.groovy.ast.stmt.Statement>> getStatementsBlacklist()
 meth public java.util.List<java.lang.Class<? extends org.codehaus.groovy.ast.stmt.Statement>> getStatementsWhitelist()
+meth public java.util.List<java.lang.Integer> getAllowedTokens()
+meth public java.util.List<java.lang.Integer> getDisallowedTokens()
 meth public java.util.List<java.lang.Integer> getTokensBlacklist()
 meth public java.util.List<java.lang.Integer> getTokensWhitelist()
+meth public java.util.List<java.lang.String> getAllowedConstantTypes()
+meth public java.util.List<java.lang.String> getAllowedImports()
+meth public java.util.List<java.lang.String> getAllowedReceivers()
+meth public java.util.List<java.lang.String> getAllowedStarImports()
+meth public java.util.List<java.lang.String> getAllowedStaticImports()
+meth public java.util.List<java.lang.String> getAllowedStaticStarImports()
 meth public java.util.List<java.lang.String> getConstantTypesBlackList()
 meth public java.util.List<java.lang.String> getConstantTypesWhiteList()
+meth public java.util.List<java.lang.String> getDisallowedConstantTypes()
+meth public java.util.List<java.lang.String> getDisallowedImports()
+meth public java.util.List<java.lang.String> getDisallowedReceivers()
+meth public java.util.List<java.lang.String> getDisallowedStarImports()
+meth public java.util.List<java.lang.String> getDisallowedStaticImports()
+meth public java.util.List<java.lang.String> getDisallowedStaticStarImports()
 meth public java.util.List<java.lang.String> getImportsBlacklist()
 meth public java.util.List<java.lang.String> getImportsWhitelist()
 meth public java.util.List<java.lang.String> getReceiversBlackList()
@@ -8846,11 +8840,32 @@ meth public java.util.List<java.lang.String> getStaticImportsWhitelist()
 meth public java.util.List<java.lang.String> getStaticStarImportsBlacklist()
 meth public java.util.List<java.lang.String> getStaticStarImportsWhitelist()
 meth public void call(org.codehaus.groovy.control.SourceUnit,org.codehaus.groovy.classgen.GeneratorContext,org.codehaus.groovy.ast.ClassNode)
+meth public void setAllowedConstantTypes(java.util.List<java.lang.String>)
+meth public void setAllowedConstantTypesClasses(java.util.List<java.lang.Class>)
+meth public void setAllowedExpressions(java.util.List<java.lang.Class<? extends org.codehaus.groovy.ast.expr.Expression>>)
+meth public void setAllowedImports(java.util.List<java.lang.String>)
+meth public void setAllowedReceivers(java.util.List<java.lang.String>)
+meth public void setAllowedReceiversClasses(java.util.List<java.lang.Class>)
+meth public void setAllowedStarImports(java.util.List<java.lang.String>)
+meth public void setAllowedStatements(java.util.List<java.lang.Class<? extends org.codehaus.groovy.ast.stmt.Statement>>)
+meth public void setAllowedStaticImports(java.util.List<java.lang.String>)
+meth public void setAllowedStaticStarImports(java.util.List<java.lang.String>)
+meth public void setAllowedTokens(java.util.List<java.lang.Integer>)
 meth public void setClosuresAllowed(boolean)
 meth public void setConstantTypesBlackList(java.util.List<java.lang.String>)
 meth public void setConstantTypesClassesBlackList(java.util.List<java.lang.Class>)
 meth public void setConstantTypesClassesWhiteList(java.util.List<java.lang.Class>)
 meth public void setConstantTypesWhiteList(java.util.List<java.lang.String>)
+meth public void setDisallowedConstantTypesClasses(java.util.List<java.lang.Class>)
+meth public void setDisallowedExpressions(java.util.List<java.lang.Class<? extends org.codehaus.groovy.ast.expr.Expression>>)
+meth public void setDisallowedImports(java.util.List<java.lang.String>)
+meth public void setDisallowedReceivers(java.util.List<java.lang.String>)
+meth public void setDisallowedReceiversClasses(java.util.List<java.lang.Class>)
+meth public void setDisallowedStarImports(java.util.List<java.lang.String>)
+meth public void setDisallowedStatements(java.util.List<java.lang.Class<? extends org.codehaus.groovy.ast.stmt.Statement>>)
+meth public void setDisallowedStaticImports(java.util.List<java.lang.String>)
+meth public void setDisallowedStaticStarImports(java.util.List<java.lang.String>)
+meth public void setDisallowedTokens(java.util.List<java.lang.Integer>)
 meth public void setExpressionsBlacklist(java.util.List<java.lang.Class<? extends org.codehaus.groovy.ast.expr.Expression>>)
 meth public void setExpressionsWhitelist(java.util.List<java.lang.Class<? extends org.codehaus.groovy.ast.expr.Expression>>)
 meth public void setImportsBlacklist(java.util.List<java.lang.String>)
@@ -8873,7 +8888,7 @@ meth public void setStaticStarImportsWhitelist(java.util.List<java.lang.String>)
 meth public void setTokensBlacklist(java.util.List<java.lang.Integer>)
 meth public void setTokensWhitelist(java.util.List<java.lang.Integer>)
 supr org.codehaus.groovy.control.customizers.CompilationCustomizer
-hfds constantTypesBlackList,constantTypesWhiteList,expressionCheckers,expressionsBlacklist,expressionsWhitelist,importsBlacklist,importsWhitelist,isClosuresAllowed,isIndirectImportCheckEnabled,isMethodDefinitionAllowed,isPackageAllowed,receiversBlackList,receiversWhiteList,starImportsBlacklist,starImportsWhitelist,statementCheckers,statementsBlacklist,statementsWhitelist,staticImportsBlacklist,staticImportsWhitelist,staticStarImportsBlacklist,staticStarImportsWhitelist,tokensBlacklist,tokensWhitelist
+hfds allowedConstantTypes,allowedExpressions,allowedImports,allowedReceivers,allowedStarImports,allowedStatements,allowedStaticImports,allowedStaticStarImports,allowedTokens,disallowedConstantTypes,disallowedExpressions,disallowedImports,disallowedReceivers,disallowedStarImports,disallowedStatements,disallowedStaticImports,disallowedStaticStarImports,disallowedTokens,expressionCheckers,isClosuresAllowed,isIndirectImportCheckEnabled,isMethodDefinitionAllowed,isPackageAllowed,statementCheckers
 hcls SecuringCodeVisitor
 
 CLSS public abstract interface static org.codehaus.groovy.control.customizers.SecureASTCustomizer$ExpressionChecker
@@ -10714,7 +10729,7 @@ meth public void visitUnaryPlusExpression(org.codehaus.groovy.ast.expr.UnaryPlus
 meth public void visitVariableExpression(org.codehaus.groovy.ast.expr.VariableExpression)
 meth public void visitWhileLoop(org.codehaus.groovy.ast.stmt.WhileStatement)
 supr org.codehaus.groovy.ast.ClassCodeVisitorSupport
-hfds DEBUG_GENERATED_CODE,EMPTY_STRING_ARRAY,UNIQUE_LONG
+hfds CLOSURE_IMPLICIT_VARIABLE_SET,DEBUG_GENERATED_CODE,EMPTY_STRING_ARRAY,UNIQUE_LONG
 hcls ExtensionMethodDeclaringClass,ParameterVariableExpression,SetterInfo
 
 CLSS public static org.codehaus.groovy.transform.stc.StaticTypeCheckingVisitor$SignatureCodecFactory

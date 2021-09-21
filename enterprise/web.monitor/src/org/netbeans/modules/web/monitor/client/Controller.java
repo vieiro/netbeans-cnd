@@ -927,7 +927,7 @@ class Controller  {
 	}
 
 	Enumeration e = null;
-	Vector nodes = new Vector(); 
+	Vector<TransactionNode> nodes = new Vector<>(); 
 	int numtns = 0;
 	TransactionNode[] tns = null;
 	FileObject fo = null;
@@ -959,7 +959,7 @@ class Controller  {
 	}
         RequestProcessor.getDefault().post(new Runnable () {
             public void run() {
-                for (Iterator it = fileObjectsToDelete.iterator(); it.hasNext(); ) {
+                for (Iterator<FileObject> it = fileObjectsToDelete.iterator(); it.hasNext(); ) {
                     try {
                         ((FileObject) it.next()).delete();
                     } catch (IOException e) {
@@ -977,7 +977,7 @@ class Controller  {
 
 
 	savedTrans.remove(savedTrans.getNodes());
-	nodes = new Vector();
+	nodes = new Vector<>();
 	e = saveDir.getData(false);
 	while(e.hasMoreElements()) {
 
