@@ -24,9 +24,9 @@ package org.netbeans.modules.cpplite.editor.file;
  */
 public class MIMETypes {
 
-    public static final String C = "text/X-c";
-    public static final String H = "text/X-h";
-    public static final String CPP = "text/X-c++";
-    public static final String HPP = "text/X-h++";
+    public static final String C = "text/x-c";
+    public static final String H = "text/x-h";
+    public static final String CPP = "text/x-c++";
+    public static final String HPP = "text/x-h++";
 
 }

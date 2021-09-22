@@ -61,8 +61,8 @@ public abstract class SourceDataObject extends MultiDataObject implements Instan
             ic = new InstanceContent();
             ic.add(this);
             ic.add(getPrimaryFile());
-            ic.add(this, CppEditorSupportProvider.staticFactory);
-            ic.add(this, CppEditorSupportProvider.saveAsStaticFactory);
+            // VIEIRO: Disabled ic.add(this, CppEditorSupportProvider.staticFactory);
+            // VIEIRO: Disabled ic.add(this, CppEditorSupportProvider.saveAsStaticFactory);
             CndCookieProvider.getDefault().addLookup(this);
             myLookup = new AbstractLookup(ic);
         }
