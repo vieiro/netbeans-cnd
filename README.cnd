@@ -1,0 +1,16 @@
+Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements; and to You under the Apache License, Version 2.0.
+
+C/C++ Support
+-------------
+
+See https://cwiki.apache.org/confluence/display/NETBEANS/4th+and+5th+donations
+for details on how the C/C++ support donated by Oracle has been incorporated to
+Apache NetBeans.
+
+Building
+--------
+
+To build the C/C++ support, invoke:
+
+ant -Dcluster.config=cnd
+

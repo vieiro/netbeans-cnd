@@ -86,6 +86,9 @@ extide/gradle/external/gradle-7.3-bin.zip platform/libs.junit4/external/junit-4.
 extide/gradle/external/gradle-7.3-bin.zip platform/libs.testng/external/jcommander-1.78.jar
 extide/gradle/external/gradle-7.3-bin.zip platform/o.apache.commons.io/external/commons-io-2.6.jar
 
+# cnd/libs.clank uses a zip file that is expanded at compile time into different jar files.
+cnd/libs.clank/external/clank_0.3.9.zip cnd/libs.clank/external/clank_0.3.9.zip
+
 # These are the endorsed version of the javaee apis and create libraries, so they are better kept separate
 enterprise/javaee.api/external/javax.annotation-api-1.2.jar enterprise/javaee7.api/external/javax.annotation-api-1.2.jar
 enterprise/javaee7.api/external/javax.annotation-api-1.2.jar java/maven.indexer/external/javax.annotation-api-1.2.jar
@@ -124,3 +127,4 @@ harness/apisupport.harness/external/launcher-12.5-distribution.zip platform/o.n.
 # only one is part of the product:
 java/libs.javacapi/external/nb-javac-jdk-17.0.1-ga-api.jar java/libs.nbjavacapi/external/nb-javac-jdk-17.0.1-ga-api.jar
 java/libs.javacapi/external/nb-javac-jdk-17.0.1-ga.jar java/libs.nbjavacapi/external/nb-javac-jdk-17.0.1-ga.jar
+
