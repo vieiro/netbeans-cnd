@@ -45,12 +45,11 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.AccessControlException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -268,12 +267,22 @@ final class FileChooserUIImpl extends BasicFileChooserUI{
 
     private final char fileSeparatorChar;
 
+    private final Method changeDirectoryInBasicFileChooserUI;
+
     public FileChooserUIImpl(FileChooserBuilder.JFileChooserEx filechooser) {
         super(filechooser);
         approveSelectionAction = new ApproveSelectionAction();
         changeToParentDirectoryAction = new ChangeToParentDirectoryAction();
         cancelSelectionAction = new CancelSelectionAction();
         fileSeparatorChar = filechooser.getFileSeparatorChar();
+        Method basicFileChooserUIChangeDirectory = null;
+        try {
+            basicFileChooserUIChangeDirectory = BasicFileChooserUI.class.getDeclaredMethod("changeDirectory", java.io.File.class);
+            basicFileChooserUIChangeDirectory.setAccessible(true);
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        this.changeDirectoryInBasicFileChooserUI = basicFileChooserUIChangeDirectory;
     }
 
     @Override
@@ -3258,7 +3267,7 @@ final class FileChooserUIImpl extends BasicFileChooserUI{
                 File dir = getDirectory();
                 if (dir != null) {
                     dir = dir.toPath().normalize().toFile();
-                    changeDirectory(dir);
+                    changeDirectoryImplementation(dir);
                     return;
                 }
             }
@@ -3426,7 +3435,7 @@ final class FileChooserUIImpl extends BasicFileChooserUI{
                 // check for wildcard pattern
                 FileFilter currentFilter = chooser.getFileFilter();
                 if (!isSlectedFileExists && isGlobPattern(filename)) {
-                    changeDirectory(selectedFile.getParentFile());
+                    changeDirectoryImplementation(selectedFile.getParentFile());
                     if (globFilter == null) {
                         globFilter = new GlobFilter();
                     }
@@ -3452,7 +3461,7 @@ final class FileChooserUIImpl extends BasicFileChooserUI{
                         Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()) != 0);
 
                 if (isDir && isTrav && (isCtrl || !isDirSelEnabled)) {
-                    changeDirectory(selectedFile);
+                    changeDirectoryImplementation(selectedFile);
                     return;
                 } else if ((isDir || !isFileSelEnabled)
                         && (!isDir || !isDirSelEnabled)
@@ -3502,7 +3511,45 @@ final class FileChooserUIImpl extends BasicFileChooserUI{
         this.directoryComboBox.setEnabled(enable);
     }
 
-    private void changeDirectory(File dir) {
+    private void changeDirectoryImplementation(File dir) {
+
+// In order to pass Apache NetBeans JDK 11 validations we've commented the code 
+// below, that has dependencies on sun.swing.FilePane and sun.awt.ShellFolder classes.
+// we're invoking private BasicFileChoooserUI.changeDirectoryImplementation(File) (if available) using reflection.
+// ---
+//        // Traverse shortcuts on Windows
+//        if (dir != null && FilePane.usesShellFolder(fc)) {
+//            try {
+//                ShellFolder shellFolder = ShellFolder.getShellFolder(dir);
+//
+//                if (shellFolder.isLink()) {
+//                    File linkedTo = shellFolder.getLinkLocation();
+//
+//                    // If linkedTo is null we try to use dir
+//                    if (linkedTo != null) {
+//                        if (fc.isTraversable(linkedTo)) {
+//                            dir = linkedTo;
+//                        } else {
+//                            return;
+//                        }
+//                    } else {
+//                        dir = shellFolder;
+//                    }
+//                }
+//            } catch (FileNotFoundException ex) {
+//                return;
+//            }
+//        }
+// ---
+        if (changeDirectoryInBasicFileChooserUI != null) {
+            try {
+                // Invoke BasicFileChooserUI.changeDirectory(dir)
+                changeDirectoryInBasicFileChooserUI.invoke(dir);
+                return;
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
         JFileChooser fc = getFileChooser();
         fc.setCurrentDirectory(dir);
         if (fc.getFileSelectionMode() == JFileChooser.FILES_AND_DIRECTORIES &&
