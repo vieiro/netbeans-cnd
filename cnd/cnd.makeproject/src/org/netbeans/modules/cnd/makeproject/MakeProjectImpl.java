@@ -77,6 +77,7 @@ import org.netbeans.modules.cnd.makeproject.api.support.MakeProjectHelper;
 import org.netbeans.modules.cnd.makeproject.api.support.MakeProjectLife;
 import org.netbeans.modules.cnd.makeproject.api.support.MakeProjectListener;
 import org.netbeans.modules.cnd.makeproject.api.launchers.LaunchersProjectMetadataFactory;
+import org.netbeans.modules.cnd.makeproject.compilationdb.ClangCDBSupport;
 import org.netbeans.modules.cnd.makeproject.options.FullFileIndexer;
 import org.netbeans.modules.cnd.makeproject.uiapi.ConfirmSupport;
 import org.netbeans.modules.cnd.spi.remote.RemoteSyncFactory;
@@ -161,6 +162,7 @@ public final class MakeProjectImpl implements Project, MakeProjectListener, Make
     private final PropertyChangeListener indexerListener;
     private String configurationXMLComment;
     private final Set<MyInterrupter> interrupters = new WeakSet<>();
+    private final ClangCDBSupport compilationDBGenerator;
 
     public MakeProjectImpl(MakeProjectHelper helper) throws IOException {
         LOGGER.log(Level.FINE, "Start of creation MakeProject@{0} {1}", new Object[]{System.identityHashCode(MakeProjectImpl.this), helper.getProjectDirectory()}); // NOI18N
@@ -185,6 +187,8 @@ public final class MakeProjectImpl implements Project, MakeProjectListener, Make
         readProjectExtension(data, C_EXTENSIONS, cExtensions);
         readProjectExtension(data, CPP_EXTENSIONS, cppExtensions);
         sourceEncoding = getSourceEncodingFromProjectXml();
+
+        compilationDBGenerator = new ClangCDBSupport(this);
 
         LOGGER.log(Level.FINE, "End of creation MakeProject@{0} {1}", new Object[]{System.identityHashCode(MakeProjectImpl.this), helper.getProjectDirectory()}); // NOI18N
     }
