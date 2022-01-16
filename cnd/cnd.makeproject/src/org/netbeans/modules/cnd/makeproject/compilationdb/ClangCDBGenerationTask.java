@@ -18,16 +18,20 @@
  */
 package org.netbeans.modules.cnd.makeproject.compilationdb;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONStreamAware;
-import org.json.simple.JSONValue;
+import org.netbeans.modules.cnd.api.project.IncludePath;
 import org.netbeans.modules.cnd.api.project.NativeFileItem.Language;
 import static org.netbeans.modules.cnd.api.project.NativeFileItem.Language.CPP;
 import static org.netbeans.modules.cnd.api.project.NativeFileItem.Language.C_HEADER;
@@ -47,9 +51,9 @@ import org.netbeans.modules.cnd.makeproject.api.configurations.Item;
 import org.netbeans.modules.cnd.makeproject.api.configurations.ItemConfiguration;
 import org.netbeans.modules.cnd.makeproject.api.configurations.MakeConfiguration;
 import org.netbeans.modules.cnd.makeproject.api.configurations.MakeConfigurationDescriptor;
-import org.openide.filesystems.FileAlreadyLockedException;
-import org.openide.filesystems.FileLock;
+import org.netbeans.modules.cnd.utils.FSPath;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 import org.openide.util.Cancellable;
 
 /**
@@ -136,11 +140,14 @@ final class ClangCDBGenerationTask implements Callable<Void>, Cancellable {
 
         }
 
-        try ( FileLock lock = compilationDatabase.lock()) {
-            updateCompilationDatabase(compilationDatabase, lock, items,
+        File file = FileUtil.toFile(compilationDatabase);
+
+        try ( FileOutputStream outputStream = new FileOutputStream(file); //FMT
+                  PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
+            FileChannel channel = outputStream.getChannel();
+            FileLock lock = channel.lock();
+            updateCompilationDatabase(nativeProject, compilationDatabase, writer, lock, items,
                     activeMakeConfiguration, compilerSet, makeConfigurationDescriptor);
-        } catch (FileAlreadyLockedException fale) {
-            LOG.log(DEBUG_LEVEL, "Somebody is already updating the file...");
         } catch (Throwable e) {
             LOG.log(DEBUG_LEVEL,
                     String.format("Error creating database %s:%s:%s", // NOI18N
@@ -153,51 +160,49 @@ final class ClangCDBGenerationTask implements Callable<Void>, Cancellable {
     }
 
     private void updateCompilationDatabase(
-            FileObject compilationDatabase, FileLock fileLock, Item[] items, MakeConfiguration activeMakeConfiguration, CompilerSet compilerSet, MakeConfigurationDescriptor makeConfigurationDescriptor)
+            NativeProject nativeProject,
+            FileObject compilationDatabase, PrintWriter writer,
+            FileLock fileLock, Item[] items, MakeConfiguration activeMakeConfiguration,
+            CompilerSet compilerSet, MakeConfigurationDescriptor makeConfigurationDescriptor)
             throws Exception {
 
         // We're streaming the JSON output
-        try ( PrintWriter writer = new PrintWriter(
-                new OutputStreamWriter(
-                        compilationDatabase.getOutputStream(fileLock),
-                        StandardCharsets.UTF_8))) {
-
-            writer.println("[");
-            boolean firstItem = true;
-            for (Item item : items) {
-                LOG.log(DEBUG_LEVEL, "Updating compilatino db for item {0}", item.getName());
-                Language language = item.getLanguage();
-                ItemConfiguration itemConfiguration = item.getItemConfiguration(activeMakeConfiguration);
-                JSONObject commandObject = null;
-                switch (language) {
-                    case C_HEADER:
-                        // C headers are not included in compilation databases
-                        continue;
-                    case C:
-                    case CPP:
-                    case OTHER: // Assembler?
-                        // C and C++ files (and possibly assembler) are included in the compilation database
-                        commandObject = generateObjectCommandForItem(
-                                makeProject, activeMakeConfiguration,
-                                compilerSet,
-                                language, item, itemConfiguration);
-                        break;
-                    case FORTRAN:
-                        // Fortran is not supported in clang-style compilation databases, AFAIK
-                        break;
-                }
-                if (commandObject != null) {
-                    if (firstItem) {
-                        firstItem = false;
-                    } else {
-                        writer.print(",");
-                    }
-                    commandObject.writeJSONString(writer);
-                    writer.println();
-                }
+        writer.println("[");
+        boolean firstItem = true;
+        for (Item item : items) {
+            LOG.log(DEBUG_LEVEL, "Updating compilatino db for item {0}", item.getName());
+            Language language = item.getLanguage();
+            ItemConfiguration itemConfiguration = item.getItemConfiguration(activeMakeConfiguration);
+            JSONObject commandObject = null;
+            switch (language) {
+                case C_HEADER:
+                    // C headers are not included in compilation databases
+                    continue;
+                case C:
+                case CPP:
+                case OTHER: // Assembler?
+                    // C and C++ files (and possibly assembler) are included in the compilation database
+                    commandObject = generateObjectCommandForItem(
+                            nativeProject,
+                            makeProject, activeMakeConfiguration,
+                            compilerSet,
+                            language, item, itemConfiguration);
+                    break;
+                case FORTRAN:
+                    // Fortran is not supported in clang-style compilation databases, AFAIK
+                    break;
             }
-            writer.println("]");
+            if (commandObject != null) {
+                if (firstItem) {
+                    firstItem = false;
+                } else {
+                    writer.print(",");
+                }
+                commandObject.writeJSONString(writer);
+                writer.println();
+            }
         }
+        writer.println("]");
     }
 
     /**
@@ -212,13 +217,7 @@ final class ClangCDBGenerationTask implements Callable<Void>, Cancellable {
      * @throws Exception If an I/O error happens.
      */
     private JSONObject generateObjectCommandForItem(
-            MakeProject makeProject,
-            MakeConfiguration activeMakeConfiguration,
-            CompilerSet compilerSet,
-            Language language,
-            Item item,
-            ItemConfiguration itemConfiguration
-    )
+            NativeProject nativeProject, MakeProject makeProject, MakeConfiguration activeMakeConfiguration, CompilerSet compilerSet, Language language, Item item, ItemConfiguration itemConfiguration)
             throws Exception {
 
         if (itemConfiguration.getExcluded().getValue()) {
@@ -230,9 +229,8 @@ final class ClangCDBGenerationTask implements Callable<Void>, Cancellable {
         CommandObjectBuilder builder = new CommandObjectBuilder(makeProject);
 
         // 0. 'directory' property (already present in constructor)
-
         // 1. file property
-        LOG.log(DEBUG_LEVEL, "ITEM: {0} FILE: {1}", new Object[] { item.getName(), item.getAbsolutePath()});
+        LOG.log(DEBUG_LEVEL, "ITEM: {0} FILE: {1}", new Object[]{item.getName(), item.getAbsolutePath()});
         builder.setFile(item.getAbsolutePath());
 
         // 2. command property
@@ -244,32 +242,101 @@ final class ClangCDBGenerationTask implements Callable<Void>, Cancellable {
             return null;
         }
         AbstractCompiler compiler = (AbstractCompiler) compilerTool;
-
+        if (compiler == null) {
+            LOG.log(DEBUG_LEVEL, "Cannot find a compiler for item {0}", // NOI18N
+                    item.getName());
+            return null;
+        }
         // 2.1 compiler path
         builder.addCommandItem(compiler.getPath());
 
-        // 2.2 "-c" flag. This is currently hardwired in NetBeans CND... :-(
+        // 2.2 "-c" flag. This is currently hardcoded in NetBeans CND... :-(
         builder.addCommandItem("-c");
 
         // 2.3 The full path of the file to compile
         builder.addCommandItem(builder.getFile());
 
         // 2.3 language specific flags
-        CCompilerConfiguration cConfiguration = itemConfiguration.getCCompilerConfiguration();
-        if (cConfiguration != null) {
-            LOG.log(DEBUG_LEVEL, "CConfiguration {0}", cConfiguration);
+        // C
+        {
+            CCompilerConfiguration cConfiguration = itemConfiguration.getCCompilerConfiguration();
+            if (cConfiguration != null) {
+                String cFlags = cConfiguration.getCFlags(compiler);
+                builder.addCommandItem(cFlags);
+                String allOptions = cConfiguration.getAllOptions2(compiler);
+                builder.addCommandItem(allOptions);
+                LOG.log(DEBUG_LEVEL, "CFLAGS {0} ALLOPTIONS {1}", new Object[]{cFlags, allOptions});
+            }
         }
 
-        CCCompilerConfiguration cppConfiguration = itemConfiguration.getCCCompilerConfiguration();
-        if (cppConfiguration != null) {
-            LOG.log(DEBUG_LEVEL, "CPPConfiguration {0}", cppConfiguration);
+        // CPP
+        {
+            CCCompilerConfiguration cppConfiguration = itemConfiguration.getCCCompilerConfiguration();
+            if (cppConfiguration != null) {
+                String cppFlags = cppConfiguration.getCCFlags(compiler);
+                builder.addCommandItem(cppFlags);
+                String allOptions = cppConfiguration.getAllOptions2(compiler);
+                builder.addCommandItem(allOptions);
+                LOG.log(DEBUG_LEVEL, "CPPFLAGS {0} ALLOPTIONS {1}", new Object[]{cppFlags, allOptions});
+            }
         }
 
-        // 2.4 all options
+        // 2.5 Include files
+        {
+            List<FSPath> includeFiles = nativeProject.getIncludeFiles();
+            includeFiles = includeFiles == null ? Collections.EMPTY_LIST : includeFiles;
+            for (FSPath path : includeFiles) {
+                LOG.log(DEBUG_LEVEL, "INCLUDE FILE : {0}", path.getPath());
+            }
+        }
+
+        {
+            List<FSPath> includeHeaders = nativeProject.getSystemIncludeHeaders();
+            includeHeaders = includeHeaders == null ? Collections.EMPTY_LIST : includeHeaders;
+            for (FSPath path : includeHeaders) {
+                LOG.log(DEBUG_LEVEL, "SYSTEM INCLUDE HEADER: {0}", path.getPath());
+            }
+        }
+
+        {
+            List<IncludePath> includePaths = nativeProject.getSystemIncludePaths();
+            includePaths = includePaths == null ? Collections.EMPTY_LIST : includePaths;
+            for (IncludePath path : includePaths) {
+                LOG.log(DEBUG_LEVEL, "SYSTEM INCLUDE PATH : {0}", path.getFSPath().getPath());
+            }
+        }
+
+        {
+            List<IncludePath> includePaths = nativeProject.getUserIncludePaths();
+            includePaths = includePaths == null ? Collections.EMPTY_LIST : includePaths;
+            for (IncludePath path : includePaths) {
+                LOG.log(DEBUG_LEVEL, "USER INCLUDE PATH : {0}", path.getFSPath().getPath());
+            }
+        }
+
+        {
+            List<String> macroDefinitions = nativeProject.getSystemMacroDefinitions();
+            macroDefinitions = macroDefinitions == null ? Collections.EMPTY_LIST: macroDefinitions;
+            for(String macroDefintion: macroDefinitions) {
+                LOG.log(DEBUG_LEVEL, "SYSTEM MACRO DEFINITION: {0}", macroDefintion);
+            }
+        }
+
+        {
+            List<String> macroDefinitions = nativeProject.getUserMacroDefinitions();
+            macroDefinitions = macroDefinitions == null ? Collections.EMPTY_LIST: macroDefinitions;
+            for(String macroDefintion: macroDefinitions) {
+                LOG.log(DEBUG_LEVEL, "USER MACRO DEFINITION: {0}", macroDefintion);
+            }
+        }
+
+
+        // 3. output file
         BasicCompilerConfiguration basicCompilerConfiguration = itemConfiguration.getCompilerConfiguration();
-        String allOptions = basicCompilerConfiguration.getAllOptions(compilerTool);
-        LOG.log(DEBUG_LEVEL, "allOptions {0}", allOptions);
-        builder.addCommandItem(allOptions);
+        String outputFile = basicCompilerConfiguration.getOutputFile(item, activeMakeConfiguration, true);
+        if (outputFile != null) {
+            builder.setOutput(outputFile);
+        }
 
         // CCompilerConfiguration cCompilerConfiguration = itemConfiguration.getCCompilerConfiguration();
         // cCompilerConfiguration.get

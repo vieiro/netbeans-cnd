@@ -31,15 +31,14 @@ import org.openide.filesystems.FileObject;
 /**
  * CommandObjectBuilder builds a JSON string representing a CommandObject as
  * defined in https://clang.llvm.org/docs/JSONCompilationDatabase.html
- * 
+ *
  * NOTES:
- * 
+ *
  * 1. It seems clangd wants paths separated by forward slashes, even in Windows.
  * 2. It seems clangd does not want quoted forward slashes.
- * 
- * See:
- * - https://github.com/15knots/cmake4eclipse/issues/44
- * - https://stackoverflow.com/questions/1580647/json-why-are-forward-slashes-escaped
+ *
+ * See: - https://github.com/15knots/cmake4eclipse/issues/44 -
+ * https://stackoverflow.com/questions/1580647/json-why-are-forward-slashes-escaped
  *
  * @author antonio
  */
@@ -58,7 +57,9 @@ final class CommandObjectBuilder {
     }
 
     CommandObjectBuilder addCommandItem(String part) {
-        command.append(' ').append(part).append(' ');
+        if (part != null) {
+            command.append(' ').append(part).append(' ');
+        }
         return this;
     }
 

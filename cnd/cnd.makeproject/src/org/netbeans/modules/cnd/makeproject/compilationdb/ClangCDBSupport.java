@@ -58,8 +58,8 @@ public final class ClangCDBSupport
         this.nativeProject.addProjectItemsListener(this);
 
         // Fire a "PROJECT_OPENED" task, within a second or so
-        ClangCDBGenerationTask projectOpenedTask = 
-                new ClangCDBGenerationTask(makeProject, ClangCDBGenerationCause.PROJECT_OPENED);
+        ClangCDBGenerationTask projectOpenedTask
+                = new ClangCDBGenerationTask(makeProject, ClangCDBGenerationCause.PROJECT_OPENED);
         runningTask = CLANG_CDB_PROCESSOR.schedule(projectOpenedTask, 1500, TimeUnit.MILLISECONDS);
     }
 
@@ -124,9 +124,7 @@ public final class ClangCDBSupport
      * compilation database.
      */
     private void updateCompilationDatabase(ClangCDBGenerationCause cause) {
-        if (runningTask != null && !runningTask.isDone()) {
-            // TODO: See if this is correct or not. If a task hangs we don't
-            // want to block for ever, right?
+        if (runningTask != null && !runningTask.isDone() && !runningTask.isCancelled()) {
             LOG.log(DEBUGLEVEL, "Wanted to update CDB because of {0} but a task is already running", cause.name());
             return;
         }
