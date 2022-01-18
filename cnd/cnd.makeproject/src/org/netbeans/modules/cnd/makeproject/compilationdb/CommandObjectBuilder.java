@@ -18,7 +18,6 @@
  */
 package org.netbeans.modules.cnd.makeproject.compilationdb;
 
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
@@ -32,15 +31,6 @@ import org.openide.filesystems.FileObject;
  * CommandObjectBuilder builds a JSON string representing a CommandObject as
  * defined in https://clang.llvm.org/docs/JSONCompilationDatabase.html
  *
- * NOTES:
- *
- * 1. It seems clangd wants paths separated by forward slashes, even in Windows.
- * 2. It seems clangd does not want quoted forward slashes.
- *
- * See: - https://github.com/15knots/cmake4eclipse/issues/44 -
- * https://stackoverflow.com/questions/1580647/json-why-are-forward-slashes-escaped
- *
- * @author antonio
  */
 final class CommandObjectBuilder {
 
@@ -56,6 +46,13 @@ final class CommandObjectBuilder {
         this.command = new StringBuilder();
     }
 
+    /**
+     * Appends another piece of the 'command' entry in the command object. For
+     * instance, you can add "-strip" or "-std=ansi".
+     *
+     * @param part The part to append at the end of the command line.
+     * @return this
+     */
     CommandObjectBuilder addCommandItem(String part) {
         if (part != null) {
             command.append(' ').append(part).append(' ');
@@ -63,11 +60,27 @@ final class CommandObjectBuilder {
         return this;
     }
 
+    /**
+     * Sets the 'file' entry in the command object. For instance,
+     * "/usr/home/user/project/folder/file.c"
+     *
+     * @param file The file. Absolute paths are recommended, but can be relative
+     * to the project.getProjectDirectory().
+     * @return this
+     */
     CommandObjectBuilder setFile(String file) {
         this.file = Paths.get(file).toAbsolutePath().toString();
         return this;
     }
 
+    /**
+     * Sets the 'output' entry in the command object. For instance,
+     * "/usr/home/user/project/build/platform/file.o"
+     *
+     * @param output The file. Absolute paths are recommended, but can be
+     * relative to the project.getProjectDirectory().
+     * @return this.
+     */
     CommandObjectBuilder setOutput(String output) {
         this.output = Paths.get(output).toAbsolutePath().toString();
         return this;
@@ -77,7 +90,15 @@ final class CommandObjectBuilder {
         return file;
     }
 
-    JSONObject build() throws IllegalStateException, InvalidPathException {
+    /**
+     * Builds a JSONObject representing this command object. NOTE: 'directory'
+     * entry is automatically set to project.getProjectDirectory().
+     *
+     * @return The JSONObject representing this command object.
+     * @throws IllegalStateException if a mandatory entri in the command object
+     * is not present.
+     */
+    JSONObject build() throws IllegalStateException {
         if (file == null) {
             throw new IllegalStateException("Missing file"); // NOI18N
         }

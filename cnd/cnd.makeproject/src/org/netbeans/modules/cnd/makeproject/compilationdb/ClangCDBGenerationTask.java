@@ -228,12 +228,12 @@ final class ClangCDBGenerationTask implements Callable<Void>, Cancellable {
 
         CommandObjectBuilder builder = new CommandObjectBuilder(makeProject);
 
-        // 0. 'directory' property (already present in constructor)
-        // 1. file property
+        // 0. 'directory' entry in the command object is automatically added.
+        // 1. 'file' entry in the command object.
         LOG.log(DEBUG_LEVEL, "ITEM: {0} FILE: {1}", new Object[]{item.getName(), item.getAbsolutePath()});
         builder.setFile(item.getAbsolutePath());
 
-        // 2. command property
+        // 2. 'command' entry in the command object
         PredefinedToolKind toolKind = itemConfiguration.getTool();
         Tool compilerTool = compilerSet.getTool(toolKind);
         if (!(compilerTool instanceof AbstractCompiler)) {
@@ -257,7 +257,7 @@ final class ClangCDBGenerationTask implements Callable<Void>, Cancellable {
         builder.addCommandItem(builder.getFile());
 
         // 2.3 language specific flags
-        // C
+        // C Options
         {
             CCompilerConfiguration cConfiguration = itemConfiguration.getCCompilerConfiguration();
             if (cConfiguration != null) {
@@ -269,7 +269,7 @@ final class ClangCDBGenerationTask implements Callable<Void>, Cancellable {
             }
         }
 
-        // CPP
+        // C++ options
         {
             CCCompilerConfiguration cppConfiguration = itemConfiguration.getCCCompilerConfiguration();
             if (cppConfiguration != null) {
@@ -281,65 +281,23 @@ final class ClangCDBGenerationTask implements Callable<Void>, Cancellable {
             }
         }
 
-        // 2.5 Include files
-        {
-            List<FSPath> includeFiles = nativeProject.getIncludeFiles();
-            includeFiles = includeFiles == null ? Collections.EMPTY_LIST : includeFiles;
-            for (FSPath path : includeFiles) {
-                LOG.log(DEBUG_LEVEL, "INCLUDE FILE : {0}", path.getPath());
-            }
-        }
-
-        {
-            List<FSPath> includeHeaders = nativeProject.getSystemIncludeHeaders();
-            includeHeaders = includeHeaders == null ? Collections.EMPTY_LIST : includeHeaders;
-            for (FSPath path : includeHeaders) {
-                LOG.log(DEBUG_LEVEL, "SYSTEM INCLUDE HEADER: {0}", path.getPath());
-            }
-        }
-
-        {
-            List<IncludePath> includePaths = nativeProject.getSystemIncludePaths();
-            includePaths = includePaths == null ? Collections.EMPTY_LIST : includePaths;
-            for (IncludePath path : includePaths) {
-                LOG.log(DEBUG_LEVEL, "SYSTEM INCLUDE PATH : {0}", path.getFSPath().getPath());
-            }
-        }
-
-        {
-            List<IncludePath> includePaths = nativeProject.getUserIncludePaths();
-            includePaths = includePaths == null ? Collections.EMPTY_LIST : includePaths;
-            for (IncludePath path : includePaths) {
-                LOG.log(DEBUG_LEVEL, "USER INCLUDE PATH : {0}", path.getFSPath().getPath());
-            }
-        }
-
-        {
-            List<String> macroDefinitions = nativeProject.getSystemMacroDefinitions();
-            macroDefinitions = macroDefinitions == null ? Collections.EMPTY_LIST: macroDefinitions;
-            for(String macroDefintion: macroDefinitions) {
-                LOG.log(DEBUG_LEVEL, "SYSTEM MACRO DEFINITION: {0}", macroDefintion);
-            }
-        }
-
-        {
-            List<String> macroDefinitions = nativeProject.getUserMacroDefinitions();
-            macroDefinitions = macroDefinitions == null ? Collections.EMPTY_LIST: macroDefinitions;
-            for(String macroDefintion: macroDefinitions) {
-                LOG.log(DEBUG_LEVEL, "USER MACRO DEFINITION: {0}", macroDefintion);
-            }
-        }
-
-
-        // 3. output file
+       // 3. output file
         BasicCompilerConfiguration basicCompilerConfiguration = itemConfiguration.getCompilerConfiguration();
         String outputFile = basicCompilerConfiguration.getOutputFile(item, activeMakeConfiguration, true);
+
         if (outputFile != null) {
+            // outputFile is constructed with Makefile macros, like these:
+            // "/home/antonio/tmp/${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/main.o
+            // We want to expand these
+            outputFile = activeMakeConfiguration.expandMacros(outputFile);
             builder.setOutput(outputFile);
+
+            // NOTE: We also include a '-o outputfile' to the command
+            builder.addCommandItem("-o");
+            builder.addCommandItem(outputFile);
         }
 
-        // CCompilerConfiguration cCompilerConfiguration = itemConfiguration.getCCompilerConfiguration();
-        // cCompilerConfiguration.get
+        // Build the JSONObject for this command object.
         return builder.build();
     }
 

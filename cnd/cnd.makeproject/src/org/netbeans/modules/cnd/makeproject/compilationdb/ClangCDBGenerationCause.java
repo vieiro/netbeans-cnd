@@ -19,8 +19,8 @@
 package org.netbeans.modules.cnd.makeproject.compilationdb;
 
 /**
- * ClangCDBGenerationCause represents possible causes that require a
- Clang compilation database to be regenerated.
+ * ClangCDBGenerationCause represents possible causes that require a Clang
+ * compilation database to be regenerated.
  *
  * @author antonio
  */
