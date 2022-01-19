@@ -28,9 +28,8 @@ import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
 
 /**
- * CommandObjectBuilder builds a JSON string representing a CommandObject as
+ * CommandObjectBuilder builds a JSONObject representing a CommandObject as
  * defined in https://clang.llvm.org/docs/JSONCompilationDatabase.html
- *
  */
 final class CommandObjectBuilder {
 

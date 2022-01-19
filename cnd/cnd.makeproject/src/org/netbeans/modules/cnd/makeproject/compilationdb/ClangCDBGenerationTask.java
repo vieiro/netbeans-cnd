@@ -25,13 +25,10 @@ import java.io.PrintWriter;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.simple.JSONObject;
-import org.netbeans.modules.cnd.api.project.IncludePath;
 import org.netbeans.modules.cnd.api.project.NativeFileItem.Language;
 import static org.netbeans.modules.cnd.api.project.NativeFileItem.Language.CPP;
 import static org.netbeans.modules.cnd.api.project.NativeFileItem.Language.C_HEADER;
@@ -51,7 +48,6 @@ import org.netbeans.modules.cnd.makeproject.api.configurations.Item;
 import org.netbeans.modules.cnd.makeproject.api.configurations.ItemConfiguration;
 import org.netbeans.modules.cnd.makeproject.api.configurations.MakeConfiguration;
 import org.netbeans.modules.cnd.makeproject.api.configurations.MakeConfigurationDescriptor;
-import org.netbeans.modules.cnd.utils.FSPath;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.Cancellable;
@@ -142,7 +138,7 @@ final class ClangCDBGenerationTask implements Callable<Void>, Cancellable {
 
         File file = FileUtil.toFile(compilationDatabase);
 
-        try ( FileOutputStream outputStream = new FileOutputStream(file); //FMT
+        try ( FileOutputStream outputStream = new FileOutputStream(file); //
                   PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
             FileChannel channel = outputStream.getChannel();
             FileLock lock = channel.lock();
@@ -281,7 +277,7 @@ final class ClangCDBGenerationTask implements Callable<Void>, Cancellable {
             }
         }
 
-       // 3. output file
+        // 3. output file
         BasicCompilerConfiguration basicCompilerConfiguration = itemConfiguration.getCompilerConfiguration();
         String outputFile = basicCompilerConfiguration.getOutputFile(item, activeMakeConfiguration, true);
 
