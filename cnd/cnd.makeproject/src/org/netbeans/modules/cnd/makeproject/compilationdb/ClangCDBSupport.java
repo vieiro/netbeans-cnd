@@ -19,7 +19,8 @@
 package org.netbeans.modules.cnd.makeproject.compilationdb;
 
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,6 +30,7 @@ import org.netbeans.modules.cnd.api.project.NativeProjectItemsListener;
 import org.netbeans.modules.cnd.makeproject.api.MakeProject;
 import org.netbeans.modules.cnd.makeproject.api.support.MakeProjectEvent;
 import org.netbeans.modules.cnd.makeproject.api.support.MakeProjectListener;
+import org.netbeans.spi.project.ui.ProjectOpenedHook;
 import org.openide.util.RequestProcessor;
 
 /**
@@ -38,29 +40,28 @@ import org.openide.util.RequestProcessor;
  *
  */
 public final class ClangCDBSupport
+        extends ProjectOpenedHook
         implements
         NativeProjectItemsListener, MakeProjectListener {
 
     private static final Logger LOG = Logger.getLogger(ClangCDBSupport.class.getName());
     private static final Level DEBUGLEVEL = Level.INFO;
-    private static final RequestProcessor CLANG_CDB_PROCESSOR = new RequestProcessor(ClangCDBSupport.class.getName(), 2);
+    private static final RequestProcessor CLANG_CDB_PROCESSOR = new RequestProcessor(ClangCDBSupport.class.getName());
+    private static final long COALESCING_DELAY_MS = 1000;
 
     private final MakeProject makeProject;
-    private final NativeProject nativeProject;
-    private Future<Void> runningTask;
+    private final BlockingQueue<ClangCDBGenerationCause> pendingCauses;
+
+    private boolean projectOpen;
 
     public ClangCDBSupport(final MakeProject makeProject) {
         this.makeProject = makeProject;
-        this.nativeProject = makeProject.getLookup().lookup(NativeProject.class);
 
         // Start listening
         this.makeProject.getHelper().addMakeProjectListener(this);
-        this.nativeProject.addProjectItemsListener(this);
-
-        // Fire a "PROJECT_OPENED" task, within a second or so
-        ClangCDBGenerationTask projectOpenedTask
-                = new ClangCDBGenerationTask(makeProject, ClangCDBGenerationCause.PROJECT_OPENED);
-        runningTask = CLANG_CDB_PROCESSOR.schedule(projectOpenedTask, 1500, TimeUnit.MILLISECONDS);
+        this.pendingCauses = new LinkedBlockingQueue<>();
+        this.projectOpen = false;
+        LOG.log(DEBUGLEVEL, "ClangCDBSupport created.");
     }
 
     @Override
@@ -92,6 +93,7 @@ public final class ClangCDBSupport
 
     @Override
     public void projectDeleted(NativeProject nativeProject) {
+        projectOpen = false;
         nativeProject.removeProjectItemsListener(this);
     }
 
@@ -116,6 +118,33 @@ public final class ClangCDBSupport
                 ev.getPath());
     }
 
+    @Override
+    protected void projectOpened() {
+        LOG.log(DEBUGLEVEL, "Project opened.");
+        projectOpen = true;
+        NativeProject nativeProject = makeProject.getLookup().lookup(NativeProject.class);
+        if (nativeProject != null) {
+            LOG.log(DEBUGLEVEL, "Attaching to project items listener...");
+            makeProject.getHelper().addMakeProjectListener(this);
+            nativeProject.addProjectItemsListener(this);
+        } else {
+            LOG.log(DEBUGLEVEL, "Cannot attach to native project events.");
+        }
+        updateCompilationDatabase(ClangCDBGenerationCause.PROJECT_OPENED);
+    }
+
+    @Override
+    protected void projectClosed() {
+        LOG.log(DEBUGLEVEL, "Project closed.");
+        projectOpen = false;
+        NativeProject nativeProject = makeProject.getLookup().lookup(NativeProject.class);
+        if (nativeProject != null) {
+            LOG.log(DEBUGLEVEL, "Detached from native project events.");
+            makeProject.getHelper().removeMakeProjectListener(this);
+            nativeProject.removeProjectItemsListener(this);
+        }
+    }
+
     /**
      * Updates the compilation database "[project]/compile_commands.json". If a
      * task is already running then the request is silently ignored.
@@ -124,11 +153,28 @@ public final class ClangCDBSupport
      * compilation database.
      */
     private void updateCompilationDatabase(ClangCDBGenerationCause cause) {
-        if (runningTask != null && !runningTask.isDone() && !runningTask.isCancelled()) {
-            LOG.log(DEBUGLEVEL, "Wanted to update CDB because of {0} but a task is already running", cause.name());
-            return;
+        LOG.log(DEBUGLEVEL, "Update compilation database project is open: {0}", projectOpen);
+        if (projectOpen) {
+            pendingCauses.add(cause);
+            ClangCDBGenerationTask task = null;
+            try {
+                task = new ClangCDBGenerationTask(this, pendingCauses);
+            } catch (IllegalArgumentException iae) {
+                LOG.log(Level.SEVERE, "Unable to create ClangCDBGenerationTask: {0}", iae.getMessage());
+                return;
+            }
+            // Well, don't hurry updating the compilation database, let's
+            // coalesce some events first...
+            CLANG_CDB_PROCESSOR.schedule(task, COALESCING_DELAY_MS, TimeUnit.MILLISECONDS);
         }
-        ClangCDBGenerationTask task = new ClangCDBGenerationTask(makeProject, cause);
-        runningTask = CLANG_CDB_PROCESSOR.submit(task);
     }
+
+    MakeProject getMakeProject() {
+        return makeProject;
+    }
+
+    boolean isOpen() {
+        return projectOpen;
+    }
+
 }

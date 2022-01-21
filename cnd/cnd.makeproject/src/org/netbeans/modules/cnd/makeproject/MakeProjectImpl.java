@@ -162,7 +162,6 @@ public final class MakeProjectImpl implements Project, MakeProjectListener, Make
     private final PropertyChangeListener indexerListener;
     private String configurationXMLComment;
     private final Set<MyInterrupter> interrupters = new WeakSet<>();
-    private final ClangCDBSupport compilationDBGenerator;
 
     public MakeProjectImpl(MakeProjectHelper helper) throws IOException {
         LOGGER.log(Level.FINE, "Start of creation MakeProject@{0} {1}", new Object[]{System.identityHashCode(MakeProjectImpl.this), helper.getProjectDirectory()}); // NOI18N
@@ -188,7 +187,6 @@ public final class MakeProjectImpl implements Project, MakeProjectListener, Make
         readProjectExtension(data, CPP_EXTENSIONS, cppExtensions);
         sourceEncoding = getSourceEncodingFromProjectXml();
 
-        compilationDBGenerator = new ClangCDBSupport(this);
 
         LOGGER.log(Level.FINE, "End of creation MakeProject@{0} {1}", new Object[]{System.identityHashCode(MakeProjectImpl.this), helper.getProjectDirectory()}); // NOI18N
     }
@@ -266,6 +264,7 @@ public final class MakeProjectImpl implements Project, MakeProjectListener, Make
         ic.add(remoteProject);
         ic.add(new ToolchainProjectImpl(this));
         ic.add(new CacheDirectoryProviderImpl(helper.getProjectDirectory()));
+        ic.add(new ClangCDBSupport(this));
         ic.add(this);
         
         Object[] lookups = ic.toArray(new Object[ic.size()]);

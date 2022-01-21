@@ -25,6 +25,10 @@ import java.io.PrintWriter;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,7 +52,6 @@ import org.netbeans.modules.cnd.makeproject.api.configurations.Item;
 import org.netbeans.modules.cnd.makeproject.api.configurations.ItemConfiguration;
 import org.netbeans.modules.cnd.makeproject.api.configurations.MakeConfiguration;
 import org.netbeans.modules.cnd.makeproject.api.configurations.MakeConfigurationDescriptor;
-import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.Cancellable;
 
@@ -66,106 +69,139 @@ final class ClangCDBGenerationTask implements Callable<Void>, Cancellable {
     private static final Level DEBUG_LEVEL = Level.INFO;
 
     protected boolean cancelled;
-    protected final MakeProject makeProject;
-    protected final ClangCDBGenerationCause cause;
+    private final ClangCDBSupport support;
+    private final BlockingQueue<ClangCDBGenerationCause> pendingCauses;
+    private final MakeProject makeProject;
+    private final NativeProject nativeProject;
+    private final MakeConfiguration activeMakeConfiguration;
+    private final CompilerSet compilerSet;
+    private final ConfigurationDescriptorProvider configurationDescriptorProvider;
+    private final MakeConfigurationDescriptor makeConfigurationDescriptor;
 
-    ClangCDBGenerationTask(MakeProject makeProject, ClangCDBGenerationCause cause) {
-        this.makeProject = makeProject;
-        this.cause = cause;
+    ClangCDBGenerationTask(ClangCDBSupport support, BlockingQueue<ClangCDBGenerationCause> pendingCauses)
+            throws IllegalArgumentException {
+        this.support = support;
+        this.makeProject = support.getMakeProject();
+        this.pendingCauses = pendingCauses;
         this.cancelled = false;
+
+        // Prepare some required objects
+        nativeProject = makeProject.getLookup().lookup(NativeProject.class);
+        if (nativeProject == null) {
+            throw new IllegalArgumentException("No native project found"); // NOI18N
+        }
+
+        if (makeProject.getDevelopmentHost() != null && !makeProject.getDevelopmentHost().isLocal()) {
+            throw new IllegalArgumentException("Not a local project"); // NOI18N
+        }
+
+        activeMakeConfiguration = makeProject.getActiveConfiguration();
+        if (activeMakeConfiguration == null) {
+            throw new IllegalArgumentException("No active make configuration"); // NOI18N
+        }
+
+        compilerSet = activeMakeConfiguration.getCompilerSet().getCompilerSet();
+        if (compilerSet == null) {
+            throw new IllegalArgumentException("No compilerset defined"); // NOI18N
+        }
+
+        configurationDescriptorProvider
+                = makeProject.getLookup().lookup(ConfigurationDescriptorProvider.class);
+        if (configurationDescriptorProvider == null) {
+            throw new IllegalArgumentException("No configuration descriptor found"); // NOI18N
+        }
+
+        makeConfigurationDescriptor = configurationDescriptorProvider.getConfigurationDescriptor();
+        if (makeConfigurationDescriptor == null) {
+            throw new IllegalArgumentException("No MakeConfigurationDescriptor"); // NOI18N
+        }
+
     }
 
     @Override
     public Void call() throws Exception {
+
+        try {
+            updateCompilationDatabase();
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, String.format("Error updating compilation database:%s:%s", e.getMessage(), e.getClass().getName()), e);
+        }
+        return null;
+    }
+
+    public void updateCompilationDatabase() throws Exception {
+        LOG.log(DEBUG_LEVEL, "Task.call()");
+
         if (cancelled) {
-            return null;
+            LOG.log(DEBUG_LEVEL, "Task cancelled.");
+            return;
         }
 
-        FileObject compilationDatabase = makeProject.getProjectDirectory().getFileObject(CDB_NAME);
+        if (!support.isOpen()) {
+            LOG.log(DEBUG_LEVEL, "Project is not open");
+            return;
+        }
 
+        if (pendingCauses.isEmpty()) {
+            LOG.log(DEBUG_LEVEL, "No pending causes");
+            return;
+        }
+
+        ArrayList<ClangCDBGenerationCause> coalescedCauses = new ArrayList<>(pendingCauses.size());
+        pendingCauses.drainTo(coalescedCauses);
+
+        File projectDirectory = FileUtil.toFile(makeProject.getProjectDirectory());
+        File compilationDatabase = new File(projectDirectory, CDB_NAME);
         LOG.log(DEBUG_LEVEL, "Updating compilation database {0} because {1}", // NOI18N
-                new Object[]{compilationDatabase.getPath(), cause.name()});
-
-        // Prepare some required objects
-        NativeProject nativeProject = makeProject.getLookup().lookup(NativeProject.class);
-        if (nativeProject == null) {
-            LOG.log(DEBUG_LEVEL, "No native project found"); // NOI18N
-            return null;
-        }
-
-        if (makeProject.getDevelopmentHost() != null && !makeProject.getDevelopmentHost().isLocal()) {
-            LOG.log(DEBUG_LEVEL, "Not a local project"); // NOI18N
-            return null;
-        }
-
-        MakeConfiguration activeMakeConfiguration = makeProject.getActiveConfiguration();
-        if (activeMakeConfiguration == null) {
-            LOG.log(DEBUG_LEVEL, "No active make configuration"); // NOI18N
-            return null;
-        }
-
-        CompilerSet compilerSet = activeMakeConfiguration.getCompilerSet().getCompilerSet();
-        if (compilerSet == null) {
-            LOG.log(DEBUG_LEVEL, "No compiler set defined"); // NOI18N
-            return null;
-        }
-
-        ConfigurationDescriptorProvider configurationDescriptorProvider
-                = makeProject.getLookup().lookup(ConfigurationDescriptorProvider.class);
-        if (configurationDescriptorProvider == null) {
-            LOG.log(DEBUG_LEVEL, "No configuration descriptor found"); // NOI18N
-            return null;
-        }
-
-        MakeConfigurationDescriptor makeConfigurationDescriptor = configurationDescriptorProvider.getConfigurationDescriptor();
-        if (makeConfigurationDescriptor == null) {
-            LOG.log(DEBUG_LEVEL, "No MakeConfigurationDescriptor"); // NOI18N
-            return null;
-        }
+                new Object[]{compilationDatabase.getPath(), coalescedCauses.toString()});
 
         // Get the project items,
         Item[] items = makeConfigurationDescriptor.getProjectItems();
         if (items == null || items.length == 0) {
             LOG.log(DEBUG_LEVEL, "No items in project"); // NOI18N
-            return null;
+            return;
         }
 
         if (cancelled) {
             LOG.log(DEBUG_LEVEL, "Task cancelled"); // NOI18N
-            return null;
-
+            return;
         }
 
-        File file = FileUtil.toFile(compilationDatabase);
+        long startTime = System.currentTimeMillis();
 
-        try ( FileOutputStream outputStream = new FileOutputStream(file); //
+        File tempFile = Files.createTempFile("CDB", ".json").toFile();
+
+        try ( FileOutputStream outputStream = new FileOutputStream(tempFile); //
                   PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
             FileChannel channel = outputStream.getChannel();
             FileLock lock = channel.lock();
-            updateCompilationDatabase(nativeProject, compilationDatabase, writer, lock, items,
-                    activeMakeConfiguration, compilerSet, makeConfigurationDescriptor);
-        } catch (Throwable e) {
-            LOG.log(DEBUG_LEVEL,
-                    String.format("Error creating database %s:%s:%s", // NOI18N
-                            compilationDatabase.getPath(),
-                            e.getMessage(),
-                            e.getClass().getName()),
-                    e);
+            updateCompilationDatabase(nativeProject, writer, lock, items);
         }
-        return null;
+
+        if (!cancelled) {
+            try {
+                Files.move(tempFile.toPath(), compilationDatabase.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } finally {
+                tempFile.delete();
+            }
+        }
+
+        long endTime = System.currentTimeMillis();
+
+        LOG.log(Level.INFO, "Compilation database regenerated in {0} ms.", endTime-startTime);
+
     }
 
-    private void updateCompilationDatabase(
-            NativeProject nativeProject,
-            FileObject compilationDatabase, PrintWriter writer,
-            FileLock fileLock, Item[] items, MakeConfiguration activeMakeConfiguration,
-            CompilerSet compilerSet, MakeConfigurationDescriptor makeConfigurationDescriptor)
+    private void updateCompilationDatabase(NativeProject nativeProject, PrintWriter writer, FileLock lock, Item[] items)
             throws Exception {
 
         // We're streaming the JSON output
         writer.println("[");
         boolean firstItem = true;
         for (Item item : items) {
+            if (cancelled) {
+                return;
+            }
             LOG.log(DEBUG_LEVEL, "Updating compilatino db for item {0}", item.getName());
             Language language = item.getLanguage();
             ItemConfiguration itemConfiguration = item.getItemConfiguration(activeMakeConfiguration);
@@ -288,12 +324,11 @@ final class ClangCDBGenerationTask implements Callable<Void>, Cancellable {
             outputFile = activeMakeConfiguration.expandMacros(outputFile);
             builder.setOutput(outputFile);
 
-            // NOTE: We also include a '-o outputfile' to the command
+            // We also include a '-o outputfile' to the command
             builder.addCommandItem("-o");
             builder.addCommandItem(outputFile);
         }
 
-        // Build the JSONObject for this command object.
         return builder.build();
     }
 
