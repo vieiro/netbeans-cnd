@@ -93,8 +93,7 @@ public final class ClangCDBSupport
 
     @Override
     public void projectDeleted(NativeProject nativeProject) {
-        projectOpen = false;
-        nativeProject.removeProjectItemsListener(this);
+        removeListenersOnCloseOrDelete();
     }
 
     @Override
@@ -121,27 +120,36 @@ public final class ClangCDBSupport
     @Override
     protected void projectOpened() {
         LOG.log(DEBUGLEVEL, "Project opened.");
-        projectOpen = true;
-        NativeProject nativeProject = makeProject.getLookup().lookup(NativeProject.class);
-        if (nativeProject != null) {
-            LOG.log(DEBUGLEVEL, "Attaching to project items listener...");
-            makeProject.getHelper().addMakeProjectListener(this);
-            nativeProject.addProjectItemsListener(this);
-        } else {
-            LOG.log(DEBUGLEVEL, "Cannot attach to native project events.");
-        }
+        addListenersOnOpened();
         updateCompilationDatabase(ClangCDBGenerationCause.PROJECT_OPENED);
     }
 
     @Override
     protected void projectClosed() {
-        LOG.log(DEBUGLEVEL, "Project closed.");
-        projectOpen = false;
+        removeListenersOnCloseOrDelete();
+    }
+
+    private void addListenersOnOpened() {
+        LOG.log(DEBUGLEVEL, "Project opened");
+        projectOpen = true;
+        makeProject.getHelper().addMakeProjectListener(this);
         NativeProject nativeProject = makeProject.getLookup().lookup(NativeProject.class);
         if (nativeProject != null) {
-            LOG.log(DEBUGLEVEL, "Detached from native project events.");
-            makeProject.getHelper().removeMakeProjectListener(this);
+            nativeProject.addProjectItemsListener(this);
+        } else {
+            LOG.log(DEBUGLEVEL, "Cannot attach to native project events.");
+        }
+    }
+
+    private void removeListenersOnCloseOrDelete() {
+        LOG.log(DEBUGLEVEL, "Detached from native project events.");
+        projectOpen = false;
+        makeProject.getHelper().removeMakeProjectListener(this);
+        NativeProject nativeProject = makeProject.getLookup().lookup(NativeProject.class);
+        if (nativeProject != null) {
             nativeProject.removeProjectItemsListener(this);
+        } else {
+            LOG.log(DEBUGLEVEL, "Cannot detach from native project events.");
         }
     }
 
