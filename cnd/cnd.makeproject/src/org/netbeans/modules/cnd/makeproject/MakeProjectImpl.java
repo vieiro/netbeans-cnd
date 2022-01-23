@@ -77,6 +77,7 @@ import org.netbeans.modules.cnd.makeproject.api.support.MakeProjectHelper;
 import org.netbeans.modules.cnd.makeproject.api.support.MakeProjectLife;
 import org.netbeans.modules.cnd.makeproject.api.support.MakeProjectListener;
 import org.netbeans.modules.cnd.makeproject.api.launchers.LaunchersProjectMetadataFactory;
+import org.netbeans.modules.cnd.makeproject.compilationdb.ClangCDBSupport;
 import org.netbeans.modules.cnd.makeproject.options.FullFileIndexer;
 import org.netbeans.modules.cnd.makeproject.uiapi.ConfirmSupport;
 import org.netbeans.modules.cnd.spi.remote.RemoteSyncFactory;
@@ -186,6 +187,7 @@ public final class MakeProjectImpl implements Project, MakeProjectListener, Make
         readProjectExtension(data, CPP_EXTENSIONS, cppExtensions);
         sourceEncoding = getSourceEncodingFromProjectXml();
 
+
         LOGGER.log(Level.FINE, "End of creation MakeProject@{0} {1}", new Object[]{System.identityHashCode(MakeProjectImpl.this), helper.getProjectDirectory()}); // NOI18N
     }
 
@@ -262,6 +264,7 @@ public final class MakeProjectImpl implements Project, MakeProjectListener, Make
         ic.add(remoteProject);
         ic.add(new ToolchainProjectImpl(this));
         ic.add(new CacheDirectoryProviderImpl(helper.getProjectDirectory()));
+        ic.add(new ClangCDBSupport(this));
         ic.add(this);
         
         Object[] lookups = ic.toArray(new Object[ic.size()]);
