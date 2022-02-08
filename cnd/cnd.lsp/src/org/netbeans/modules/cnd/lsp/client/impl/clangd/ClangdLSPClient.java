@@ -16,28 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.cnd.lsp.makeproject;
+package org.netbeans.modules.cnd.lsp.client.impl.clangd;
 
-import java.util.ArrayList;
-import org.netbeans.modules.cnd.lsp.client.impl.clangd.ClangdLSPClient;
-import org.netbeans.modules.cnd.lsp.compilationdb.ClangCDBSupport;
-import org.netbeans.modules.cnd.makeproject.api.MakeProject;
-import org.netbeans.modules.cnd.makeproject.api.MakeProjectLookupProvider;
-import org.openide.util.lookup.ServiceProvider;
+import org.netbeans.modules.cnd.lsp.client.impl.NBLSPClient;
 
 /**
- * Adds stuff to MakeProject Lookup.
+ *
  * @author antonio
  */
-@ServiceProvider(service = MakeProjectLookupProvider.class)
-public class LSPMakeProjectLookupProvider implements MakeProjectLookupProvider {
+public class ClangdLSPClient extends NBLSPClient {
+
+    // TODO: Parametrize this
+    private static final String CLANGD_PATH = "/usr/bin/clangd";
+    private static final String[] CLANGD_COMMAND = {
+        CLANGD_PATH,
+        "--clang-tidy",
+        "--completion-style=detailed",
+        "--offset-encoding=utf-8",
+        "--pch-storage=disk",
+        "--log=verbose",
+        "--background-index",};
 
     @Override
-    public void addLookup(MakeProject owner, ArrayList<Object> ic) {
-        ClangCDBSupport support = new ClangCDBSupport(owner);
-        ic.add(support);
-        ClangdLSPClient lspClient = new ClangdLSPClient();
-        ic.add(lspClient);
+    public String[] getProcessCommands() {
+        return CLANGD_COMMAND;
     }
-    
+
 }

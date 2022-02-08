@@ -16,28 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.cnd.lsp.makeproject;
+package org.netbeans.modules.cnd.lsp.client.capabilities.textdocument;
 
-import java.util.ArrayList;
-import org.netbeans.modules.cnd.lsp.client.impl.clangd.ClangdLSPClient;
-import org.netbeans.modules.cnd.lsp.compilationdb.ClangCDBSupport;
-import org.netbeans.modules.cnd.makeproject.api.MakeProject;
-import org.netbeans.modules.cnd.makeproject.api.MakeProjectLookupProvider;
-import org.openide.util.lookup.ServiceProvider;
+import org.eclipse.lsp4j.CodeActionCapabilities;
+import org.eclipse.lsp4j.TextDocumentClientCapabilities;
 
 /**
- * Adds stuff to MakeProject Lookup.
+ * @see
+ * <a href="https://github.com/microsoft/language-server-protocol/blob/gh-pages/_specifications/specification-3-16.md#textdocumentclientcapabilities>text
+ * document client capabilities</a>
  * @author antonio
  */
-@ServiceProvider(service = MakeProjectLookupProvider.class)
-public class LSPMakeProjectLookupProvider implements MakeProjectLookupProvider {
+public final class NBTextDocumentClientCapabilities extends TextDocumentClientCapabilities {
 
-    @Override
-    public void addLookup(MakeProject owner, ArrayList<Object> ic) {
-        ClangCDBSupport support = new ClangCDBSupport(owner);
-        ic.add(support);
-        ClangdLSPClient lspClient = new ClangdLSPClient();
-        ic.add(lspClient);
+    public NBTextDocumentClientCapabilities() {
+        setCompletion(new NBCompletionCapabilities());
+        setSynchronization(new NBSynchronizationCapabilities());
+        setCodeAction(new NBCodeActionCapabilities());
+        setSemanticTokens(new NBSemanticTokensCapabilities());
     }
-    
+
 }

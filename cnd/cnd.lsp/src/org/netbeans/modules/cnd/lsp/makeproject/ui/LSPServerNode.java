@@ -16,28 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.cnd.lsp.makeproject;
+package org.netbeans.modules.cnd.lsp.makeproject.ui;
 
-import java.util.ArrayList;
-import org.netbeans.modules.cnd.lsp.client.impl.clangd.ClangdLSPClient;
-import org.netbeans.modules.cnd.lsp.compilationdb.ClangCDBSupport;
-import org.netbeans.modules.cnd.makeproject.api.MakeProject;
-import org.netbeans.modules.cnd.makeproject.api.MakeProjectLookupProvider;
-import org.openide.util.lookup.ServiceProvider;
+import org.netbeans.api.project.Project;
+import org.openide.nodes.AbstractNode;
+import org.openide.nodes.Children;
 
 /**
- * Adds stuff to MakeProject Lookup.
+ * LSPServerNode is a node for LSP Servers.
  * @author antonio
  */
-@ServiceProvider(service = MakeProjectLookupProvider.class)
-public class LSPMakeProjectLookupProvider implements MakeProjectLookupProvider {
+public class LSPServerNode extends AbstractNode {
 
-    @Override
-    public void addLookup(MakeProject owner, ArrayList<Object> ic) {
-        ClangCDBSupport support = new ClangCDBSupport(owner);
-        ic.add(support);
-        ClangdLSPClient lspClient = new ClangdLSPClient();
-        ic.add(lspClient);
+    private final Project project;
+
+    public LSPServerNode(Project project) {
+        super(Children.LEAF);
+        this.project = project;
+        setDisplayName("LSP Servers");
     }
     
 }
