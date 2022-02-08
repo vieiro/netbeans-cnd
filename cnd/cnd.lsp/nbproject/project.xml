@@ -180,35 +180,35 @@
             <public-packages/>
             <class-path-extension>
                 <runtime-relative-path>ext/org.eclipse.lsp4j.jsonrpc-0.12.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/org.eclipse.lsp4j.jsonrpc-0.12.0.jar</binary-origin>
+                <binary-origin>external/org.eclipse.lsp4j.jsonrpc-0.12.0.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/org.eclipse.xtend.lib.macro-2.24.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/org.eclipse.xtend.lib.macro-2.24.0.jar</binary-origin>
+                <binary-origin>external/org.eclipse.xtend.lib.macro-2.24.0.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/gson-2.8.9.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/gson-2.8.9.jar</binary-origin>
+                <binary-origin>external/gson-2.8.9.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/org.eclipse.lsp4j.generator-0.12.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/org.eclipse.lsp4j.generator-0.12.0.jar</binary-origin>
+                <binary-origin>external/org.eclipse.lsp4j.generator-0.12.0.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/guava-27.1-jre.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/guava-27.1-jre.jar</binary-origin>
+                <binary-origin>external/guava-27.1-jre.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/org.eclipse.lsp4j-0.12.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/org.eclipse.lsp4j-0.12.0.jar</binary-origin>
+                <binary-origin>external/org.eclipse.lsp4j-0.12.0.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/org.eclipse.xtend.lib-2.24.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/org.eclipse.xtend.lib-2.24.0.jar</binary-origin>
+                <binary-origin>external/org.eclipse.xtend.lib-2.24.0.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/org.eclipse.xtext.xbase.lib-2.24.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/org.eclipse.xtext.xbase.lib-2.24.0.jar</binary-origin>
+                <binary-origin>external/org.eclipse.xtext.xbase.lib-2.24.0.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>
