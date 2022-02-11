@@ -36,7 +36,7 @@ import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.InitializedParams;
 import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
+import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
 import org.eclipse.lsp4j.TraceValue;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
@@ -44,8 +44,9 @@ import org.eclipse.lsp4j.jsonrpc.RemoteEndpoint;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
-import org.netbeans.api.project.Project;
 import org.netbeans.modules.cnd.lsp.client.capabilities.NBClientCapabilities;
+import org.netbeans.modules.cnd.lsp.client.impl.diagnostics.DiagnosticsPublisherTask;
+import org.netbeans.modules.cnd.lsp.client.impl.mappers.MessageTypeMapper;
 import org.netbeans.modules.cnd.lsp.client.impl.ui.ShowMessageRequestPanel;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
@@ -58,25 +59,25 @@ import org.openide.NotifyDescriptor;
  *
  * @author antonio
  */
-public abstract class NBLSPClient
+public abstract class NBLanguageClient
         extends AbstractLSPClient
         implements LanguageClient {
 
-    private static final Logger LOG = Logger.getLogger(NBLSPClient.class.getName());
+    private static final Logger LOG = Logger.getLogger(NBLanguageClient.class.getName());
 
     protected Process process;
-    protected Project project;
     protected File stderr;
     private Launcher<LanguageServer> server;
     private LanguageServer languageServer;
     private RemoteEndpoint remoteEndpoint;
     private InputStream input;
     private OutputStream output;
+    private InitializeResult initializeResult;
 
     /**
      * Creates an instance that logs to NetBeans log.
      */
-    public NBLSPClient() {
+    public NBLanguageClient() {
         this(null);
     }
 
@@ -86,7 +87,7 @@ public abstract class NBLSPClient
      * @param stderrLogFile The log file where the LSP stderr is to be stored,
      * or null to redirect to NetBeans log.
      */
-    public NBLSPClient(File stderrLogFile) {
+    public NBLanguageClient(File stderrLogFile) {
         this.stderr = stderrLogFile;
     }
 
@@ -101,9 +102,8 @@ public abstract class NBLSPClient
     public abstract String[] getProcessCommands();
 
     @Override
-    public CompletableFuture<LSPServerStatus> start(Project project) throws InterruptedException, ExecutionException {
-        this.project = project;
-        return submit(this::startProcess);
+    public CompletableFuture<LSPServerStatus> start() throws InterruptedException, ExecutionException {
+        return submit(this::initialize);
     }
 
     @Override
@@ -118,7 +118,7 @@ public abstract class NBLSPClient
      * @return The final status
      * @throws Exception on error.
      */
-    protected LSPServerStatus startProcess() throws Exception {
+    protected LSPServerStatus initialize() throws Exception {
         if (status == LSPServerStatus.STARTED) {
             LOG.log(Level.INFO, "Stopping previously started process");
             stopProcess();
@@ -153,12 +153,13 @@ public abstract class NBLSPClient
             InitializeParams initializeServerParams = new InitializeParams();
             // PID Only in Java 9 initializeServerParams.setProcessId((int) ProcessHandle.current().pid());
             initializeServerParams.setTrace(TraceValue.Verbose);
+
             ClientCapabilities clientCapabilities = new NBClientCapabilities();
             initializeServerParams.setCapabilities(clientCapabilities);
             LOG.log(Level.INFO, "Initialize");
-            InitializeResult result = languageServer.initialize(initializeServerParams).get();
+            initializeResult = languageServer.initialize(initializeServerParams).get();
             LOG.log(Level.INFO, String.format(
-                    "(T: %s) Server responded to initalize: %s%n", Thread.currentThread().toString(), result));
+                    "(T: %s) Server responded to initalize: %s%n", Thread.currentThread().toString(), initializeResult));
 
             InitializedParams clientInitializedParams = new InitializedParams();
             languageServer.initialized(clientInitializedParams);
@@ -206,22 +207,7 @@ public abstract class NBLSPClient
      */
     @Override
     public void logMessage(MessageParams messageParams) {
-        MessageType messageType = messageParams.getType() == null ? MessageType.Error : messageParams.getType();
-        Level level = Level.SEVERE;
-        switch (messageType) {
-            case Error:
-                level = Level.SEVERE;
-                break;
-            case Warning:
-                level = Level.WARNING;
-                break;
-            case Info:
-                level = Level.INFO;
-                break;
-            case Log:
-                level = Level.FINE;
-                break;
-        }
+        Level level = MessageTypeMapper.getInstance().messageType2Level(messageParams.getType());
         String logMessage = String.format("LSP SERVER: %s", messageParams.getMessage());
         LOG.log(level, logMessage);
     }
@@ -234,25 +220,8 @@ public abstract class NBLSPClient
      */
     @Override
     public void showMessage(MessageParams messageParams) {
-        MessageType messageType = messageParams.getType() == null ? MessageType.Error : messageParams.getType();
         String message = "LSP Server: " + messageParams.getMessage(); // NOI18N
-
-        int nbMessageType = NotifyDescriptor.ERROR_MESSAGE;
-        switch (messageType) {
-            case Error:
-                nbMessageType = NotifyDescriptor.ERROR_MESSAGE;
-                break;
-            case Info:
-                nbMessageType = NotifyDescriptor.INFORMATION_MESSAGE;
-                break;
-            case Log:
-                nbMessageType = NotifyDescriptor.PLAIN_MESSAGE;
-                break;
-            case Warning:
-                nbMessageType = NotifyDescriptor.WARNING_MESSAGE;
-                break;
-        }
-
+        int nbMessageType = MessageTypeMapper.getInstance().messageType2NotifyDescriptorType(messageParams.getType());
         NotifyDescriptor nd = new NotifyDescriptor.Message(message, nbMessageType);
         DialogDisplayer.getDefault().notifyLater(nd);
     }
@@ -266,7 +235,6 @@ public abstract class NBLSPClient
      */
     @Override
     public CompletableFuture<MessageActionItem> showMessageRequest(ShowMessageRequestParams requestParams) {
-        final MessageType messageType = requestParams.getType() == null ? MessageType.Error : requestParams.getType();
         final String message = "LSP Server: " + requestParams.getMessage(); // NOI18N
         final List<MessageActionItem> actions = requestParams.getActions();
         final ArrayList<MessageActionItem> selectedAction = new ArrayList<>();
@@ -292,6 +260,38 @@ public abstract class NBLSPClient
         };
 
         return submit(task);
+    }
+
+    /**
+     * This event is sent from the server to log a telemetry event. The exact
+     * type of the argument is not specified. Most clients even don’t handle the
+     * event directly but forward them to the extensions owing the corresponding
+     * server issuing the event.
+     *
+     * @param object The data received from the server.
+     */
+    @Override
+    public void telemetryEvent(Object object) {
+        // TODO: See if we want to forward to extensions in the future
+        LOG.log(Level.INFO, "LSP Server Telemetry: {0}", object);
+    }
+
+    /**
+     * Sent by the server with information about validations. Diagnostics are
+     * “owned” by the server so it is the server’s responsibility to clear them
+     * if necessary.
+     *
+     * @see
+     * <a href="https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#publishDiagnosticsParams">PublishDiagnosticsParams</a>
+     * @see
+     * <a href="https://microsoft.github.io/language-server-protocol/specification.html#diagnostic">Diagnostic
+     * in the LSP specification</a>
+     *
+     * @param diagnostics
+     */
+    @Override
+    public void publishDiagnostics(PublishDiagnosticsParams diagnostics) {
+        submit(new DiagnosticsPublisherTask(this, diagnostics));
     }
 
 }

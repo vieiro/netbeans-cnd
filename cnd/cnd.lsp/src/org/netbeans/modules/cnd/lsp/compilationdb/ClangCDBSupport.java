@@ -20,7 +20,6 @@ package org.netbeans.modules.cnd.lsp.compilationdb;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -32,7 +31,6 @@ import org.netbeans.modules.cnd.makeproject.api.MakeProject;
 import org.netbeans.modules.cnd.makeproject.api.support.MakeProjectEvent;
 import org.netbeans.modules.cnd.makeproject.api.support.MakeProjectListener;
 import org.netbeans.spi.project.ui.ProjectOpenedHook;
-import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
 import org.netbeans.modules.cnd.lsp.client.impl.LSPClient;
 
@@ -168,14 +166,13 @@ public final class ClangCDBSupport
         LOG.log(Level.INFO, "Found instance of LSPClient in project lookup: {0}", client);
         if (client != null) {
             try {
-                client.start(makeProject).thenAccept(status -> {
+                client.start().thenAccept(status -> {
                     LOG.log(Level.INFO, "LSPClient started with status {0}", status);
                 });
             } catch (Exception ex) {
                 LOG.log(Level.INFO, "LSPClient failed", ex);
             }
         }
-
     }
 
     @Override

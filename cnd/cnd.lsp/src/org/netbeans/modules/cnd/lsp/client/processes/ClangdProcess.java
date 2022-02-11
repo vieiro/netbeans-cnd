@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.cnd.lsp.client.impl.clangd;
+package org.netbeans.modules.cnd.lsp.client.processes;
 
-import org.netbeans.modules.cnd.lsp.client.impl.NBLSPClient;
+import org.netbeans.modules.cnd.lsp.client.impl.NBLanguageClient;
 
 /**
  *
  * @author antonio
  */
-public class ClangdLSPClient extends NBLSPClient {
+public class ClangdProcess extends NBLanguageClient {
 
     // TODO: Parametrize this
     private static final String CLANGD_PATH = "/usr/bin/clangd";

@@ -49,7 +49,7 @@ public abstract class AbstractLSPClient implements LSPClient {
         this.executorService = Executors.newSingleThreadExecutor();
     }
 
-    protected synchronized void setStatus(LSPServerStatus newStatus) {
+    protected final synchronized void setStatus(LSPServerStatus newStatus) {
         if (newStatus != status) {
             LSPServerStatus oldStatus = status;
             status = newStatus;
@@ -58,17 +58,17 @@ public abstract class AbstractLSPClient implements LSPClient {
     }
 
     @Override
-    public LSPServerStatus getStatus() {
+    public final LSPServerStatus getStatus() {
         return status;
     }
 
     @Override
-    public void addPropertyChangeListener(PropertyChangeListener propertyChangeListener) {
+    public final void addPropertyChangeListener(PropertyChangeListener propertyChangeListener) {
         propertyChangeSupport.addPropertyChangeListener(propertyChangeListener);
     }
 
     @Override
-    public void removePropertyChangeListener(PropertyChangeListener propertyChangeListener) {
+    public final void removePropertyChangeListener(PropertyChangeListener propertyChangeListener) {
         propertyChangeSupport.removePropertyChangeListener(propertyChangeListener);
     }
 
@@ -80,24 +80,21 @@ public abstract class AbstractLSPClient implements LSPClient {
      *   the calling thread.
      * @return A CompletableFuture used to process the response asynchronously.
      */
-    protected <T> CompletableFuture<T> submit(Callable<T> task) {
+    protected final <T> CompletableFuture<T> submit(Callable<T> task) {
 
         final Future<T> future = executorService.submit(task);
 
         final CompletableFuture<T> completableFuture = new CompletableFuture<>();
 
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (!completableFuture.isDone()
-                        && !completableFuture.isCancelled()
-                        && !completableFuture.isCompletedExceptionally()) {
-                    try {
-                        T result = future.get();
-                        completableFuture.complete(result);
-                    } catch (Exception e) {
-                        completableFuture.completeExceptionally(e);
-                    }
+        executorService.execute(() -> {
+            if (!completableFuture.isDone()
+                    && !completableFuture.isCancelled()
+                    && !completableFuture.isCompletedExceptionally()) {
+                try {
+                    T result = future.get();
+                    completableFuture.complete(result);
+                } catch (Exception e) {
+                    completableFuture.completeExceptionally(e);
                 }
             }
         });

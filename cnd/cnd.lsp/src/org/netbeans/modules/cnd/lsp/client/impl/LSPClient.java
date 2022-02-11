@@ -21,7 +21,6 @@ package org.netbeans.modules.cnd.lsp.client.impl;
 import java.beans.PropertyChangeListener;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import org.netbeans.api.project.Project;
 
 /**
  * A LSP client. NOTE: This interface does not depend on LSP4J on purpose.
@@ -38,12 +37,12 @@ public interface LSPClient {
     /**
      * Starts the LSP server and connects to it..
      *
-     * @param project The project associated to this LSP client.
+     * @param process The LSP server process.
      * @return a CompletableFuture associated with the initialization task.
      * @throws InterruptedException If the initialization task was interrupted.
      * @throws ExecutionException If the task failed.
      */
-    CompletableFuture<LSPServerStatus> start(Project project) throws InterruptedException, ExecutionException;
+    CompletableFuture<LSPServerStatus> start() throws InterruptedException, ExecutionException;
 
     /**
      * Stops the server.
