@@ -20,6 +20,7 @@ package org.netbeans.modules.cnd.lsp.compilationdb;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -32,7 +33,8 @@ import org.netbeans.modules.cnd.makeproject.api.support.MakeProjectEvent;
 import org.netbeans.modules.cnd.makeproject.api.support.MakeProjectListener;
 import org.netbeans.spi.project.ui.ProjectOpenedHook;
 import org.openide.util.RequestProcessor;
-import org.netbeans.modules.cnd.lsp.client.impl.LSPClient;
+import org.netbeans.modules.cnd.lsp.client.api.LSPClient;
+import org.openide.util.Exceptions;
 
 /**
  * ClangCDBSupport is responsible for detecting and generating a JSON
@@ -140,7 +142,8 @@ public final class ClangCDBSupport
 
     /**
      * Ignored. See javadoc
-     * @param ev 
+     *
+     * @param ev
      */
     @Override
     public void propertiesChanged(MakeProjectEvent ev) {
@@ -170,7 +173,7 @@ public final class ClangCDBSupport
                     LOG.log(Level.INFO, "LSPClient started with status {0}", status);
                 });
             } catch (Exception ex) {
-                LOG.log(Level.INFO, "LSPClient failed", ex);
+                LOG.log(Level.INFO, "LSPClient start failed", ex);
             }
         }
     }
@@ -179,6 +182,18 @@ public final class ClangCDBSupport
     protected void projectClosed() {
         LOG.log(Level.FINE, "Project closed");
         removeListenersOnCloseOrDelete();
+
+        LSPClient client = makeProject.getLookup().lookup(LSPClient.class);
+        if (client != null) {
+            try {
+                client.stop().thenAccept(status -> {
+                    LOG.log(Level.INFO, "LSPClient stopped with status{0}", status);
+                });
+            } catch (Exception ex) {
+                LOG.log(Level.INFO, "LSPClient stop failed", ex);
+            }
+        }
+
     }
 
     @Override

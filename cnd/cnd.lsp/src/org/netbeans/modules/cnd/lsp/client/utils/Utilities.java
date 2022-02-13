@@ -18,17 +18,24 @@
  */
 package org.netbeans.modules.cnd.lsp.client.utils;
 
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 import javax.swing.text.StyledDocument;
 import org.eclipse.lsp4j.Position;
 import org.netbeans.api.editor.document.LineDocument;
 import org.netbeans.api.editor.document.LineDocumentUtils;
+import org.netbeans.modules.editor.NbEditorUtilities;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.URLMapper;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -79,6 +86,69 @@ public final class Utilities {
         int lineStartOffset = LineDocumentUtils.getLineStartFromIndex(document, line);
         int offset = lineStartOffset + column;
         return offset;
+    }
+
+    /**
+     * Returns the FileObject being edited in the text component, or null if none.
+     * @param textComponent The text component.
+     * @return the FileObject being edited in the text component, if any, or null.
+     */
+    public static FileObject getFileObject(JTextComponent textComponent) {
+        if (textComponent == null) {
+            return null;
+        }
+        Document document = textComponent.getDocument();
+        return NbEditorUtilities.getFileObject(document);
+    }
+
+    /**
+     * Returns a Position from a given offset in a Document
+     * @param document The document.
+     * @param offset The offset.
+     * @return The position
+     */
+    public static Position createPosition(LineDocument document, int offset) 
+            throws BadLocationException {
+        int lineNumber = LineDocumentUtils.getLineIndex(document, offset);
+        int lineStartOffset = LineDocumentUtils.getLineStart(document, offset);
+        int character = offset - lineStartOffset;
+        return new Position(lineNumber, character);
+    }
+
+    /**
+     * Computes the end position of a text that has been removed at position
+     * @param position The initial position
+     * @param removedText The text removed from the initial position
+     * @return The end position of the removed text.
+     */
+    public static Position computeEndPositionForRemovedText(Position position, String removedText) {
+        int endLine = position.getLine();
+        int endChar = position.getCharacter();
+        for (char c : removedText.toCharArray()) {
+            if (c == '\n') {
+                endLine++;
+                endChar = 0;
+            } else {
+                endChar++;
+            }
+        }
+        return new Position(endLine, endChar);
+     }
+
+    /**
+     * Finds a FileObject given a DocumentURI.
+     * @param uriString The DocumentURI
+     * @return  The FileObject, or null.
+     */
+    public static FileObject findFileObject(String uriString) {
+        try {
+            URI uri = new URI(uriString);
+            URL url = uri.toURL();
+            return URLMapper.findFileObject(url);
+        } catch (URISyntaxException | MalformedURLException ex) {
+            LOG.log(Level.SEVERE, ex.getClass().getName() + ":" + ex.getMessage(), ex);
+            return null;
+        }
     }
 
 }

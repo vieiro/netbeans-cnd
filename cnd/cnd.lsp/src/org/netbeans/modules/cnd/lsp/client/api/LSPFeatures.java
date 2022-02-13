@@ -16,30 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.cnd.lsp.client.processes;
-
-import org.netbeans.modules.cnd.lsp.client.impl.NBLanguageClient;
+package org.netbeans.modules.cnd.lsp.client.api;
 
 /**
- *
+ * Different LSP features.
  * @author antonio
  */
-public class ClangdProcess extends NBLanguageClient {
+public enum LSPFeatures {
 
-    // TODO: Parametrize this
-    private static final String CLANGD_PATH = "/usr/bin/clangd";
-    private static final String[] CLANGD_COMMAND = {
-        CLANGD_PATH,
-        "--clang-tidy",
-        "--completion-style=detailed",
-        "--offset-encoding=utf-8",
-        "--pch-storage=disk",
-        "--log=verbose",
-        "--background-index",};
-
-    @Override
-    public String[] getProcessCommands() {
-        return CLANGD_COMMAND;
-    }
-
+    /**
+     * Breadcrumbs feature.
+     */
+    BREADCRUMBS,
+    /**
+     * Mark occurences
+     */
+    MARK_OCURRENCES,
+    /**
+     * Completion
+     */
+    COMPLETION,
+    /**
+     * Diagnostics
+     */
+    DIAGNOSTICS,
 }

@@ -18,17 +18,48 @@
  */
 package org.netbeans.modules.cnd.lsp.client.impl.clangd;
 
-import org.netbeans.modules.cnd.lsp.client.impl.NBLanguageClient;
+import java.util.EnumSet;
+import org.netbeans.api.project.FileOwnerQuery;
+import org.netbeans.api.project.Project;
+import org.netbeans.modules.cnd.lsp.client.api.LSPFeatures;
+import org.netbeans.modules.cnd.lsp.client.impl.AbstractLanguageClient;
+import org.openide.filesystems.FileObject;
 
 /**
  *
  * @author antvie
  */
-public class ClangdLanguageClient extends NBLanguageClient {
+public class ClangdLanguageClient extends AbstractLanguageClient {
+
+    // TODO: Parametrize this
+    private static final String CLANGD_PATH = "/usr/bin/clangd";
+    private static final String[] CLANGD_COMMAND = {
+        CLANGD_PATH,
+        "--clang-tidy",
+        "--completion-style=detailed",
+        "--offset-encoding=utf-8",
+        "--pch-storage=disk",
+        "--log=verbose",
+        "--background-index",};
+
+    private EnumSet<LSPFeatures> features = EnumSet.of(LSPFeatures.COMPLETION);
 
     @Override
-    public String[] getProcessCommands() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public String[] getLSPServerStartCommands() {
+        return CLANGD_COMMAND;
     }
-    
+
+    @Override
+    public Project isResponsibleFor(FileObject fileObject) {
+        if (fileObject == null) {
+            return null;
+        }
+        return FileOwnerQuery.getOwner(fileObject);
+    }
+
+    @Override
+    public EnumSet<LSPFeatures> getClientFeatures() {
+        return features;
+    }
+   
 }

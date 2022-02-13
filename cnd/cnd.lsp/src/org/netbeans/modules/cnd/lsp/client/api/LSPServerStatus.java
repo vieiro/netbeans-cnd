@@ -16,14 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.cnd.lsp.client.impl;
+package org.netbeans.modules.cnd.lsp.client.api;
 
 /**
  * The status of a LSPServer
  * @author antonio
  */
 public enum LSPServerStatus {
+    /**
+     * The server is stopped.
+     */
     STOPPED,
+    /**
+     * The server is starting.
+     */
     STARTING,
+    /**
+     * The server is started and running.
+     */
     STARTED,
+    /**
+     * The server is not configured yet.
+     */
+    NOT_CONFIGURED_YET
 }

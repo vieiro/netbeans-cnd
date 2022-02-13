@@ -16,11 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.cnd.lsp.client.impl;
+package org.netbeans.modules.cnd.lsp.client.api;
 
 import java.beans.PropertyChangeListener;
+import java.util.EnumSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import org.netbeans.api.project.Project;
+import org.openide.filesystems.FileObject;
 
 /**
  * A LSP client. NOTE: This interface does not depend on LSP4J on purpose.
@@ -28,6 +31,34 @@ import java.util.concurrent.ExecutionException;
  * @author antonio
  */
 public interface LSPClient {
+
+    /**
+     * Returns the array of strings that are used to start the Process.
+     * Subclasses are responsible for setting this.
+     * 
+     * @return The array of strings used to conform the command to start the
+     * process, the first one must, of course, point to the LSP Server
+     * executable
+     */
+    String[] getLSPServerStartCommands();
+
+    /**
+     * Returns the set of features this __client__ is interested in. A Client
+     * may be interested in the completion feature, but not in the breadcrumbs one,
+     * for instance.
+     * @return The set of _client_ features we are interested in.
+     */
+    EnumSet<LSPFeatures> getClientFeatures();
+
+    /**
+     * Checks if the given FileObject is to be synchronized with the LSP Server,
+     * if so the Project that holds the FileObject is returned.
+     * @param fileObject The fileObject, may be null.
+     * @return The Project that owns this FileObject, iff this FileObject is
+     * to be synchronized with the LSP Server.
+     */
+    Project isResponsibleFor(FileObject fileObject);
+
 
     /**
      * The property name used for "status" PropertyChangeEvents

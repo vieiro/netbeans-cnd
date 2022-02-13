@@ -19,7 +19,7 @@
 package org.netbeans.modules.cnd.lsp.makeproject;
 
 import java.util.ArrayList;
-import org.netbeans.modules.cnd.lsp.client.processes.ClangdProcess;
+import org.netbeans.modules.cnd.lsp.client.impl.clangd.ClangdLanguageClient;
 import org.netbeans.modules.cnd.lsp.compilationdb.ClangCDBSupport;
 import org.netbeans.modules.cnd.makeproject.api.MakeProject;
 import org.netbeans.modules.cnd.makeproject.api.MakeProjectLookupProvider;
@@ -36,8 +36,8 @@ public class LSPMakeProjectLookupProvider implements MakeProjectLookupProvider {
     public void addLookup(MakeProject owner, ArrayList<Object> ic) {
         ClangCDBSupport support = new ClangCDBSupport(owner);
         ic.add(support);
-        ClangdProcess lspClient = new ClangdProcess();
-        ic.add(lspClient);
+        ClangdLanguageClient clangdClient = new ClangdLanguageClient();
+        ic.add(clangdClient);
     }
     
 }

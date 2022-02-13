@@ -18,7 +18,9 @@
  */
 package org.netbeans.modules.cnd.lsp.client.capabilities;
 
+import java.util.EnumSet;
 import org.eclipse.lsp4j.ClientCapabilities;
+import org.netbeans.modules.cnd.lsp.client.api.LSPFeatures;
 import org.netbeans.modules.cnd.lsp.client.capabilities.textdocument.NBTextDocumentClientCapabilities;
 import org.netbeans.modules.cnd.lsp.client.capabilities.workspace.NBWorkspaceClientCapabilities;
 
@@ -39,7 +41,17 @@ import org.netbeans.modules.cnd.lsp.client.capabilities.workspace.NBWorkspaceCli
  */
 public final class NBClientCapabilities extends ClientCapabilities {
 
-    public NBClientCapabilities() {
+    private final EnumSet<LSPFeatures> requiredFeatures;
+
+    /**
+     * Builds a NetBeans ClientCapabilities object with the desired client
+     * capabilities.
+     *
+     * @param requiredFeatures The required capabilities in the client, note
+     * that LSP servers may or may not have these capabilities.
+     */
+    public NBClientCapabilities(EnumSet<LSPFeatures> requiredFeatures) {
+        this.requiredFeatures = requiredFeatures;
         setTextDocument(new NBTextDocumentClientCapabilities());
         setWorkspace(new NBWorkspaceClientCapabilities());
     }

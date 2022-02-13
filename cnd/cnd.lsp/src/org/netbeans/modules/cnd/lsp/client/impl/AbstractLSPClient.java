@@ -18,18 +18,21 @@
  */
 package org.netbeans.modules.cnd.lsp.client.impl;
 
+import org.netbeans.modules.cnd.lsp.client.api.LSPServerStatus;
+import org.netbeans.modules.cnd.lsp.client.api.LSPClient;
 import java.beans.PropertyChangeListener;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.SwingPropertyChangeSupport;
 
 /**
- * A LSPClient with property change support and background thread.
- * NOTE: This class does not depend on LSP4J on purpose.
+ * A LSPClient with property change support and background thread. NOTE: This
+ * class does not depend on LSP4J on purpose.
  *
  * @author antonio
  */
@@ -73,14 +76,20 @@ public abstract class AbstractLSPClient implements LSPClient {
     }
 
     /**
-     * Used to send messages to the LSP server in a background thread.
-     * NOTE: All LSP4J request must be done in a task for proper sequencing.
+     * Used to send messages to the LSP server in a background thread. NOTE:
+     * Does the LSP specification if request can be sent in parallel or not? It
+     * seems some LSP servers expect stuff to be received sequentially?.
+     *
      * @param <T> The type of the response expected.
      * @param task The task to perform in a background thread without blocking
-     *   the calling thread.
+     * the calling thread.
      * @return A CompletableFuture used to process the response asynchronously.
      */
-    protected final <T> CompletableFuture<T> submit(Callable<T> task) {
+    public final <T> CompletableFuture<T> submit(Callable<T> task) {
+
+        if (status != LSPServerStatus.STARTED) {
+            LOG.log(Level.WARNING, "Cannot submit LSP tasks for servers that have not been started (status={0})", status);
+        }
 
         final Future<T> future = executorService.submit(task);
 

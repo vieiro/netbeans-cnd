@@ -18,11 +18,13 @@
  */
 package org.netbeans.modules.cnd.lsp.client.impl;
 
+import org.netbeans.modules.cnd.lsp.client.api.LSPServerStatus;
 import java.awt.Dialog;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -37,6 +39,7 @@ import org.eclipse.lsp4j.InitializedParams;
 import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
 import org.eclipse.lsp4j.TraceValue;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
@@ -44,9 +47,11 @@ import org.eclipse.lsp4j.jsonrpc.RemoteEndpoint;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
+import org.netbeans.modules.cnd.lsp.client.api.LSPFeatures;
 import org.netbeans.modules.cnd.lsp.client.capabilities.NBClientCapabilities;
-import org.netbeans.modules.cnd.lsp.client.impl.diagnostics.DiagnosticsPublisherTask;
+import org.netbeans.modules.cnd.lsp.client.impl.diagnostics.ApplyDiagnosticsOnEDT;
 import org.netbeans.modules.cnd.lsp.client.impl.mappers.MessageTypeMapper;
+import org.netbeans.modules.cnd.lsp.client.impl.textdocument.ClientTextDocumentService;
 import org.netbeans.modules.cnd.lsp.client.impl.ui.ShowMessageRequestPanel;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
@@ -59,11 +64,11 @@ import org.openide.NotifyDescriptor;
  *
  * @author antonio
  */
-public abstract class NBLanguageClient
+public abstract class AbstractLanguageClient
         extends AbstractLSPClient
         implements LanguageClient {
 
-    private static final Logger LOG = Logger.getLogger(NBLanguageClient.class.getName());
+    private static final Logger LOG = Logger.getLogger(AbstractLanguageClient.class.getName());
 
     protected Process process;
     protected File stderr;
@@ -73,11 +78,12 @@ public abstract class NBLanguageClient
     private InputStream input;
     private OutputStream output;
     private InitializeResult initializeResult;
+    private ClientTextDocumentService clientTextDocumentService;
 
     /**
      * Creates an instance that logs to NetBeans log.
      */
-    public NBLanguageClient() {
+    public AbstractLanguageClient() {
         this(null);
     }
 
@@ -87,19 +93,9 @@ public abstract class NBLanguageClient
      * @param stderrLogFile The log file where the LSP stderr is to be stored,
      * or null to redirect to NetBeans log.
      */
-    public NBLanguageClient(File stderrLogFile) {
+    public AbstractLanguageClient(File stderrLogFile) {
         this.stderr = stderrLogFile;
     }
-
-    /**
-     * Returns the array of strings that are used to start the Process.
-     * Subclasses are responsible for setting this.
-     *
-     * @return The array of strings used to conform the command to start the
-     * process, the first one must, of course, point to the LSP Server
-     * executable
-     */
-    public abstract String[] getProcessCommands();
 
     @Override
     public CompletableFuture<LSPServerStatus> start() throws InterruptedException, ExecutionException {
@@ -130,7 +126,7 @@ public abstract class NBLanguageClient
         LOG.info("LSP client starting");
         setStatus(LSPServerStatus.STARTING);
         try {
-            String[] commands = getProcessCommands();
+            String[] commands = getLSPServerStartCommands();
             ProcessBuilder processBuilder = new ProcessBuilder(commands);
             if (stderr != null) {
                 LOG.log(Level.INFO, "LSP client process redirecting to {0}", stderr.getAbsolutePath());
@@ -154,7 +150,8 @@ public abstract class NBLanguageClient
             // PID Only in Java 9 initializeServerParams.setProcessId((int) ProcessHandle.current().pid());
             initializeServerParams.setTrace(TraceValue.Verbose);
 
-            ClientCapabilities clientCapabilities = new NBClientCapabilities();
+            EnumSet<LSPFeatures> clientFeatures = EnumSet.allOf(LSPFeatures.class);
+            ClientCapabilities clientCapabilities = new NBClientCapabilities(clientFeatures);
             initializeServerParams.setCapabilities(clientCapabilities);
             LOG.log(Level.INFO, "Initialize");
             initializeResult = languageServer.initialize(initializeServerParams).get();
@@ -163,6 +160,8 @@ public abstract class NBLanguageClient
 
             InitializedParams clientInitializedParams = new InitializedParams();
             languageServer.initialized(clientInitializedParams);
+
+            clientTextDocumentService = new ClientTextDocumentService(this);
 
             LOG.info("LSP client started");
             setStatus(LSPServerStatus.STARTED);
@@ -183,6 +182,8 @@ public abstract class NBLanguageClient
     protected LSPServerStatus stopProcess() throws Exception {
         if (process.isAlive()) {
             try {
+                clientTextDocumentService.stop();
+                clientTextDocumentService = null;
                 languageServer.shutdown().get();
                 languageServer.exit();
             } finally {
@@ -291,7 +292,18 @@ public abstract class NBLanguageClient
      */
     @Override
     public void publishDiagnostics(PublishDiagnosticsParams diagnostics) {
-        submit(new DiagnosticsPublisherTask(this, diagnostics));
+        if (! getClientFeatures().contains(LSPFeatures.DIAGNOSTICS)) {
+            ApplyDiagnosticsOnEDT applyDiagnosticsTask = new ApplyDiagnosticsOnEDT(this, diagnostics);
+            SwingUtilities.invokeLater(applyDiagnosticsTask);
+        }
+    }
+
+    public LanguageServer getLanguageServer() {
+        return languageServer;
+    }
+
+    public ServerCapabilities getServerCapabilities() {
+        return initializeResult.getCapabilities();
     }
 
 }
