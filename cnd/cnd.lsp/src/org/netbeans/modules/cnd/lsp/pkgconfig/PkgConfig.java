@@ -18,45 +18,58 @@
  */
 package org.netbeans.modules.cnd.lsp.pkgconfig;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.SwingUtilities;
+import org.netbeans.modules.nativeexecution.api.ExecutionEnvironment;
+import org.netbeans.modules.nativeexecution.api.HostInfo;
+import org.netbeans.modules.nativeexecution.api.util.ConnectionManager;
+import org.netbeans.modules.nativeexecution.api.util.HostInfoUtils;
+import org.netbeans.modules.nativeexecution.api.util.ProcessUtils;
+import org.netbeans.modules.nativeexecution.api.util.ProcessUtils.ExitStatus;
 
 /**
- * Responsible for expanding substrings of the form "`pkgconfig --cflags XXX`"
- * and similar, and keeping expansions in a map to avoid excessive Process
- * calls. Can be run in test mode (substrings are checked for correctness, but
- * are not expanded).
+ * Responsible for invoking "pkg-config" and retrieving the results.
  *
  * @author antonio
  */
-public final class PkgConfigExpander {
+public class PkgConfig {
 
-    private static final Logger LOG = Logger.getLogger(PkgConfigExpander.class.getName());
+    private static final Logger LOG = Logger.getLogger(PkgConfig.class.getName());
+    private static final String PKG_CONFIG_WINDOWS = "pkg-config.exe"; // NOI18N
+    private static final String PKG_CONFIG_UNIX = "pkg-config"; // NOI18N
 
-    public static enum ExpansionStrategy {
-        TESTING,
-        PRODUCTION,
-    }
-
+    private final ExecutionEnvironment env;
+    private final HostInfo.OSFamily osFamily;
+    private final String pkgConfigExecutable;
     private final HashMap<String, String> expansions;
-    private final ExpansionStrategy strategy;
+    private final boolean windows;
 
-    public PkgConfigExpander() {
-        this(ExpansionStrategy.PRODUCTION);
+    public PkgConfig(ExecutionEnvironment env) throws IOException, ConnectionManager.CancellationException {
+        this.expansions = new HashMap<>();
+        this.env = env;
+        this.osFamily = HostInfoUtils.getHostInfo(env).getOSFamily();
+        if (HostInfo.OSFamily.WINDOWS == this.osFamily) {
+            this.windows = true;
+            this.pkgConfigExecutable = PKG_CONFIG_WINDOWS;
+        } else {
+            this.windows = false;
+            this.pkgConfigExecutable = PKG_CONFIG_UNIX;
+        }
     }
 
-    public PkgConfigExpander(ExpansionStrategy strategy) {
-        this.strategy = strategy;
-        this.expansions = new HashMap<>();
+    /**
+     * Returns true if the ExecutionEnvironment is a windows operating system.
+     * @return true if the ExecutionEnvironment is windows, false otherwise.
+     */
+    public boolean isWindows() {
+        return windows;
     }
 
     /**
@@ -67,7 +80,7 @@ public final class PkgConfigExpander {
      * with the result of pkg-config invocations.
      * @throws IOException If an I/O error happens.
      */
-    public String expandPkgConfig(String commandLine) throws IOException {
+    public String expand(String commandLine) throws IOException {
         StringBuilder expanded = new StringBuilder();
         String string = commandLine;
 
@@ -90,12 +103,9 @@ public final class PkgConfigExpander {
         return expanded.toString();
     }
 
-    protected String expandSubstring(String toExpand) throws IOException {
+    private String expandSubstring(String toExpand) throws IOException {
         // We don't want to block the EDT...
         assert !SwingUtilities.isEventDispatchThread();
-        if (ExpansionStrategy.TESTING == strategy) {
-            return "`" + toExpand + "`"; // NOI18N
-        }
         // Check if we're invoking `pkgconfig` or not
         if (!toExpand.startsWith("pkg-config")) // NOI18N
         {
@@ -107,34 +117,41 @@ public final class PkgConfigExpander {
             LOG.log(Level.FINE, "Cache hit for expansion `{0}`", toExpand);
             return result;
         }
-        ProcessBuilder builder = new ProcessBuilder();
-        String[] arguments = splitCommandIntoArguments(toExpand);
-        builder.command(arguments);
-        builder.redirectError(ProcessBuilder.Redirect.INHERIT);
-        Process pkgConfigProcess = builder.start();
-        int exitCode;
-        try {
-            exitCode = pkgConfigProcess.waitFor();
-        } catch (InterruptedException ex) {
-            throw new IOException(String.format("Expansion of command `%s` failed with %s(%s)", toExpand, ex.getMessage(), ex.getClass().getName()), ex);
+        String[] splittedCommandLine = splitCommandIntoArguments(toExpand);
+        String[] arguments = new String[splittedCommandLine.length - 1];
+        System.arraycopy(splittedCommandLine, 1, arguments, 0, arguments.length);
+
+        ExitStatus execution = call(arguments);
+        String expansion = execution.getOutputString();
+        // Cache the result, so we don't keep on invoking the same command over and over.
+        expansions.put(toExpand, expansion);
+        return expansion;
+    }
+
+    /**
+     * Invokes "pkg-config" in the ExecutionEnvironment, and returns the output.
+     * @param arguments The arguments to "pkg-config".
+     * @return An ExitStatus (always isOK).
+     * @throws IOException If ExitStatus representing the execution is not ok.
+     */
+    public ExitStatus call(String [] arguments) throws IOException {
+        if (LOG.isLoggable(Level.INFO)) {
+            LOG.log(Level.INFO, "Invoking pkg-config: {0} arguments {1}",
+                    new Object[]{pkgConfigExecutable, Arrays.toString(arguments)});
         }
-        if (exitCode != 0) {
-            throw new IOException(String.format("Expansion of command `%s` failed with code %d", toExpand, exitCode));
+        ExitStatus execution = ProcessUtils.execute(env, pkgConfigExecutable, arguments);
+        if (!execution.isOK()) {
+            LOG.log(Level.WARNING, "Error invoking {0} arguments: {1} exitStatus: {2} error {3}",
+                    new Object[] {
+                        pkgConfigExecutable,
+                        Arrays.toString(arguments),
+                        execution.exitCode,
+                        execution.getErrorString()
+                    });
+            throw new IOException(String.format("Expansion of command '%s' (%s) failed with exit code %d",
+                    pkgConfigExecutable, Arrays.toString(arguments), execution.exitCode));
         }
-        byte[] buffer = new byte[4 * 1024];
-        String outputString = null;
-        try ( InputStream input = pkgConfigProcess.getInputStream();  ByteArrayOutputStream output = new ByteArrayOutputStream(10 * 1024)) {
-            do {
-                int n = input.read(buffer);
-                if (n == -1) {
-                    break;
-                }
-                output.write(buffer, 0, n);
-            } while (true);
-            outputString = new String(output.toByteArray(), StandardCharsets.US_ASCII);
-        }
-        expansions.put(toExpand, outputString);
-        return outputString;
+        return execution;
     }
 
     /**
@@ -149,7 +166,7 @@ public final class PkgConfigExpander {
      * @param command A string with substrings quoted with " or '.
      * @return An array of substrings.
      */
-    public static String[] splitCommandIntoArguments(String command) {
+    private static final String[] splitCommandIntoArguments(String command) {
         ArrayList<String> parts = new ArrayList<>(16);
         Matcher matcher = PARTS.matcher(command);
         while (matcher.find()) {
