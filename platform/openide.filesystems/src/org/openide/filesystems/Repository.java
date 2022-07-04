@@ -63,6 +63,8 @@ import org.openide.util.lookup.ServiceProviders;
 public class Repository implements Serializable {
     /** @GuardedBy(Repository.class) */
     private static Repository repository;
+
+    private static final Class REPOSITORY_CLASS = Repository.class;
     
     /** Contributes to content of {@link #getDefaultFileSystem() system file system} 
      * (which influences structure under {@link FileUtil#getConfigRoot()}). The
@@ -241,7 +243,7 @@ public class Repository implements Serializable {
 
 
         public void resultChanged(LookupEvent ev) {
-            synchronized (Repository.class) {
+            synchronized (REPOSITORY_CLASS) {
                 setDelegates(computeDelegates());
             }
         }
@@ -348,7 +350,7 @@ public class Repository implements Serializable {
     public static Repository getDefault() {
         final Lookup lkp = Lookup.getDefault();
 
-        synchronized (Repository.class) {
+        synchronized (REPOSITORY_CLASS) {
             if (repository != null) {
                 return repository;
             }
@@ -364,7 +366,7 @@ public class Repository implements Serializable {
                     return r;
                 }
             });
-            synchronized (Repository.class) {
+            synchronized (REPOSITORY_CLASS) {
                 if (repository == null) {
                     repository = newRepo;
                 }
@@ -416,7 +418,7 @@ public class Repository implements Serializable {
         Reference<Lookup> c;
         LocalProvider p = null;
         LocalProvider q;
-        synchronized (Repository.class) {
+        synchronized (REPOSITORY_CLASS) {
             c = lastDefLookup;
             Lookup l = c.get();
             if (lkp == l) {
@@ -438,7 +440,7 @@ public class Repository implements Serializable {
             return null;
         }
         if (p == null) {
-            synchronized (Repository.class) {
+            synchronized (REPOSITORY_CLASS) {
                 if (lastDefLookup == c) {
                     lastLocalProvider = q;
                     lastDefLookup = new WeakReference<>(lkp);
@@ -456,10 +458,12 @@ public class Repository implements Serializable {
     };
     
     
-    static synchronized void reset() {
-        repository = null;
-        lastLocalProvider = null;
-        lastDefLookup = new WeakReference<>(null);
+    static void reset() {
+        synchronized(REPOSITORY_CLASS) {
+            repository = null;
+            lastLocalProvider = null;
+            lastDefLookup = new WeakReference<>(null);
+        }
     }
     private static final ThreadLocal<FileSystem[]> ADD_FS = new ThreadLocal<FileSystem[]>();
     private static boolean addFileSystemDelayed(FileSystem fs) {
@@ -703,11 +707,13 @@ public class Repository implements Serializable {
     * @deprecated Unused.
     */
     @Deprecated
-    public final synchronized void writeExternal(ObjectOutput oos)
+    public final void writeExternal(ObjectOutput oos)
     throws IOException {
-        for (FileSystem fs : fileSystems) {
-            if (!fs.isDefault()) {
-                oos.writeObject(new NbMarshalledObject(fs));
+        synchronized(REPOSITORY_CLASS) {
+            for (FileSystem fs : fileSystems) {
+                if (!fs.isDefault()) {
+                    oos.writeObject(new NbMarshalledObject(fs));
+                }
             }
         }
 
@@ -722,59 +728,61 @@ public class Repository implements Serializable {
     * @deprecated Unused.
     */
     @Deprecated
-    public final synchronized void readExternal(ObjectInput ois)
+    public final void readExternal(ObjectInput ois)
     throws IOException, ClassNotFoundException {
-        ArrayList<FileSystem> temp = new ArrayList<FileSystem>(10);
+        synchronized (REPOSITORY_CLASS) {
+            ArrayList<FileSystem> temp = new ArrayList<FileSystem>(10);
 
-        for (;;) {
-            Object obj = ois.readObject();
+            for (;;) {
+                Object obj = ois.readObject();
 
-            if (obj == null) {
-                // all system has been read in
-                break;
-            }
+                if (obj == null) {
+                    // all system has been read in
+                    break;
+                }
 
-            FileSystem fs;
+                FileSystem fs;
 
-            if (obj instanceof FileSystem) {
-                fs = (FileSystem) obj;
-            } else {
-                try {
-                    NbMarshalledObject mar = (NbMarshalledObject) obj;
-                    fs = (FileSystem) mar.get();
-                } catch (IOException ex) {
-                    ExternalUtil.exception(ex);
-                    fs = null;
-                } catch (ClassNotFoundException ex) {
-                    ExternalUtil.exception(ex);
-                    fs = null;
+                if (obj instanceof FileSystem) {
+                    fs = (FileSystem) obj;
+                } else {
+                    try {
+                        NbMarshalledObject mar = (NbMarshalledObject) obj;
+                        fs = (FileSystem) mar.get();
+                    } catch (IOException ex) {
+                        ExternalUtil.exception(ex);
+                        fs = null;
+                    } catch (ClassNotFoundException ex) {
+                        ExternalUtil.exception(ex);
+                        fs = null;
+                    }
+                }
+
+                if (fs != null) {
+                    // add the new filesystem
+                    temp.add(fs);
                 }
             }
 
-            if (fs != null) {
-                // add the new filesystem
-                temp.add(fs);
+            Enumeration<? extends FileSystem> ee = getFileSystems();
+            FileSystem fs;
+
+            while (ee.hasMoreElements()) {
+                fs = ee.nextElement();
+
+                if (!fs.isDefault()) {
+                    removeFileSystem(fs);
+                }
             }
-        }
 
-        Enumeration<? extends FileSystem> ee = getFileSystems();
-        FileSystem fs;
+            // in init assigned is checked and we force 'system' to be added again
+            system.assigned = false;
+            init();
 
-        while (ee.hasMoreElements()) {
-            fs = ee.nextElement();
-
-            if (!fs.isDefault()) {
-                removeFileSystem(fs);
+            // all is successfuly read
+            for (FileSystem fileSystem : temp) {
+                addFileSystem(fileSystem);
             }
-        }
-
-        // in init assigned is checked and we force 'system' to be added again
-        system.assigned = false;
-        init();
-
-        // all is successfuly read
-        for (FileSystem fileSystem : temp) {
-            addFileSystem(fileSystem);
         }
     }
 
