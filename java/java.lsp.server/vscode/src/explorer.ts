@@ -23,6 +23,7 @@ import { NbLanguageClient } from './extension';
 import { NodeChangedParams, NodeInfoNotification, NodeInfoRequest, GetResourceParams } from './protocol';
 
 const doLog : boolean = false;
+const EmptyIcon = "EMPTY_ICON";
 
 /**
  * Cached image information.
@@ -176,6 +177,9 @@ export class TreeViewService extends vscode.Disposable {
       const r = this.findProductIcon(nodeData.iconDescriptor.baseUri, nodeData.name, nodeData.contextValue);
       // override the icon with local.
       if (r) {
+        if (r === EmptyIcon) {
+          ci = new CachedImage(nodeData.iconDescriptor.baseUri, undefined, undefined, [ nodeData.name, nodeData.contextValue ]);
+        }
         ci = new CachedImage(nodeData.iconDescriptor.baseUri, undefined, r, [ nodeData.name, nodeData.contextValue ]);
         this.images.set(nodeData.iconIndex, ci);
       }
@@ -198,11 +202,11 @@ export class TreeViewService extends vscode.Disposable {
   public findProductIcon(res : vscode.Uri, ...values: string[]) : string | ThemeIcon | undefined {
     const s : string = res.toString();
     outer: for (let e of this.entries) {
-      if (e.uriRegexp.exec(s)) {
+      if (e.uriRegexp.test(s)) {
         if (e.valueRegexps) {
           let s : string = " " + values.join(" ") + " ";
           for (let vr of e.valueRegexps) {
-            if (!vr.exec(s)) {
+            if (!vr.test(s)) {
               continue outer;
             }
           }
@@ -211,10 +215,19 @@ export class TreeViewService extends vscode.Disposable {
           return ThemeIcon.File;
         } else if (e.codeicon == '*folder') {
           return ThemeIcon.Folder;
+        } else if (e.codeicon == '') {
+          return EmptyIcon;
         } else if (e.iconPath) {
           return e.iconPath;
         }
-        return new ThemeIcon(e.codeicon);
+        let resultIcon;
+        if (e.color) {
+          resultIcon = new ThemeIcon(e.codeicon, new vscode.ThemeColor(e.color));
+        } else {
+          resultIcon = new ThemeIcon(e.codeicon);
+        }
+        
+        return resultIcon;
       }
     }
     return undefined;
@@ -237,7 +250,7 @@ export class TreeViewService extends vscode.Disposable {
                   vals.push(re);
                 }
               }
-              newEntries.push(new ImageEntry(re, m?.codeicon, m?.iconPath, vals));
+              newEntries.push(new ImageEntry(re, m?.codeicon, m?.iconPath, vals, m?.color));
             } catch (e) {
               console.log("Invalid icon mapping in extension %s: %s -> %s", ext.id, reString, m?.codicon);
             }
@@ -402,9 +415,10 @@ class VisualizerProvider extends vscode.Disposable implements CustomizableTreeDa
     return this.wrap(async (arr) => {
       const pn : number = Number(element.parent?.id) || -1;
       let fetched = await this.queryVisualizer(element, arr, () => this.fetchItem(pn, n));
+      let origin : vscode.TreeItem;
       if (fetched) {
         element.update(fetched);
-        return self.getTreeItem2(fetched);
+        origin = await self.getTreeItem2(fetched);
       } else {
         // fire a change, this was unexpected
         const pn : number = Number(element.parent?.id) || -1;
@@ -412,8 +426,27 @@ class VisualizerProvider extends vscode.Disposable implements CustomizableTreeDa
         if (pv) {
           this.fireItemChange(pv);
         }
-        return element;
+        origin = element;
       }
+      let ti : vscode.TreeItem = new vscode.TreeItem(origin.label || "", origin.collapsibleState);
+
+      // See #4113 -- vscode broke icons display, if resourceUri is defined in TreeItem. We're OK with files,
+      // but folders can have a semantic icon, so let hide resourceUri from vscode for folders.
+      ti.command = origin.command;
+      ti.contextValue = origin.contextValue;
+      ti.description = origin.description;
+      ti.iconPath = origin.iconPath;
+      ti.id = origin.id;
+      ti.label = origin.label;
+      ti.tooltip = origin.tooltip;
+      ti.accessibilityInformation = origin.accessibilityInformation;
+
+      if (origin.resourceUri) {
+        if (!origin.resourceUri.toString().endsWith("/")) {
+          ti.resourceUri = origin.resourceUri;
+        }
+      }
+      return ti;
     });
   }
 
@@ -697,7 +730,8 @@ class ImageEntry {
     readonly uriRegexp : RegExp,
     readonly codeicon : string,
     readonly iconPath? : string,
-    readonly valueRegexps? : RegExp[]
+    readonly valueRegexps? : RegExp[],
+    readonly color?: string
     ) {}
 }
 class ImageTranslator {

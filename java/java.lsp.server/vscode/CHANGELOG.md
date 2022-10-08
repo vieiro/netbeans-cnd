@@ -20,6 +20,22 @@
     under the License.
 
 -->
+## Version 14.0.301
+* Settings: `NetBeans:UserDir` is set to `Local` as default value. This means each instance of VSCode runs own VSNetBeans LS
+* Format Document and Format Selection added 
+* External formatters using Eclipse, Google and Spring added.
+* JavaDoc completion added
+* Groovy Go To Symbol added
+* Several refactorings added
+* Settings are Remote-SSH aware
+* Native Image debugging provided by GraalVM works now for GraalVM CE and EE
+* Number of bug fixes and improvements in Java, projects and databases support
+
+## Version 14.0
+* Workaround for VSCode 1.67 error which breaks Projects explorer icon
+* Remove HTML tags from project problem messages
+* Fixes for Gradle projects and LSP
+
 ## Version 13.0.301
 * Added base code completion for Spock test framework
   * Spock Block Names are offered inside methods if the class extends Spock Specification

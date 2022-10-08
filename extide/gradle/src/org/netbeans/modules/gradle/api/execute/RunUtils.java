@@ -259,6 +259,7 @@ public final class RunUtils {
     public static GradleDistribution getCompatibleGradleDistribution(Project prj) {
         GradleDistributionProvider pvd = prj.getLookup().lookup(GradleDistributionProvider.class);
         GradleDistribution ret = pvd != null ? pvd.getGradleDistribution() : GradleDistributionManager.get().defaultDistribution();
+        ret = ret != null ? ret : GradleDistributionManager.get().defaultDistribution();
         ret = ret.isCompatibleWithSystemJava() ? ret : GradleDistributionManager.get().defaultDistribution();
         return ret;
 
@@ -337,7 +338,7 @@ public final class RunUtils {
      * </ol>
      * <div class="nonnormative">
      * Example of branding: 
-     * {@codesnippet org.netbeans.modules.gradle.api.execute.Bundle#trustDialgoBranding}
+     * {@snippet file="org/netbeans/modules/gradle/api/execute/TestBundle.properties" region="trustDialogBranding"}
      * This branding enables all supported options, and will make the "Trust Permanently" the default one.
      * </div>
      * 

@@ -102,8 +102,30 @@ jobs:
       - name: Extract
         run: tar --zstd -xf build.tar.zst
 
+      - name: Setup Xvfb
+        if: ${{ matrix.java != '19-ea' }}  # see #4299
+        run: |
+          echo "DISPLAY=:99.0" >> $GITHUB_ENV
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+
       - name: Commit Validation tests
         run: ant -Dcluster.config=release commit-validation
+
+      - name: Create Test Summary
+        uses: test-summary/action@v1
+        if: failure()
+        with:
+          paths: "./nbbuild/build/test/commit-validation/results/*.xml"
+
+# the test-summary action above is currently only looking for failures and ignores errors,
+# this step can be removed as soon this is fixed upstream
+      - name: Upload Test Results
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: validation-log-linux-${{ matrix.java }}
+          path: /home/runner/work/netbeans/netbeans/nbbuild/build/test/commit-validation/results/
+          retention-days: 1
 
   linux-build-system-test:
     needs: base-build
@@ -158,9 +180,6 @@ jobs:
       - name: Extract
         run: tar --zstd -xf build.tar.zst
 
-      - name: Get maven coordinates
-        run: ant getallmavencoordinates
-
       - name: Build nbms
         run: ant build-nbms
 
@@ -213,6 +232,12 @@ jobs:
       - name: Commit Validation tests
         run: ant -Dcluster.config=release commit-validation
 
+      - name: Create Test Summary
+        uses: test-summary/action@v1
+        if: failure()
+        with:
+          paths: "./*/*/build/test/*/results/*.xml"
+
   php:
     needs: base-build
     name: PHP on ${{ matrix.os }}/JDK ${{ matrix.java }} 
@@ -247,7 +272,7 @@ jobs:
           extensions: xdebug
           ini-values: xdebug.mode=debug
 
-      - name: Launch Xvfb
+      - name: Setup Xvfb
         if: contains(matrix.os, 'ubuntu')
         run: Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
       # - - -
@@ -302,7 +327,7 @@ jobs:
       - name: Test PHP Composer
         run: ant $OPTS -f php/php.composer test
 
-      # needs X fails on fails on Windows
+      # needs X fails on Windows
       - name: Test PHP Debugger
         if: contains(matrix.os, 'ubuntu')
         run: ant $OPTS -f php/php.dbgp test
@@ -348,6 +373,12 @@ jobs:
 
       - name: Test PHP Spellchecker Bindings
         run: ant $OPTS -f php/spellchecker.bindings.php test
+
+      - name: Create Test Summary
+        uses: test-summary/action@v1
+        if: failure()
+        with:
+          paths: "./*/*/build/test/*/results/*.xml"
  
 
 # last job depends on everything so that it is forced to run last even if a long job fails early
@@ -364,10 +395,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           persist-credentials: false
-          submodules: recursive
+          submodules: true
 
-      - uses: ./.github/actions/delete-artifact/
-        name: Delete build Artifact
+      - name: Delete build Artifact
+        uses: ./.github/actions/delete-artifact/
         with:
           name: build
           failOnError: true

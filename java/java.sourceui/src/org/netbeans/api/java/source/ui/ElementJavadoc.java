@@ -35,6 +35,7 @@ import com.sun.source.doctree.ReferenceTree;
 import com.sun.source.doctree.ReturnTree;
 import com.sun.source.doctree.SeeTree;
 import com.sun.source.doctree.SinceTree;
+import com.sun.source.doctree.SnippetTree;
 import com.sun.source.doctree.StartElementTree;
 import com.sun.source.doctree.TextTree;
 import com.sun.source.doctree.ThrowsTree;
@@ -1319,56 +1320,71 @@ public class ElementJavadoc {
                 case TEXT:
                     TextTree ttag = (TextTree)tag;
                     sb.append(ttag.getBody());
-					break;
-		default:
-                    if (tag.getKind().toString().equals("SNIPPET")) { 
-                        snippetCount++;
-                        processDocSnippet(sb, tag, snippetCount,docPath, doc, trees);
-                    }	
+                    break;
+                case SNIPPET:
+                    snippetCount++;
+                    processDocSnippet(sb, (SnippetTree)tag, snippetCount,docPath, doc, trees);
+                    break;
             }
         }
         return sb;
     }
 
-    private void processDocSnippet(StringBuilder sb, DocTree tag, Integer snippetCount, TreePath docPath,DocCommentTree doc, DocTrees trees) {
+    private void processDocSnippet(StringBuilder sb, SnippetTree javadocSnippet, Integer snippetCount, TreePath docPath,DocCommentTree doc, DocTrees trees) {
         sb.append("<div id=\"snippet").append(snippetCount).append("\" style=\"font-size: 10px; border: 1px solid black; margin-top: 2px; margin-bottom: 2px\">"); //NOI18N
         sb.append("<div align=right>" //NOI18N
                 + "<a href=\"copy.snippet").append(snippetCount).append("\">Copy</a>" //NOI18N
                 + "</div>\n"); //NOI18N
+        
         sb.append("<pre>"); //NOI18N
         sb.append("<code>"); //NOI18N
+  
 
-        ClassPath classPath = this.cpInfo.getClassPath(ClasspathInfo.PathKind.SOURCE);
-        String pckgName = docPath.getCompilationUnit().getPackageName().toString();
-        
-        List<DocTree> attributes = (List<DocTree>) TreeShims.getSnippetDocTreeAttributes(tag);
+        List<? extends DocTree> attributes = javadocSnippet.getAttributes();
         
         String fileName = null;
         String regionName = null;
         String lang = null;
-  
+        Set<String> errorList = new HashSet<>();
+        String error = "";
+
         boolean isExternalSnippet = false;
+        String text = null;
         
         for(DocTree att : attributes){
             switch (((AttributeTree)att).getName().toString()) {
                 case "file":
-                    fileName = ((AttributeTree)att).getValue().get(0).toString();
+                    if(isAttrPresent(att) && text==null) {
+                        fileName = ((AttributeTree)att).getValue().get(0).toString();
+                        text = extractContent(docPath, att, errorList, fileName);
+                    } else {
+                        error = "error: snippet markup: File invalid";
+                    }
                     isExternalSnippet = true;
                     break;
                 case "class":
-                    fileName = ((AttributeTree)att).getValue().get(0).toString() + ".java";
+                    if(isAttrPresent(att) && text==null) {
+                        fileName = ((AttributeTree)att).getValue().get(0).toString() + ".java";
+                        text = extractContent(docPath, att, errorList, fileName);
+                        lang="java";
+                    } else {
+                        error = "error: snippet markup: File invalid";
+                    }
                     isExternalSnippet = true;
-                    lang="java";
                     break;
                 case "region":
-                    regionName = ((AttributeTree)att).getValue().get(0).toString();
+                    if(isAttrPresent(att)) {
+                        regionName = ((AttributeTree)att).getValue().get(0).toString();
+                    } else {
+                        error = "error: snippet markup:region not specified";
+                    }
                     break;
                 case "lang":
                     lang = ((AttributeTree)att).getValue().get(0).toString();
                     break;
             }
+            if(!error.isEmpty())errorList.add(error);
         }
-        
         
         if(lang == null && fileName!=null){
             if(fileName.endsWith(".java")){
@@ -1378,19 +1394,16 @@ public class ElementJavadoc {
             }
         }
         
-        String text = null;
-        if (isExternalSnippet) {
-            pckgName = pckgName.replaceAll("\\.", "\\\\");
-            FileObject snippetFile = classPath.findResource(pckgName + "\\snippet-files\\" + fileName);
-            try {
-                text = snippetFile.asText();
-            } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
+        if (!isExternalSnippet) {
+            if(javadocSnippet.getBody() != null) {
+                text = javadocSnippet.getBody().toString();
             }
-        } else {
-            text = TreeShims.getSnippetDocTreeText(tag).toString();
         }
-        
+
+        if(!errorList.isEmpty() && text==null) {
+            reportError(new ArrayList(errorList), sb);
+            return;
+        }
         String langCommentPattern;
         if(lang != null && lang.equals("properties")){
             langCommentPattern = "#";
@@ -1410,14 +1423,40 @@ public class ElementJavadoc {
         sb.append("</div>"); //NOI18N
     }
     
-    private void applyTags(List<SourceLineMeta> parseResult, MarkupTagProcessor.ProcessedTags tags, StringBuilder sb, String regionName) {
+    private boolean isAttrPresent(DocTree att) {
+        return !((AttributeTree)att).getValue().isEmpty() && (!((AttributeTree)att).getValue().get(0).toString().isEmpty());
+    }
 
+    private String extractContent(TreePath docPath, DocTree attr, Set<String> errorList, String fileName) {
+        String pckgName = docPath.getCompilationUnit().getPackageName().toString();
+
+        ClassPath classPath = this.cpInfo.getClassPath(ClasspathInfo.PathKind.SOURCE);
+        String error = null;
+        String text = null;
+
+        pckgName = pckgName.replaceAll("\\.", "\\\\");
+        FileObject snippetFile = classPath.findResource(pckgName + "\\snippet-files\\" + fileName);
+        if (snippetFile == null || fileName.isEmpty()) {
+            error = "error: snippet markup: File invalid";
+            errorList.add(error);
+        } else {
+            try {
+                text = snippetFile.asText();
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+        return text;
+    }
+
+    private void applyTags(List<SourceLineMeta> parseResult, MarkupTagProcessor.ProcessedTags tags, StringBuilder sb, String regionName) {
         if(!tags.getErrorList().isEmpty()){
             reportError(tags.getErrorList(), sb);
             return;
         }
 
         int lineCounter = 0;
+        List<List<MarkupTagProcessor.Region>> regionList = new ArrayList<>();
         for (SourceLineMeta fullLineInfo : parseResult) {
             lineCounter++;
 
@@ -1435,6 +1474,7 @@ public class ElementJavadoc {
             boolean toAddCurrent = true;
             if (regionName != null && regions != null) {
                 toAddCurrent = regions.stream().anyMatch(p -> p.getValue().equals(regionName));
+                regionList.add(regions);
             } else if (regionName != null) {
                 toAddCurrent = false;
             }
@@ -1442,7 +1482,7 @@ public class ElementJavadoc {
                 if (attributes != null) {
                     for (MarkupTagProcessor.ApplicableMarkupTag attrib : attributes) {
                         codeLine = applyTagsToHTML(codeLine, attrib.getAttributes(), attrib.getMarkupTagName(), sb, eachCharList);
-                        if (codeLine == null) {//its error
+                        if(codeLine == null){//its error
                             return;
                         }
                     }
@@ -1459,6 +1499,16 @@ public class ElementJavadoc {
                     }
                 }
                 sb.append("\n");
+            }
+        }
+        if(regionName!=null && !regionList.isEmpty()) {
+            boolean noneMatch = regionList.stream().flatMap(List::stream)
+                    .noneMatch(p -> p.getValue().equals(regionName));
+            if(noneMatch) {
+                List<String> errorList = new ArrayList<>();
+                String error = "error: snippet markup: Region not found";
+                errorList.add(error);
+                reportError(errorList, sb);
             }
         }
     }
@@ -1521,6 +1571,7 @@ public class ElementJavadoc {
         }
         return true;
     }
+
     private void reportError(List<String> errorList, StringBuilder sb){
         errorList.iterator().forEachRemaining(error -> sb.append("<span style=\"color:red;\">"+error +"</span>").append("\n"));
     }
@@ -1588,7 +1639,7 @@ public class ElementJavadoc {
                     }
                     formattedLine.replace(fromIndex, fromIndex + tagActionValue.length(), replacement);
                     
-                        fromIndex += replacement.length();
+                    fromIndex += replacement.length();
                     codeLine = formattedLine.toString();
                 }
             }

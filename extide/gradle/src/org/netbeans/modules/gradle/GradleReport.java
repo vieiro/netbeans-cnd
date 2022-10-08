@@ -46,12 +46,12 @@ public final class GradleReport {
         this.errorClass = errorClass;
         this.location = location;
         this.line = line;
-        this.message = message;
+        this.message = message == null ? "" : message;
         this.causedBy = causedBy;
     }
     
     public static GradleReport simple(Path script, String message) {
-        return new GradleReport(null, script.toString(), -1, message, null);
+        return new GradleReport(null, Objects.toString(script), -1, message, null);
     }
 
     public GradleReport(Path scriptLocation, String message, GradleReport causedBy) {

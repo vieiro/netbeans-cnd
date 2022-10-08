@@ -83,6 +83,36 @@ is the proper place.
     <!-- ACTUAL CHANGES BEGIN HERE: -->
 
     <changes>
+        <change id="gradlefiles-versioncatalog">
+            <api name="general"/>
+            <summary>GradleFiles.Kind.VERSION_CATALOG introduced</summary>
+            <version major="2" minor="25"/>
+            <date day="15" month="7" year="2022"/>
+            <author login="lkishalmi"/>
+            <compatibility semantic="compatible" addition="yes"/>
+            <description>
+                <a href="@TOP@/org/netbeans/modules/gradle/spi/GradleFiles.Kind.html#VERSION_CATALOG">GradleFiles.Kind.VERSION_CATALOG</a>
+                was addedd to represent <code>$rootDir/gradle.libs.versions.toml</code> file of the project.
+                <code>
+                    <a href="@TOP@/org-netbeans-modules-gradle/org/netbeans/modules/gradle/spi/GradleFiles.html#getFile-org.netbeans.modules.gradle.spi.GradleFiles.Kind-">GradleFiles.getKind(VERSION_CATALOG)</a>
+                </code> can be used to retrieve the represented file. (The file might not exists though.)
+            </description>
+            <class package="org.netbeans.modules.gradle.api" name="NbGradleProject"/>
+        </change>
+        <change id="gradleproject-files">
+            <api name="general"/>
+            <summary>GradleFiles can be obtained from API</summary>
+            <version major="2" minor="24"/>
+            <date day="30" month="4" year="2022"/>
+            <author login="sdedic"/>
+            <compatibility semantic="compatible" addition="yes"/>
+            <description>
+                <a href="@TOP@/org/netbeans/modules/gradle/spi/GradleFiles.html">GradleFiles</a> can be obtained from
+                <a href="@TOP@/org/netbeans/modules/gradle/api/NbGradleProject.html">NbGradleProject</a> instance. Gradle project
+                users can use <code>GradleFiles</code> to get important files or pathnames in the project.
+            </description>
+            <class package="org.netbeans.modules.gradle.api" name="NbGradleProject"/>
+        </change>
         <change id="gradle-reports">
             <api name="general"/>
             <summary>Rich exception reports are exported from Gradle process.</summary>
