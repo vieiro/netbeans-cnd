@@ -31,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.netbeans.core.output2.options.ANSIColors;
 import org.openide.util.Exceptions;
 import org.openide.util.Pair;
 import org.openide.util.Utilities;
@@ -583,26 +584,27 @@ class OutWriter extends PrintWriter {
     private int ansiBackgroundCode = 9;
     private boolean ansiBright;
     private boolean ansiFaint;
+    private boolean ansiBrightBackground;
     private static final Pattern ANSI_CSI = Pattern.compile("\u001B\\[(\\d+(;\\d+)*)?(\\p{Alpha})"); // XXX or x9B for single-char CSI?
-    private static final Color[] COLORS = { // xterm from http://en.wikipedia.org/wiki/ANSI_escape_code#Colors
-        null, // default color (black for stdout)
-        new Color(205, 0, 0),
-        new Color(0, 205, 0),
-        new Color(205, 205, 0),
-        new Color(0, 0, 238),
-        new Color(205, 0, 205),
-        new Color(0, 205, 205),
-        new Color(229, 229, 229),
-        // bright variants:
-        new Color(127, 127, 127),
-        new Color(255, 0, 0),
-        new Color(0, 255, 0),
-        new Color(255, 255, 0),
-        new Color(92, 92, 255),
-        new Color(255, 0, 255),
-        new Color(0, 255, 255),
-        new Color(255, 255, 255),
-    };
+//    private static final Color[] COLORS = { // xterm from http://en.wikipedia.org/wiki/ANSI_escape_code#Colors
+//        null, // default color (black for stdout)
+//        new Color(205, 0, 0),
+//        new Color(0, 205, 0),
+//        new Color(205, 205, 0),
+//        new Color(0, 0, 238),
+//        new Color(205, 0, 205),
+//        new Color(0, 205, 205),
+//        new Color(229, 229, 229),
+//        // bright variants:
+//        new Color(127, 127, 127),
+//        new Color(255, 0, 0),
+//        new Color(0, 255, 0),
+//        new Color(255, 255, 0),
+//        new Color(92, 92, 255),
+//        new Color(255, 0, 255),
+//        new Color(0, 255, 255),
+//        new Color(255, 255, 255),
+//    };
     private boolean printANSI(CharSequence s, OutputListener l, boolean important, OutputKind outKind, boolean addLS) { // #192779
         int len = s.length();
         boolean hasEscape = false; // fast initial check
@@ -638,6 +640,7 @@ class OutWriter extends PrintWriter {
                 ansiBackgroundCode = 9;
                 ansiBright = false;
                 ansiFaint = false;
+                ansiBrightBackground = false;
             } else {
                 for (String param : paramsS.split(";")) {
                     int code = Integer.parseInt(param);
@@ -646,6 +649,7 @@ class OutWriter extends PrintWriter {
                         ansiBackgroundCode = 9; // default
                         ansiBright = false;
                         ansiFaint = false;
+                        ansiBrightBackground = false;
                     } else if (code == 1) { // Bright (increased intensity) or Bold
                         ansiBright = true;
                         ansiFaint = false;
@@ -665,15 +669,24 @@ class OutWriter extends PrintWriter {
                         ansiBackgroundCode = code - 40;
                     } else if (code == 49) { // Set background
                         ansiBackgroundCode = 9; // default color
+                    } else if (code >= 90 && code <= 97) { // Set text color brighter
+                        ansiColorCode = code - 90;
+                        ansiBright = true;
+                        ansiFaint = false;
+                        ansiBrightBackground = false;
+                    } else if (code >= 100 && code <= 107) {
+                        ansiBackgroundCode = code - 100;
+                        ansiBrightBackground = true;
                     }
                 }
             }
             assert ansiColorCode >= 0 && ansiColorCode <= 7;
             assert ansiBackgroundCode >= 0 && ansiBackgroundCode <= 9;
             assert !(ansiBright && ansiFaint);
+            Color [] COLORS = ANSIColors.getInstance().getColors();
             Color setColor = COLORS[ansiColorCode + (ansiBright ? 8 : 0)];
             ansiBackground = ansiBackgroundCode == 9 ? null
-                    : COLORS[ansiBackgroundCode];
+                    : COLORS[ansiBackgroundCode + (ansiBrightBackground ? 8 : 0)];
             ansiColor = fixTextColor(setColor, ansiBackground);
             if (ansiFaint && ansiColor != null) {
                 ansiColor = ansiColor.darker();

@@ -581,6 +581,8 @@ public final class OutputSettingsPanel extends javax.swing.JPanel {
         } catch (IOException ex) {
             ex.printStackTrace(previewInputOutput.getErr());
         }
+        String ANSIDemo = ANSIColors.getInstance().getDemoString();
+        previewInputOutput.getOut().println(ANSIDemo);
         previewInputOutput.getOut().close();
         previewInputOutput.getErr().close();
         outputOptions.addPropertyChangeListener(new PropertyChangeListener() {
