@@ -30,7 +30,8 @@ public enum PredefinedToolKind implements ToolKind {
     DebuggerTool, //6
     QMakeTool, //7
     CMakeTool, //8
-    UnknownTool; //9
+    UnknownTool, //9
+    MesonTool; //10
     
     @Override
     public String getDisplayName(){

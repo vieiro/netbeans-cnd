@@ -67,6 +67,7 @@ public final class MIMENames {
     public static final String CMAKE_MIME_TYPE = "text/x-cmake"; //NOI18N
     public static final String CMAKE_INCLUDE_MIME_TYPE = "text/x-cmake-include"; //NOI18N
     public static final String QTPROJECT_MIME_TYPE = "text/x-qtproject"; //NOI18N
+    public static final String MESON_MIME_TYPE = "text/x-meson"; //NOI18N
 
     /** Shell */
     public static final String SHELL_MIME_TYPE = "text/sh"; //NOI18N
@@ -129,7 +130,7 @@ public final class MIMENames {
                     HEADER_MIME_TYPE, C_HEADER_MIME_TYPE, CPLUSPLUS_MIME_TYPE, C_MIME_TYPE, FORTRAN_MIME_TYPE,ASM_MIME_TYPE)));
         
         CND_SCRIPT_MIME_TYPES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-                    MAKEFILE_MIME_TYPE, CMAKE_MIME_TYPE, CMAKE_INCLUDE_MIME_TYPE, QTPROJECT_MIME_TYPE, SHELL_MIME_TYPE, BAT_MIME_TYPE,
+                    MAKEFILE_MIME_TYPE, CMAKE_MIME_TYPE, CMAKE_INCLUDE_MIME_TYPE, QTPROJECT_MIME_TYPE, MESON_MIME_TYPE, SHELL_MIME_TYPE, BAT_MIME_TYPE,
                     VISU_MIME_TYPE,
                     LEX_MIME_TYPE, YACC_MIME_TYPE,
                     QT_UI_MIME_TYPE, QT_RESOURCE_MIME_TYPE, QT_TRANSLATION_MIME_TYPE)));

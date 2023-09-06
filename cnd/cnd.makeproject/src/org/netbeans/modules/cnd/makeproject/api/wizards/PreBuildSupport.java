@@ -37,6 +37,7 @@ public final class PreBuildSupport {
     public static final String CMAKE_MACRO = "${CMAKE}"; //NOI18N
     public static final String C_COMPILER_MACRO = "${IDE_CC}"; //NOI18N
     public static final String CPP_COMPILER_MACRO = "${IDE_CXX}"; //NOI18N
+    public static final String MESON_MACRO = "${MESON}"; //NOI18N
     
     public interface PreBuildArtifact {
         public FileObject getScript();
@@ -126,6 +127,9 @@ public final class PreBuildSupport {
               command = command.replace(CPP_COMPILER_MACRO, path);
             }
         }
+        if (command.contains(MESON_MACRO)) {
+            command = command.replace(MESON_MACRO, getMesonPath(cs));
+        }
         return command;
     }
     
@@ -133,6 +137,14 @@ public final class PreBuildSupport {
         String toolPath = getToolPath(cs, PredefinedToolKind.CMakeTool);
         if (toolPath == null || toolPath.isEmpty()) {
             toolPath = "cmake"; //NOI18N
+        }
+        return toolPath;
+    }
+
+    public static String getMesonPath(CompilerSet cs) {
+        String toolPath = getToolPath(cs, PredefinedToolKind.MesonTool);
+        if (toolPath == null || toolPath.isEmpty()) {
+            toolPath = "meson"; //NOI18N
         }
         return toolPath;
     }

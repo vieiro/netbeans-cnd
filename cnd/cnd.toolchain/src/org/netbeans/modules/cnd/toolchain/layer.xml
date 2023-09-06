@@ -422,6 +422,8 @@
             </file>
             <file name="GNU_cmake" url="resources/toolchaindefinition/GNU_cmake.xml">
             </file>
+            <file name="GNU_meson" url="resources/toolchaindefinition/GNU_meson.xml">
+            </file>
 <!-- CLang -->
             <file name="CLang_flavor" url="resources/toolchaindefinition/CLang_flavor.xml">
                 <attr name="extends" stringvalue="GNU_flavor"/>
@@ -1473,6 +1475,9 @@
                 <file name="cmake.shadow">
                     <attr name="originalFile" stringvalue="CND/Tool/GNU_cmake"/>
                 </file>
+                <file name="meson.shadow">
+                    <attr name="originalFile" stringvalue="CND/Tool/GNU_meson"/>
+                </file>
             </folder>
 <!-- MinGW -->
             <folder name="MinGW">
@@ -1510,6 +1515,9 @@
                 </file>
                 <file name="cmake.shadow">
                     <attr name="originalFile" stringvalue="CND/Tool/GNU_cmake"/>
+                </file>
+                <file name="meson.shadow">
+                    <attr name="originalFile" stringvalue="CND/Tool/GNU_meson"/>
                 </file>
             </folder>
 <!-- MinGW_TDM -->
@@ -1549,6 +1557,9 @@
                 <file name="cmake.shadow">
                     <attr name="originalFile" stringvalue="CND/Tool/GNU_cmake"/>
                 </file>
+                <file name="meson.shadow">
+                    <attr name="originalFile" stringvalue="CND/Tool/GNU_meson"/>
+                </file>
             </folder>
 <!-- Interix -->
             <folder name="Interix">
@@ -1586,6 +1597,9 @@
                 </file>
                 <file name="cmake.shadow">
                     <attr name="originalFile" stringvalue="CND/Tool/GNU_cmake"/>
+                </file>
+                <file name="meson.shadow">
+                    <attr name="originalFile" stringvalue="CND/Tool/GNU_meson"/>
                 </file>
             </folder>
 <!-- WinAVR -->
@@ -1625,6 +1639,9 @@
                 <file name="cmake.shadow">
                     <attr name="originalFile" stringvalue="CND/Tool/GNU_cmake"/>
                 </file>
+                <file name="meson.shadow">
+                    <attr name="originalFile" stringvalue="CND/Tool/GNU_meson"/>
+                </file>
             </folder>
 <!-- GNU_solaris -->
             <folder name="GNU_solaris">
@@ -1662,6 +1679,9 @@
                 </file>
                 <file name="cmake.shadow">
                     <attr name="originalFile" stringvalue="CND/Tool/GNU_cmake"/>
+                </file>
+                <file name="meson.shadow">
+                    <attr name="originalFile" stringvalue="CND/Tool/GNU_meson"/>
                 </file>
             </folder>
 <!-- GNU_mac -->
@@ -1701,6 +1721,9 @@
                 <file name="cmake.shadow">
                     <attr name="originalFile" stringvalue="CND/Tool/GNU_cmake"/>
                 </file>
+                <file name="meson.shadow">
+                    <attr name="originalFile" stringvalue="CND/Tool/GNU_meson"/>
+                </file>
             </folder>
 <!-- GNU -->
             <folder name="GNU">
@@ -1738,6 +1761,9 @@
                 </file>
                 <file name="cmake.shadow">
                     <attr name="originalFile" stringvalue="CND/Tool/GNU_cmake"/>
+                </file>
+                <file name="meson.shadow">
+                    <attr name="originalFile" stringvalue="CND/Tool/GNU_meson"/>
                 </file>
             </folder>
 <!-- CLang -->
@@ -1777,6 +1803,9 @@
                 <file name="cmake.shadow">
                     <attr name="originalFile" stringvalue="CND/Tool/GNU_cmake"/>
                 </file>
+                <file name="meson.shadow">
+                    <attr name="originalFile" stringvalue="CND/Tool/GNU_meson"/>
+                </file>
             </folder>
 <!-- CLang_mac -->
             <folder name="CLang_mac">
@@ -1814,6 +1843,9 @@
                 </file>
                 <file name="cmake.shadow">
                     <attr name="originalFile" stringvalue="CND/Tool/GNU_cmake"/>
+                </file>
+                <file name="meson.shadow">
+                    <attr name="originalFile" stringvalue="CND/Tool/GNU_meson"/>
                 </file>
             </folder>
 <!-- CLang_solaris -->
@@ -1853,6 +1885,9 @@
                 <file name="cmake.shadow">
                     <attr name="originalFile" stringvalue="CND/Tool/GNU_cmake"/>
                 </file>
+                <file name="meson.shadow">
+                    <attr name="originalFile" stringvalue="CND/Tool/GNU_meson"/>
+                </file>
             </folder>
 <!-- Intel -->
             <folder name="Intel">
@@ -1890,6 +1925,9 @@
                 </file>
                 <file name="cmake.shadow">
                     <attr name="originalFile" stringvalue="CND/Tool/GNU_cmake"/>
+                </file>
+                <file name="meson.shadow">
+                    <attr name="originalFile" stringvalue="CND/Tool/GNU_meson"/>
                 </file>
             </folder>
         </folder>

@@ -49,6 +49,8 @@ import org.netbeans.modules.nativeexecution.api.ExecutionEnvironment;
             return getFlavor().getToolchainDescriptor().getQMake();
         } else if (getKind() == PredefinedToolKind.CMakeTool) {
             return getFlavor().getToolchainDescriptor().getCMake();
+        } else if (getKind() == PredefinedToolKind.MesonTool) {
+            return getFlavor().getToolchainDescriptor().getMeson();
         }
         return null;
     }

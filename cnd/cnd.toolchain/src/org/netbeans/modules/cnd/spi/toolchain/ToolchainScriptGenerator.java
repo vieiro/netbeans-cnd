@@ -229,6 +229,9 @@ public final class ToolchainScriptGenerator {
             if (d.getQMake() != null) {
                 addTool("qmake", d.getQMake().getNames(), platform); // NOI18N
             }
+            if (d.getMeson() != null) {
+                addTool("meson", d.getMeson().getNames(), platform); // NOI18N
+            }
             line("line=\"${line};version=${versionstring}\""); // NOI18N
             line("  addNewToolChain"); // NOI18N
             line("  break"); // NOI18N

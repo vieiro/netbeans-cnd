@@ -84,6 +84,8 @@ public final class ToolchainManager {
         QMakeDescriptor getQMake();
 
         CMakeDescriptor getCMake();
+
+        MesonDescriptor getMeson();
     }
 
     public interface BaseFolder {
@@ -206,6 +208,9 @@ public final class ToolchainManager {
     }
 
     public interface CMakeDescriptor extends ToolDescriptor {
+    }
+
+    public interface MesonDescriptor extends ToolDescriptor {
     }
 
     public interface LinkerDescriptor {

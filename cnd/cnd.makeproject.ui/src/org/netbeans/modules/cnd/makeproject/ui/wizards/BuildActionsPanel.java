@@ -139,35 +139,35 @@ public class BuildActionsPanel extends javax.swing.JPanel implements HelpCtx.Pro
                 makefileName = "";
                 makefileFieldChanged();
             }
-        } else {
-            if (makefileName == null || !makefileName.equals(mn)) {
-                initFields();
-                makefileName = mn;
-                makefileFieldChanged();
-            }
+        } else if (!mn.equals(makefileName)) {
+            initFields();
+            makefileName = mn;
+            makefileFieldChanged();
         }
         makeCheckBox.setEnabled(true);
     }
     
     private String initMakeFile(WizardDescriptor wizardDescriptor) {
         String res = null;
-        String path = WizardConstants.PROPERTY_SIMPLE_MODE_FOLDER.get(wizardDescriptor);
-        if (path != null) {
-            if (Boolean.TRUE.equals(WizardConstants.PROPERTY_RUN_CONFIGURE.get(wizardDescriptor))) {
-                String folder = WizardConstants.PROPERTY_CONFIGURE_RUN_FOLDER.get(wizardDescriptor);
-                res = folder+"/Makefile"; //NOI18N
-                ExecutionEnvironment env = WizardConstants.PROPERTY_REMOTE_FILE_SYSTEM_ENV.get(wizardDescriptor);
-                if (env != null) {
-                    res = RemoteFileUtil.normalizeAbsolutePath(res, env);
+        if (Boolean.TRUE.equals(WizardConstants.PROPERTY_SIMPLE_MODE.get(wizardDescriptor))) {
+            String path = WizardConstants.PROPERTY_SIMPLE_MODE_FOLDER.get(wizardDescriptor);
+            if (path != null) {
+                if (Boolean.TRUE.equals(WizardConstants.PROPERTY_RUN_CONFIGURE.get(wizardDescriptor))) {
+                    String folder = WizardConstants.PROPERTY_CONFIGURE_RUN_FOLDER.get(wizardDescriptor);
+                    res = folder+"/Makefile"; //NOI18N
+                    ExecutionEnvironment env = WizardConstants.PROPERTY_REMOTE_FILE_SYSTEM_ENV.get(wizardDescriptor);
+                    if (env != null) {
+                        res = RemoteFileUtil.normalizeAbsolutePath(res, env);
+                    }
                 }
             }
-            if (res == null) {
-                ExecutionEnvironment ee = NewProjectWizardUtils.getExecutionEnvironment(wizardDescriptor);
-                CompilerSet cs = WizardConstants.PROPERTY_TOOLCHAIN.get(wizardDescriptor);
-                BuildSupport.BuildFile buildFile = BuildSupport.findBuildFileInFolder(WizardConstants.PROPERTY_NATIVE_PROJ_FO.get(wizardDescriptor), ee, cs);
-                if (buildFile != null) {
-                    res = buildFile.getFile();
-                }
+        }
+        if (res == null) {
+            ExecutionEnvironment ee = NewProjectWizardUtils.getExecutionEnvironment(wizardDescriptor);
+            CompilerSet cs = WizardConstants.PROPERTY_TOOLCHAIN.get(wizardDescriptor);
+            BuildSupport.BuildFile buildFile = BuildSupport.findBuildFileInFolder(WizardConstants.PROPERTY_NATIVE_PROJ_FO.get(wizardDescriptor), ee, cs);
+            if (buildFile != null) {
+                res = buildFile.getFile();
             }
         }
         return res;

@@ -60,4 +60,16 @@ public class MakeDataObjectTestCase extends NbTestCase {
         DataObject dob = DataObject.find(fo);
         assertTrue("data object is not recognized by default infrastructure:" + dob.getClass(), cls.isInstance(dob));
     }
+
+    public void testMesonDataObject() throws Exception {
+        File newFile = new File(super.getWorkDir(), "meson.build"); // NOI18N
+        newFile.createNewFile();
+        assertTrue("Not created file " + newFile, newFile.exists());
+        FileObject fo = CndFileUtils.toFileObject(newFile);
+        assertNotNull("Not found file object for file" + newFile, fo);
+        assertTrue("File object not valid for file" + newFile, fo.isValid());
+        assertEquals("Not text/x-meson mime type", MIMENames.MESON_MIME_TYPE, fo.getMIMEType());
+        DataObject dob = DataObject.find(fo);
+        assertTrue("data object is not recognized by default infrastructure:" + dob.getClass(), MesonDataObject.class.isInstance(dob));
+    }
 }

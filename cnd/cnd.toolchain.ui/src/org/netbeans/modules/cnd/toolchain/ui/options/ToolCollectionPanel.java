@@ -60,7 +60,6 @@ import org.netbeans.modules.cnd.api.toolchain.Tool;
 import org.netbeans.modules.cnd.api.toolchain.ToolKind;
 import org.netbeans.modules.cnd.api.toolchain.ui.PathEnvVariables;
 import org.netbeans.modules.cnd.api.toolchain.ui.ToolsPanelModel;
-import org.netbeans.modules.cnd.api.toolchain.ui.ToolsPanelSupport;
 import org.netbeans.modules.cnd.toolchain.support.ToolchainUtilities;
 import org.netbeans.modules.cnd.utils.CndPathUtilities;
 import org.netbeans.modules.nativeexecution.api.ExecutionEnvironment;
@@ -88,6 +87,7 @@ import org.openide.util.Utilities;
     private final String ASSEMBLER_NAME = "Assembler"; // NOI18N
     private final String QMAKE_NAME = "QMake"; // NOI18N
     private final String CMAKE_NAME = "CMake"; // NOI18N
+    private final String MESON_NAME = "Meson"; // NOI18N
     private Color tfColor = null;
     private boolean isUrl = false;
     private boolean update = false;
@@ -123,6 +123,7 @@ import org.openide.util.Utilities;
         tfDebuggerPath.setEditable(false);
         tfQMakePath.setEditable(false);
         tfCMakePath.setEditable(false);
+        tfMesonPath.setEditable(false);
 
         if (manager.getModel().enableRequiredCompilerCB()) {
             cbCRequired.setEnabled(true);
@@ -176,6 +177,7 @@ import org.openide.util.Utilities;
         tfDebuggerPath.setText(""); // NOI18N
         tfQMakePath.setText(""); // NOI18N
         tfCMakePath.setText(""); // NOI18N
+        tfMesonPath.setText(""); // NOI18N
     }
 
     void updateCompilerSet(CompilerSet cs, boolean force) {
@@ -191,6 +193,7 @@ import org.openide.util.Utilities;
             ToolchainUtilities.setToolPath(cs.getTool(PredefinedToolKind.DebuggerTool),tfDebuggerPath.getText());
             ToolchainUtilities.setToolPath(cs.getTool(PredefinedToolKind.QMakeTool),tfQMakePath.getText());
             ToolchainUtilities.setToolPath(cs.getTool(PredefinedToolKind.CMakeTool),tfCMakePath.getText());
+            ToolchainUtilities.setToolPath(cs.getTool(PredefinedToolKind.MesonTool),tfMesonPath.getText());
         } else {
             ToolchainUtilities.setToolPath(cs.findTool(PredefinedToolKind.CCompiler),tfCPath.getText());
             ToolchainUtilities.setToolPath(cs.findTool(PredefinedToolKind.CCCompiler),tfCppPath.getText());
@@ -200,6 +203,7 @@ import org.openide.util.Utilities;
             ToolchainUtilities.setToolPath(cs.findTool(PredefinedToolKind.DebuggerTool),tfDebuggerPath.getText());
             ToolchainUtilities.setToolPath(cs.findTool(PredefinedToolKind.QMakeTool),tfQMakePath.getText());
             ToolchainUtilities.setToolPath(cs.findTool(PredefinedToolKind.CMakeTool),tfCMakePath.getText());
+            ToolchainUtilities.setToolPath(cs.findTool(PredefinedToolKind.MesonTool),tfMesonPath.getText());
         }
         if (encodingComboBox.getSelectedItem() instanceof Charset) {
 
@@ -267,6 +271,7 @@ import org.openide.util.Utilities;
         lbFortranCommand.setVisible(!isUrl);
         lbMakeCommand.setVisible(!isUrl);
         lbQMakePath.setVisible(!isUrl);
+        lbMesonPath.setVisible(!isUrl);
 
         tfAsPath.setVisible(!isUrl);
         tfBaseDirectory.setVisible(!isUrl);
@@ -277,6 +282,7 @@ import org.openide.util.Utilities;
         tfFortranPath.setVisible(!isUrl);
         tfMakePath.setVisible(!isUrl);
         tfQMakePath.setVisible(!isUrl);
+        tfMesonPath.setVisible(!isUrl);
 
         btAsBrowse.setVisible(!isUrl);
         btCBrowse.setVisible(!isUrl);
@@ -286,6 +292,7 @@ import org.openide.util.Utilities;
         btFortranBrowse.setVisible(!isUrl);
         btMakeBrowse.setVisible(!isUrl);
         btQMakeBrowse.setVisible(!isUrl);
+        btMesonBrowse.setVisible(!isUrl);
         
         lbFamilyValue.setText(cs.getDisplayName());
         //final CompilerFlavor compilerFlavor = cs.getCompilerFlavor();
@@ -307,6 +314,7 @@ import org.openide.util.Utilities;
             Tool debuggerToolSelection = null;
             Tool qmakeToolSelection = null;
             Tool cmakeToolSelection = null;
+            Tool mesonToolSelection = null;
             if (!cs.isUrlPointer()) {
                 cSelection = cs.getTool(PredefinedToolKind.CCompiler);
                 cppSelection = cs.getTool(PredefinedToolKind.CCCompiler);
@@ -316,6 +324,7 @@ import org.openide.util.Utilities;
                 debuggerToolSelection = cs.getTool(PredefinedToolKind.DebuggerTool);
                 qmakeToolSelection = cs.getTool(PredefinedToolKind.QMakeTool);
                 cmakeToolSelection = cs.getTool(PredefinedToolKind.CMakeTool);
+                mesonToolSelection = cs.getTool(PredefinedToolKind.MesonTool);
             }
             if (cSelection != null) {
                 setCPathField(cSelection.getPath());
@@ -351,6 +360,11 @@ import org.openide.util.Utilities;
                 setMakePathField(makeToolSelection.getPath());
             } else {
                 tfMakePath.setText(""); // NOI18N
+            }
+            if (mesonToolSelection != null) {
+                setMesonPathField(mesonToolSelection.getPath());
+            } else {
+                tfMesonPath.setText(""); // NOI18N
             }
             if (debuggerToolSelection != null) {
                 setGdbPathField(debuggerToolSelection.getPath());
@@ -425,6 +439,14 @@ import org.openide.util.Utilities;
 
     private void validateCMakePathField() {
         postIsPathFieldValid(tfCMakePath, PredefinedToolKind.CMakeTool);
+    }
+
+    private void setMesonPathField(String path) {
+        tfMesonPath.setText(path); // Validation happens automatically
+    }
+
+    private void validateMesonPathField() {
+        postIsPathFieldValid(tfMesonPath, PredefinedToolKind.MesonTool);
     }
 
     private void setPathFieldValid(JTextField field, boolean valid, PredefinedToolKind tool) {
@@ -539,6 +561,8 @@ import org.openide.util.Utilities;
         btQMakeBrowse.setEnabled(enableText);
         updateTextField(tfCMakePath, enableText, cleanText);
         btCMakeBrowse.setEnabled(enableText);
+        updateTextField(tfMesonPath, enableText, cleanText);
+        btMesonBrowse.setEnabled(enableText);
     }
 
     private void updateTextField(JTextField tf, boolean editable, boolean cleanText) {
@@ -703,6 +727,10 @@ import org.openide.util.Utilities;
             validateCMakePathField();
             toolKind = PredefinedToolKind.CMakeTool;
             toolPath = tfCMakePath.getText();
+        } else if (title.equals(MESON_NAME)) {
+            validateMesonPathField();
+            toolKind = PredefinedToolKind.MesonTool;
+            toolPath = tfMesonPath.getText();
         }
         if (userChange && toolKind != PredefinedToolKind.UnknownTool) {
             Tool tool = manager.getCurrentCompilerSet().getTool(toolKind);
@@ -788,6 +816,8 @@ import org.openide.util.Utilities;
         versions.append(getToolVersion(cs.findTool(PredefinedToolKind.QMakeTool), tfQMakePath)).append('\n'); // NOI18N
         handle.progress(++i);
         versions.append(getToolVersion(cs.findTool(PredefinedToolKind.CMakeTool), tfCMakePath)).append('\n'); // NOI18N
+        handle.progress(++i);
+        versions.append(getToolVersion(cs.findTool(PredefinedToolKind.MesonTool), tfMesonPath)).append('\n'); // NOI18N
         handle.finish();
         String upgradeUrl = cs.getCompilerFlavor().getToolchainDescriptor().getUpgradeUrl();
         if (upgradeUrl != null) {
@@ -876,6 +906,11 @@ import org.openide.util.Utilities;
         encodingComboBox = new javax.swing.JComboBox();
         requiredSeparator = new javax.swing.JSeparator();
         btPathEdit = new javax.swing.JButton();
+        lbMesonPath = new javax.swing.JLabel();
+        tfMesonPath = new javax.swing.JTextField();
+        tfMesonPath.getDocument().putProperty(Document.TitleProperty, MESON_NAME);
+        tfMesonPath.getDocument().addDocumentListener(this);
+        btMesonBrowse = new javax.swing.JButton();
 
         setMinimumSize(new java.awt.Dimension(200, 200));
         setPreferredSize(new java.awt.Dimension(200, 200));
@@ -1055,7 +1090,7 @@ import org.openide.util.Utilities;
         requiredToolsLabel.setText(bundle.getString("ToolCollectionPanel.requiredToolsLabel.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 14;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -1244,7 +1279,7 @@ import org.openide.util.Utilities;
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridy = 12;
         gridBagConstraints.gridwidth = 3;
         add(btInstall, gridBagConstraints);
 
@@ -1255,7 +1290,7 @@ import org.openide.util.Utilities;
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridy = 11;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
@@ -1332,6 +1367,39 @@ import org.openide.util.Utilities;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 0);
         add(btPathEdit, gridBagConstraints);
+
+        lbMesonPath.setLabelFor(tfMesonPath);
+        org.openide.awt.Mnemonics.setLocalizedText(lbMesonPath, org.openide.util.NbBundle.getMessage(ToolCollectionPanel.class, "ToolCollectionPanel.lbMesonPath.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 0);
+        add(lbMesonPath, gridBagConstraints);
+        lbMesonPath.getAccessibleContext().setAccessibleName(org.openide.util.NbBundle.getMessage(ToolCollectionPanel.class, "ToolCollectionPanel.lbMesonPath.AccessibleContext.accessibleName")); // NOI18N
+
+        tfMesonPath.setText(org.openide.util.NbBundle.getMessage(ToolCollectionPanel.class, "ToolCollectionPanel.tfMesonPath.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(6, 2, 0, 0);
+        add(tfMesonPath, gridBagConstraints);
+
+        btMesonBrowse.setText(org.openide.util.NbBundle.getMessage(ToolCollectionPanel.class, "ToolCollectionPanel.btMesonBrowse.text")); // NOI18N
+        btMesonBrowse.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btMesonBrowseActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 0);
+        add(btMesonBrowse, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btMakeBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btMakeBrowseActionPerformed
@@ -1402,6 +1470,10 @@ import org.openide.util.Utilities;
         }
     }//GEN-LAST:event_btPathEditActionPerformed
 
+    private void btMesonBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btMesonBrowseActionPerformed
+        selectTool(tfMesonPath, false);
+    }//GEN-LAST:event_btMesonBrowseActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btAsBrowse;
     private javax.swing.JButton btCBrowse;
@@ -1411,6 +1483,7 @@ import org.openide.util.Utilities;
     private javax.swing.JButton btFortranBrowse;
     private javax.swing.JButton btInstall;
     private javax.swing.JButton btMakeBrowse;
+    private javax.swing.JButton btMesonBrowse;
     private javax.swing.JButton btPathEdit;
     private javax.swing.JButton btQMakeBrowse;
     private javax.swing.JCheckBox cbAsRequired;
@@ -1434,6 +1507,7 @@ import org.openide.util.Utilities;
     private javax.swing.JLabel lbFamilyValue;
     private javax.swing.JLabel lbFortranCommand;
     private javax.swing.JLabel lbMakeCommand;
+    private javax.swing.JLabel lbMesonPath;
     private javax.swing.JLabel lbQMakePath;
     private javax.swing.JSeparator requiredSeparator;
     private javax.swing.JLabel requiredToolsLabel;
@@ -1446,6 +1520,7 @@ import org.openide.util.Utilities;
     private javax.swing.JTextField tfDebuggerPath;
     private javax.swing.JTextField tfFortranPath;
     private javax.swing.JTextField tfMakePath;
+    private javax.swing.JTextField tfMesonPath;
     private javax.swing.JTextField tfQMakePath;
     private javax.swing.JTextPane tpInstall;
     // End of variables declaration//GEN-END:variables

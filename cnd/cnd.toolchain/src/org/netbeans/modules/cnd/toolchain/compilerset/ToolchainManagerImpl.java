@@ -44,6 +44,7 @@ import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.CompilerDescripto
 import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.DebuggerDescriptor;
 import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.LinkerDescriptor;
 import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.MakeDescriptor;
+import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.MesonDescriptor;
 import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.PredefinedMacro;
 import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.QMakeDescriptor;
 import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.ScannerDescriptor;
@@ -495,6 +496,12 @@ public final class ToolchainManagerImpl {
         if (cmake != null) {
             element = doc.createElement("cmake"); // NOI18N
             writeCMake(doc, element, cmake);
+            root.appendChild(element);
+        }
+        MesonDescriptor meson = descriptor.getMeson();
+        if (meson != null) {
+            element = doc.createElement("meson"); // NOI18N
+            writeMeson(doc, element, meson);
             root.appendChild(element);
         }
         try {
@@ -1069,6 +1076,28 @@ public final class ToolchainManagerImpl {
         writeAlternativePath(doc, element, cmake);
     }
 
+    private void writeMeson(Document doc, Element element, MesonDescriptor meson) {
+        Element c;
+        c = doc.createElement("tool"); // NOI18N
+        c.setAttribute("name", unsplit(meson.getNames())); // NOI18N
+        if (meson.skipSearch()) {
+            c.setAttribute("skip", "true"); // NOI18N
+        }
+        element.appendChild(c);
+        if (meson.getVersionFlags() != null ||
+                meson.getVersionPattern() != null) {
+            c = doc.createElement("version"); // NOI18N
+            if (meson.getVersionFlags() != null) {
+                c.setAttribute("flags", meson.getVersionFlags()); // NOI18N
+            }
+            if (meson.getVersionPattern() != null) {
+                c.setAttribute("pattern", meson.getVersionPattern()); // NOI18N
+            }
+            element.appendChild(c);
+        }
+        writeAlternativePath(doc, element, meson);
+    }
+
     private void writeAlternativePath(Document doc, Element element, ToolDescriptor tool){
         AlternativePath[] paths = tool.getAlternativePath();
         if (paths != null) {
@@ -1128,6 +1157,7 @@ public final class ToolchainManagerImpl {
         final Debugger debugger = new Debugger();
         final QMake qmake = new QMake();
         final CMake cmake = new CMake();
+        final Meson meson = new Meson();
 
         private CompilerVendor(String fileName, int position) {
             toolChainFileName = fileName;
@@ -1289,6 +1319,12 @@ public final class ToolchainManagerImpl {
      * class package-local for testing only
      */
     static final class CMake extends Tool {
+    }
+
+    /**
+     * class package-local for testing only
+     */
+    static final class Meson extends Tool {
     }
 
     /**
@@ -1754,6 +1790,20 @@ public final class ToolchainManagerImpl {
                 }
                 return;
             }
+            if (path.indexOf(".meson.") > 0) { // NOI18N
+                Meson d = v.meson;
+                if (path.endsWith(".tool")) { // NOI18N
+                    d.name = getValue(attributes, "name"); // NOI18N
+                    d.skipSearch = "true".equals(getValue(attributes, "skip")); // NOI18N
+                } else if (path.endsWith(".version")) { // NOI18N
+                    d.versionFlags = getValue(attributes, "flags"); // NOI18N
+                    d.versionPattern = getValue(attributes, "pattern"); // NOI18N
+                } else if (path.endsWith(".alternative_path")) { // NOI18N
+                    d.alternativePath = new ArrayList<>();
+                } else if (checkAlternativePath(attributes, d.alternativePath)) {
+                }
+                return;
+            }
             if (path.endsWith(".scanner")) { // NOI18N
                 if (!isScanerOverrided) {
                     v.scanner = new Scanner();
@@ -2130,6 +2180,7 @@ public final class ToolchainManagerImpl {
         private DebuggerDescriptor debugger;
         private QMakeDescriptor qmake;
         private CMakeDescriptor cmake;
+        private MesonDescriptor meson;
 
         private ToolchainDescriptorImpl(CompilerVendor v) {
             this.v = v;
@@ -2357,6 +2408,16 @@ public final class ToolchainManagerImpl {
                 }
             }
             return cmake;
+        }
+
+        @Override
+        public MesonDescriptor getMeson() {
+            synchronized(v) {
+                if (meson == null) {
+                    meson = new MesonDescriptorImpl(v.meson);
+                }
+            }
+            return meson;
         }
 
         @Override
@@ -2832,8 +2893,16 @@ public final class ToolchainManagerImpl {
     private static final class CMakeDescriptorImpl
             extends ToolDescriptorImpl<CMake> implements CMakeDescriptor {
 
-        public CMakeDescriptorImpl(CMake qmake) {
-            super(qmake);
+        public CMakeDescriptorImpl(CMake cmake) {
+            super(cmake);
+        }
+    }
+
+    private static final class MesonDescriptorImpl
+            extends ToolDescriptorImpl<Meson> implements MesonDescriptor {
+
+        public MesonDescriptorImpl(Meson meson) {
+            super(meson);
         }
     }
 }

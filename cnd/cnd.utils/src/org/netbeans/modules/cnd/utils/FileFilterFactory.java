@@ -38,6 +38,7 @@ import org.netbeans.modules.cnd.utils.filters.HeaderSourceFileFilter;
 import org.netbeans.modules.cnd.utils.filters.MacOSXDynamicLibraryFileFilter;
 import org.netbeans.modules.cnd.utils.filters.MacOSXExecutableFileFilter;
 import org.netbeans.modules.cnd.utils.filters.MakefileFileFilter;
+import org.netbeans.modules.cnd.utils.filters.MesonFileFilter;
 import org.netbeans.modules.cnd.utils.filters.PeDynamicLibraryFileFilter;
 import org.netbeans.modules.cnd.utils.filters.PeExecutableFileFilter;
 import org.netbeans.modules.cnd.utils.filters.PeStaticLibraryFileFilter;
@@ -172,6 +173,9 @@ public final class FileFilterFactory {
     }
     public static AbstractFileAndFileObjectFilter getMakefileFileFilter(){
         return MakefileFileFilter.getInstance();
+    }
+    public static AbstractFileAndFileObjectFilter getMesonFileFilter(){
+        return MesonFileFilter.getInstance();
     }
     public static AbstractFileAndFileObjectFilter getSconsFileFilter(){
         return SconsFileFilter.getInstance();

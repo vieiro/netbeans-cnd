@@ -613,6 +613,8 @@ public final class CompilerSetManagerImpl extends CompilerSetManager {
                 kind = PredefinedToolKind.CMakeTool;
             } else if (tool.equals("qmake")){ // NOI18N
                 kind = PredefinedToolKind.QMakeTool;
+            } else if (tool.equals("meson")){ // NOI18N
+                kind = PredefinedToolKind.MesonTool;
             } else if (tool.equals("c(PATH)")){ // NOI18N
                 cs.addPathCandidate(PredefinedToolKind.CCompiler, p);
             } else if (tool.equals("cpp(PATH)")){ // NOI18N
@@ -629,6 +631,8 @@ public final class CompilerSetManagerImpl extends CompilerSetManager {
                 cs.addPathCandidate(PredefinedToolKind.CMakeTool, p);
             } else if (tool.equals("qmake(PATH)")){ // NOI18N
                 cs.addPathCandidate(PredefinedToolKind.QMakeTool, p);
+            } else if (tool.equals("meson(PATH)")){ // NOI18N
+                cs.addPathCandidate(PredefinedToolKind.MesonTool, p);
             }
             if (kind != PredefinedToolKind.UnknownTool) {
                 cs.addTool(executionEnvironment, name, p, kind, null);
@@ -797,6 +801,9 @@ public final class CompilerSetManagerImpl extends CompilerSetManager {
             }
             if (d.getCMake() != null && !d.getCMake().skipSearch()){
                 initCompiler(PredefinedToolKind.CMakeTool, path, cs, d.getCMake().getNames());
+            }
+            if (d.getMeson() != null && !d.getMeson().skipSearch()){
+                initCompiler(PredefinedToolKind.MesonTool, path, cs, d.getMeson().getNames());
             }
             return true;
         }
@@ -1105,6 +1112,9 @@ public final class CompilerSetManagerImpl extends CompilerSetManager {
         }
         if (cs.findTool(PredefinedToolKind.CMakeTool) == null) {
             autoComplete(env, cs, sets, cs.getCompilerFlavor().getToolchainDescriptor().getCMake(), PredefinedToolKind.CMakeTool);
+        }
+        if (cs.findTool(PredefinedToolKind.MesonTool) == null) {
+            autoComplete(env, cs, sets, cs.getCompilerFlavor().getToolchainDescriptor().getMeson(), PredefinedToolKind.MesonTool);
         }
     }
 

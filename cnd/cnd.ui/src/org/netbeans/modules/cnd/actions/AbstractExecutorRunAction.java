@@ -46,6 +46,7 @@ import org.netbeans.modules.cnd.api.toolchain.Tool;
 import org.netbeans.modules.cnd.api.utils.PlatformInfo;
 import org.netbeans.modules.cnd.builds.CMakeExecSupport;
 import org.netbeans.modules.cnd.builds.MakeExecSupport;
+import org.netbeans.modules.cnd.builds.MesonExecSupport;
 import org.netbeans.modules.cnd.builds.QMakeExecSupport;
 import org.netbeans.modules.cnd.execution.ExecutionSupport;
 import org.netbeans.modules.cnd.spi.toolchain.ToolchainProject;
@@ -216,6 +217,11 @@ public abstract class AbstractExecutorRunAction extends NodeAction {
                 if (mes != null) {
                     command = mes.getCMakeCommand();
                 }
+            } else if (tool == PredefinedToolKind.MesonTool) {
+                MesonExecSupport mes = node.getLookup().lookup(MesonExecSupport.class);
+                if (mes != null) {
+                    command = mes.getMesonCommand();
+                }
             }
         }
         if (command == null || command.length() == 0) {
@@ -244,6 +250,11 @@ public abstract class AbstractExecutorRunAction extends NodeAction {
             if (mes != null) {
                 bdir = mes.getRunDirectory();
             }
+        } else if (tool == PredefinedToolKind.MesonTool) {
+            MesonExecSupport mes = node.getLookup().lookup(MesonExecSupport.class);
+            if (mes != null) {
+                bdir = mes.getRunDirectory();
+            }
         }
         if (bdir == null) {
             return makeFileDir;
@@ -261,6 +272,11 @@ public abstract class AbstractExecutorRunAction extends NodeAction {
             }
         } else if (tool == PredefinedToolKind.CMakeTool) {
             CMakeExecSupport mes = node.getLookup().lookup(CMakeExecSupport.class);
+            if (mes != null) {
+                args = mes.getArguments();
+            }
+        } else if (tool == PredefinedToolKind.MesonTool) {
+            MesonExecSupport mes = node.getLookup().lookup(MesonExecSupport.class);
             if (mes != null) {
                 args = mes.getArguments();
             }

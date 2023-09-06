@@ -46,6 +46,7 @@
                 <xs:element ref="tns:debugger" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="tns:qmake" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="tns:cmake" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="tns:meson" minOccurs="0" maxOccurs="1"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -551,6 +552,16 @@
     <xs:element name="makefile_writer">
         <xs:complexType>
             <xs:attribute name="class" type="xs:string" use="required" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="meson">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="tns:tool" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="tns:alternative_path" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="tns:version" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
         </xs:complexType>
     </xs:element>
 

@@ -795,6 +795,9 @@ public final class MakeActionProviderImpl implements MakeActionProvider {
         if (buildCommand.equals(PreBuildSupport.CMAKE_MACRO)) {
             buildCommand = removeQuotes(getCMakeCommand(pd, conf));
         }
+        if (buildCommand.equals(PreBuildSupport.MESON_MACRO)) {
+            buildCommand = removeQuotes(getMesonCommand(pd, conf));
+        }
         try {
             FileSystem fs = FileSystemProvider.getFileSystem(conf.getFileSystemHost());
             FileObject root = fs.getRoot();
@@ -1548,6 +1551,19 @@ public final class MakeActionProviderImpl implements MakeActionProvider {
         }
         return cmd;
     }
+
+    private static String getMesonCommand(MakeConfigurationDescriptor pd, MakeConfiguration conf) {
+        String cmd;
+        CompilerSet cs = conf.getCompilerSet().getCompilerSet();
+        if (cs != null) {
+            cmd = PreBuildSupport.getMesonPath(cs);
+        } else {
+            CndUtils.assertFalse(true, "Null compiler collection"); //NOI18N
+            cmd = "meson"; // NOI18N
+        }
+        return cmd;
+    }
+
     private List<String> validateStep(String id, List<String> tailSteps) {
         StepController validator = StepControllerProvider.getController(id);
         if (validator == null) {

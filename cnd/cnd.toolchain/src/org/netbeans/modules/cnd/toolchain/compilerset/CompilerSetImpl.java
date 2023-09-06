@@ -38,6 +38,7 @@ import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.CompilerDescripto
 import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.DebuggerDescriptor;
 import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.LinkerDescriptor;
 import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.MakeDescriptor;
+import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.MesonDescriptor;
 import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.PredefinedMacro;
 import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.QMakeDescriptor;
 import org.netbeans.modules.cnd.api.toolchain.ToolchainManager.ScannerDescriptor;
@@ -1175,6 +1176,50 @@ public final class CompilerSetImpl extends CompilerSet {
                 };
             }
             return proxy.getCMake();
+        }
+
+        @Override
+        public MesonDescriptor getMeson() {
+            if (proxy == null) {
+                return new MesonDescriptor() {
+
+                    @Override
+                    public String[] getNames() {
+                        return new String[0];
+                    }
+
+                    @Override
+                    public String getVersionFlags() {
+                        return ""; //NOI18N
+                    }
+
+                    @Override
+                    public String getVersionPattern() {
+                        return ""; //NOI18N
+                    }
+
+                    @Override
+                    public String getFingerPrintFlags() {
+                        return ""; //NOI18N
+                    }
+
+                    @Override
+                    public String getFingerPrintPattern() {
+                        return ""; //NOI18N
+                    }
+
+                    @Override
+                    public boolean skipSearch() {
+                        return true;
+                    }
+
+                    @Override
+                    public AlternativePath[] getAlternativePath() {
+                        return new AlternativePath[0];
+                    }
+                };
+            }
+            return proxy.getMeson();
         }
     }
 }

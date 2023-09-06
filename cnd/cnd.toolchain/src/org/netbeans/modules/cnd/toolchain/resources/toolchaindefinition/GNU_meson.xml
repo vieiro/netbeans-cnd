@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     Licensed to the Apache Software Foundation (ASF) under one
@@ -19,23 +19,14 @@
     under the License.
 
 -->
-<!DOCTYPE MIME-Resolver PUBLIC "-//NetBeans//DTD MIME Resolver 1.0//EN"
-		    "http://www.netbeans.org/dtds/mime-resolver-1_0.dtd">
 
-<MIME-resolver >
-    <file>
-        <name name="CMakeLists" substring="true"/>
-        <ext name="txt"/>
-        <resolver mime="text/x-cmake"/>
-    </file>
-    <file>
-        <name name="meson.build" substring="false" ignorecase="false"/>
-        <ext name="build"/>
-        <resolver mime="text/x-meson"/>
-    </file>
-    <file>
-        <name name="meson_options.txt" substring="false" ignorecase="false"/>
-        <ext name="txt"/>
-        <resolver mime="text/x-meson"/>
-    </file>
-</MIME-resolver>
+<toolchaindefinition xmlns="http://www.netbeans.org/ns/cnd-toolchain-definition/1">
+    <meson>
+        <tool name="meson"/>
+        <alternative_path>
+            <path directory="$PATH"/>
+            <path toolchain_name="*"/>
+        </alternative_path>
+        <version flags="--version" />
+    </meson>
+</toolchaindefinition>
