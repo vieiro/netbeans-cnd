@@ -320,6 +320,10 @@ public final class CodeUtils {
     public static String extractUnqualifiedClassName(StaticDispatch dispatch) {
         Parameters.notNull("dispatch", dispatch);
         Expression dispatcher = dispatch.getDispatcher();
+        if (dispatcher instanceof StaticConstantAccess) {
+            // e.g. EnumName::Case::staticMethod();
+            dispatcher = ((StaticConstantAccess) dispatcher).getDispatcher();
+        }
         return extractUnqualifiedName(dispatcher);
     }
 
@@ -623,7 +627,7 @@ public final class CodeUtils {
         }
         return expr == null ? null : " "; //NOI18N
     }
-    
+
     private static String getParamDefaultValue(ArrayCreation param) {
         StringBuilder sb = new StringBuilder("["); //NOI18N
         List<ArrayElement> arrayElements = param.getElements();
@@ -684,6 +688,15 @@ public final class CodeUtils {
 
     public static boolean isConstructor(MethodDeclaration node) {
         return "__construct".equals(extractMethodName(node)); //NOI18N
+    }
+
+    public static boolean isDollaredName(ClassName className) {
+        Expression name = className.getName();
+        if (name instanceof Variable) {
+            Variable variable = (Variable) name;
+            return variable.isDollared();
+        }
+        return false;
     }
 
     /**
@@ -825,5 +838,16 @@ public final class CodeUtils {
      */
     public static OffsetRange getOffsetRagne(@NonNull ASTNode node) {
         return new OffsetRange(node.getStartOffset(), node.getEndOffset());
+    }
+
+    public static boolean isDnfType(UnionType unionType) {
+        if (unionType != null) {
+            for (Expression type : unionType.getTypes()) {
+                if (type instanceof IntersectionType) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

@@ -150,7 +150,7 @@ public class PHPDocCommentParser {
         if (index == 0) {  // there is only one line comment
             line = removeStarAndTrim(comment);
         } else {
-            line = comment.substring(index, comment.length()).trim();
+            line = comment.substring(index).trim();
         }
         AnnotationParsedLine tagType = findTagOnLine(line);
         if (tagType != null) {  // is defined a tag on the last line
@@ -263,6 +263,7 @@ public class PHPDocCommentParser {
         List<PHPDocTypeNode> result = new ArrayList<>();
         for (String stype : getTypes(description, isReturnTag)) {
             stype = removeHTMLTags(stype);
+            stype = sanitizeShapes(stype);
             int startDocNode = findStartOfDocNode(originalComment, originalCommentStart, stype, startDescription);
             if (startDocNode == -1) {
                 continue;
@@ -277,7 +278,7 @@ public class PHPDocCommentParser {
                 docType = new PHPDocTypeNode(startDocNode, startDocNode + stype.length(), stype, isArray);
             } else {
                 String className = stype.substring(0, index);
-                String constantName = stype.substring(index + 2, stype.length());
+                String constantName = stype.substring(index + 2);
                 PHPDocNode classNameNode = new PHPDocNode(startDocNode, startDocNode + className.length(), className);
                 PHPDocNode constantNode = new PHPDocNode(startDocNode + className.length() + 2, startDocNode + stype.length(), constantName);
                 docType = new PHPDocStaticAccessType(startDocNode, startDocNode + stype.length(), stype, classNameNode, constantNode);
@@ -349,7 +350,7 @@ public class PHPDocCommentParser {
     }
 
     private List<PHPDocVarTypeTag> findMethodParams(String description, int startOfDescription) {
-        List<PHPDocVarTypeTag> result = new ArrayList();
+        List<PHPDocVarTypeTag> result = new ArrayList<>();
         int position = startOfDescription;
         ParametersExtractor parametersExtractor = ParametersExtractorImpl.create();
         String parameters = parametersExtractor.extract(description);
@@ -377,15 +378,31 @@ public class PHPDocCommentParser {
 
     private String removeHTMLTags(String text) {
         String value = text;
-        int index = value.indexOf('>');
-        if (index > -1) {
-            value = value.substring(index + 1);
-            index = value.indexOf('<');
-            if (index > -1) {
-                value = value.substring(0, index);
-            }
+        int startTagIndex = value.indexOf('<');
+        if (startTagIndex > -1) {
+            value = value.substring(0, startTagIndex).trim();
         }
         return value;
+    }
+
+    /**
+     * Remove `{'key': type}`.
+     *
+     * e.g. {@code array{'foo': int}}, {@code object{'foo': int, "bar": string}}
+     *
+     * @see https://phpstan.org/writing-php-code/phpdoc-types#array-shapes
+     * @see https://phpstan.org/writing-php-code/phpdoc-types#object-shapes
+     *
+     * @param type the type
+     * @return the sanitized type
+     */
+    private String sanitizeShapes(String type) {
+        String sanitizedType = type;
+        int startIndex = sanitizedType.indexOf("{"); // NOI18N
+        if (startIndex > -1) {
+            sanitizedType = sanitizedType.substring(0, startIndex).trim();
+        }
+        return sanitizedType;
     }
 
     /**
@@ -439,7 +456,7 @@ public class PHPDocCommentParser {
 
     private static String composeDescription(String[] tokens) {
         assert tokens.length > 0;
-        List<String> tokenList = new ArrayList(Arrays.asList(tokens));
+        List<String> tokenList = new ArrayList<>(Arrays.asList(tokens));
         tokenList.remove(0); // remove annotation name
         return StringUtils.implode(tokenList, " ");
     }
